@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = 'http://localhost:8000/api';
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const COMPANIES_METADATA = [
   { symbol: 'RELIANCE', name: 'Reliance Industries Ltd', sector: 'Energy & Retail', industry: 'Conglomerate', color: '#e11d48', basePrice: 2936.12 },
