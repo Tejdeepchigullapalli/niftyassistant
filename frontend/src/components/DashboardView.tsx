@@ -5,6 +5,59 @@ import {
   BarChart, Bar, Cell, PieChart, Pie, LineChart, Line
 } from 'recharts';
 
+const COMPANY_DOMAINS: Record<string, string> = {
+  RELIANCE: 'relianceindustries.com',
+  TCS: 'tcs.com',
+  HDFCBANK: 'hdfcbank.com',
+  BHARTIARTL: 'airtel.in',
+  ICICIBANK: 'icicibank.com',
+  INFY: 'infosys.com',
+  SBIN: 'sbi.co.in',
+  HINDUNILVR: 'hul.co.in',
+  ITC: 'itcportal.com',
+  LT: 'larsentoubro.com',
+  HCLTECH: 'hcltech.com',
+  AXISBANK: 'axisbank.com',
+  SUNPHARMA: 'sunpharma.com',
+  MARUTI: 'marutisuzuki.com',
+  KOTAKBANK: 'kotak.com',
+  ULTRACEMCO: 'ultratechcement.com',
+  NTPC: 'ntpc.co.in',
+  TATAMOTORS: 'tatamotors.com',
+  ONGC: 'ongcindia.com',
+  COALINDIA: 'coalindia.in',
+  POWERGRID: 'powergrid.in',
+  TITAN: 'titancompany.in',
+  ADANIENT: 'adani.com',
+  ADANIPORTS: 'adaniports.com',
+  'M&M': 'mahindra.com',
+  JSWSTEEL: 'jsw.in',
+  ASIANPAINT: 'asianpaints.com',
+  HINDALCO: 'hindalco.com',
+  TATASTEEL: 'tatasteel.com',
+  GRASIM: 'grasim.com',
+  WIPRO: 'wipro.com',
+  TECHM: 'techmahindra.com',
+  NESTLEIND: 'nestle.in',
+  LTIM: 'ltimindtree.com',
+  INDUSINDBK: 'indusind.com',
+  BAJFINANCE: 'bajajfinance.in',
+  BAJAJFINSV: 'bajajfinserv.in',
+  CIPLA: 'cipla.com',
+  DRREDDY: 'drreddys.com',
+  APOLLOHOSP: 'apollohospitals.com',
+  SBILIFE: 'sbilife.co.in',
+  EICHERMOT: 'eichermotors.com',
+  BPCL: 'bharatpetroleum.in',
+  DIVISLAB: 'divislabs.com',
+  HEROCOCO: 'heromotocorp.com',
+  BRITANNIA: 'britannia.co.in',
+  JIOFIN: 'jiofinancial.com',
+  SHREECEM: 'shreecement.com',
+  BEL: 'bel-india.in',
+  HAL: 'hal-india.co.in'
+};
+
 interface CompanyLogoProps {
   symbol: string;
   className?: string;
@@ -14,7 +67,29 @@ interface CompanyLogoProps {
 export function CompanyLogo({ symbol, className = '', size = 'md' }: CompanyLogoProps) {
   const sym = symbol.toUpperCase().trim();
   const meta = NIFTY_50_COMPANIES.find(c => c.symbol === sym) || { color: '#8b5cf6', name: sym };
+  const domain = COMPANY_DOMAINS[sym];
   
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+  const [fallbackLevel, setFallbackLevel] = useState(0); // 0 = Clearbit, 1 = Google Favicon, 2 = Monogram Text
+
+  useEffect(() => {
+    if (domain) {
+      setImgSrc(`https://logo.clearbit.com/${domain}`);
+      setFallbackLevel(0);
+    } else {
+      setFallbackLevel(2);
+    }
+  }, [domain, sym]);
+
+  const handleImageError = () => {
+    if (fallbackLevel === 0 && domain) {
+      setImgSrc(`https://www.google.com/s2/favicons?sz=128&domain=${domain}`);
+      setFallbackLevel(1);
+    } else {
+      setFallbackLevel(2);
+    }
+  };
+
   // Get dynamic initials (e.g. RELIANCE -> RI, HDFCBANK -> HB)
   let initials = sym.slice(0, 2);
   if (sym === 'RELIANCE') initials = 'RI';
@@ -36,6 +111,24 @@ export function CompanyLogo({ symbol, className = '', size = 'md' }: CompanyLogo
     md: 'w-8 h-8 text-[9px]',
     lg: 'w-10 h-10 text-[11px]'
   };
+
+  if (fallbackLevel < 2 && imgSrc) {
+    return (
+      <div 
+        className={`rounded-full overflow-hidden flex items-center justify-center bg-slate-950 border border-slate-800/80 flex-shrink-0 ${sizeClasses[size]} ${className}`}
+        style={{
+          boxShadow: `0 0 10px rgba(0,0,0,0.4)`
+        }}
+      >
+        <img 
+          src={imgSrc} 
+          alt={`${sym} logo`}
+          className="w-[75%] h-[75%] object-contain"
+          onError={handleImageError}
+        />
+      </div>
+    );
+  }
 
   return (
     <div 
