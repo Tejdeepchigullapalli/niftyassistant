@@ -76,7 +76,13 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(() => {
+      fetchData();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const quoteMap: Record<string, any> = {};
   for (const q of quotes) quoteMap[q.symbol] = q;

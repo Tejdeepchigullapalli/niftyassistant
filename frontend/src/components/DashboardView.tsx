@@ -283,8 +283,8 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const fetchStockDetails = useCallback(async (symbol: string) => {
-    setLoading(true);
+  const fetchStockDetails = useCallback(async (symbol: string, silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [q, h, f, r, s, c, rec] = await Promise.all([
         api.getQuote(symbol),
@@ -305,12 +305,18 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [period]);
 
   useEffect(() => {
-    fetchStockDetails(selectedSymbol);
+    fetchStockDetails(selectedSymbol, false);
+    
+    const interval = setInterval(() => {
+      fetchStockDetails(selectedSymbol, true);
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [selectedSymbol, fetchStockDetails]);
 
   // Sync historical period updates
