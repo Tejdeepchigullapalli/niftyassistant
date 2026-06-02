@@ -259,6 +259,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
   const [loading, setLoading] = useState(true);
   const [askInput, setAskInput] = useState('');
   const [currentLimit, setCurrentLimit] = useState(filterLimit);
+  const [mobileActiveView, setMobileActiveView] = useState<'list' | 'detail'>('list');
 
   // Loaded Details State
   const [quote, setQuote] = useState<any>(null);
@@ -326,6 +327,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
 
   const handleCompanyClick = (symbol: string) => {
     setSelectedSymbol(symbol);
+    setMobileActiveView('detail');
     if (onSymbolSelect) {
       onSymbolSelect(symbol);
     }
@@ -927,7 +929,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
         
         {/* COLUMN 1: LEFT COMPACT COMPANY TABLE */}
-        <div className="lg:col-span-1 card p-4 bg-slate-900 border-slate-800 flex flex-col h-[650px] shadow-2xl">
+        <div className={`lg:col-span-1 card p-4 bg-slate-900 border-slate-800 flex flex-col h-[650px] shadow-2xl ${mobileActiveView === 'list' ? 'flex' : 'hidden lg:flex'}`}>
           <div className="flex items-center justify-between mb-3 border-b border-slate-850 pb-2">
             <div>
               <h3 className="text-xs font-bold text-violet-400 uppercase tracking-wider">Top {currentLimit} Companies</h3>
@@ -1011,7 +1013,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
         </div>
 
         {/* COLUMN 2 & 3: RIGHT ANALYTICS COMPONENT */}
-        <div className="lg:col-span-2 xl:col-span-3 space-y-6 flex flex-col justify-between">
+        <div className={`lg:col-span-2 xl:col-span-3 space-y-6 flex flex-col justify-between ${mobileActiveView === 'detail' ? 'flex' : 'hidden lg:flex'}`}>
           
           {/* Header Panel */}
           {loading ? (
@@ -1024,6 +1026,15 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
           ) : (
             <div className="card p-5 bg-slate-900 border-slate-800 shadow-2xl space-y-5 flex-1">
               
+              {/* Back button on mobile */}
+              <button
+                type="button"
+                onClick={() => setMobileActiveView('list')}
+                className="lg:hidden w-fit mb-2 flex items-center gap-1.5 text-[10px] font-bold text-violet-400 bg-violet-950/20 border border-violet-900/30 px-3.5 py-2 rounded-xl hover:bg-violet-950/40"
+              >
+                ← Back to Company List
+              </button>
+
               {/* Asset Header and Badge row */}
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-850 pb-3">
                 <div className="flex items-center gap-3">
@@ -1063,7 +1074,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
               </div>
 
               {/* Sub tabs inside right panel */}
-              <div className="flex border-b border-slate-800 gap-3">
+              <div className="flex border-b border-slate-800 gap-3 overflow-x-auto whitespace-nowrap scrollbar-none pb-0.5 select-none">
                 {['Overview', 'Financials', 'Performance', 'News', 'Peer Comparison', 'History'].map((t, idx) => (
                   <button
                     key={t}

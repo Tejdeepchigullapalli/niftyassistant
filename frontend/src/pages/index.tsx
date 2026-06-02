@@ -255,7 +255,7 @@ export default function Home() {
           </header>
 
           {/* Core App Main */}
-          <main className="flex-1 p-6 max-w-screen-2xl w-full mx-auto">
+          <main className="flex-1 p-4 md:p-6 max-w-screen-2xl w-full mx-auto pb-20 md:pb-6">
             {loading ? (
               <div className="flex items-center justify-center h-[500px]">
                 <div className="text-center space-y-4">
@@ -314,8 +314,33 @@ export default function Home() {
 
       </div>
 
-      {/* Floating FAQ Chatbot Widget */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0d121f]/95 backdrop-blur-md border-t border-[#1f293d] py-2 px-4 flex justify-around items-center z-50 md:hidden shadow-lg shadow-black/40">
+        {[
+          { idx: 0, label: 'Home', icon: '🏠' },
+          { idx: 1, label: 'Markets', icon: '🌐' },
+          { idx: 2, label: 'Analysis', icon: '🔍' },
+          { idx: 4, label: 'Portfolio', icon: '💼' },
+          { idx: 5, label: 'AI Chat', icon: '🤖' }
+        ].map((btn) => {
+          const isActive = activeTab === btn.idx;
+          return (
+            <button
+              key={btn.idx}
+              onClick={() => setActiveTab(btn.idx)}
+              className={`flex flex-col items-center gap-0.5 transition-all active:scale-95 ${
+                isActive ? 'text-violet-400 font-bold scale-105' : 'text-slate-500 hover:text-slate-350'
+              }`}
+            >
+              <span className="text-base">{btn.icon}</span>
+              <span className="text-[9px] tracking-wider uppercase font-semibold">{btn.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Floating FAQ Chatbot Widget (Desktop only) */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end hidden md:flex">
         
         {/* Expanded Chat Dialog */}
         {isChatOpen && (
