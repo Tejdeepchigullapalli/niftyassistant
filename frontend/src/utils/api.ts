@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const rawBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const BASE = rawBase.replace(/\/$/, '');
 console.log("[NiftyAI Diagnostics] API Base URL evaluates to:", BASE);
 
 const COMPANIES_METADATA = [
@@ -358,7 +359,7 @@ export const api = {
   checkHealth: async () => {
     try {
       const healthUrl = BASE.replace(/\/api$/, '') + '/health';
-      const res = await axios.get(healthUrl, { timeout: 3000 });
+      const res = await axios.get(healthUrl, { timeout: 5000 });
       return res.status === 200;
     } catch {
       return false;
