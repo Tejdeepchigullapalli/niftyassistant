@@ -48,14 +48,8 @@ export default function Home() {
 
   const fetchData = useCallback(async () => {
     try {
-      // Check if real FastAPI backend is online
-      let online = false;
-      try {
-        const res = await fetch('http://localhost:8000/health');
-        online = res.ok;
-      } catch {
-        online = false;
-      }
+      // Check if real FastAPI backend is online dynamically
+      const online = await api.checkHealth();
       setBackendOnline(online);
 
       const [qRes, pRes] = await Promise.all([
@@ -267,7 +261,7 @@ export default function Home() {
                 <div className="text-center space-y-4">
                   <div className="text-5xl animate-spin">⏳</div>
                   <p className="text-slate-400 text-sm">Compiling Nifty analysis layers...</p>
-                  <p className="text-xs text-slate-600">Ensure the backend is online at http://localhost:8000</p>
+                  <p className="text-xs text-slate-600">Ensure the backend server is online and accessible</p>
                 </div>
               </div>
             ) : (

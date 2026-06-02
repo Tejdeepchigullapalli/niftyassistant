@@ -354,6 +354,15 @@ export const api = {
         };
       }
     ),
+  checkHealth: async () => {
+    try {
+      const healthUrl = BASE.replace(/\/api$/, '') + '/health';
+      const res = await axios.get(healthUrl, { timeout: 3000 });
+      return res.status === 200;
+    } catch {
+      return false;
+    }
+  },
 };
 
 export function formatCurrency(n: number): string {
