@@ -273,6 +273,7 @@ export default function Home() {
                     onSymbolSelect={(s) => setSelectedSymbol(s)}
                     onNavigateToChat={handleNavigateToChat}
                     filterLimit={niftyFilterLimit}
+                    quotes={quotes}
                   />
                 )}
                 {activeTab === 1 && (

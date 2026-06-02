@@ -248,9 +248,10 @@ interface DashboardViewProps {
   initialSymbol?: string;
   onNavigateToChat?: (query?: string, symbol?: string) => void;
   filterLimit?: number;
+  quotes?: any[];
 }
 
-export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANCE', onNavigateToChat, filterLimit = 50 }: DashboardViewProps) {
+export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANCE', onNavigateToChat, filterLimit = 50, quotes = [] }: DashboardViewProps) {
   const [selectedSymbol, setSelectedSymbol] = useState(initialSymbol);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSubTab, setActiveSubTab] = useState(0);
@@ -957,6 +958,10 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
           <div className="flex-1 overflow-y-auto pr-1 mt-1 space-y-1 chat-scrollbar">
             {filteredCompanies.map(c => {
               const isSelected = selectedSymbol === c.symbol;
+              const liveQuote = quotes?.find((q: any) => q.symbol === c.symbol);
+              const displayPrice = liveQuote ? liveQuote.current_price : c.basePrice;
+              const displayChangePct = liveQuote ? liveQuote.change_pct : c.changePct;
+
               return (
                 <button
                   key={c.symbol}
@@ -978,9 +983,9 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
                   </div>
 
                   <div className="col-span-4 text-right">
-                    <span className="text-xs font-black text-slate-200 block">₹{c.basePrice?.toLocaleString('en-IN')}</span>
-                    <span className={`text-[9px] font-bold flex items-center justify-end gap-0.5 ${c.changePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {c.changePct >= 0 ? '▲' : '▼'} {Math.abs(c.changePct)}%
+                    <span className="text-xs font-black text-slate-200 block">₹{displayPrice?.toLocaleString('en-IN')}</span>
+                    <span className={`text-[9px] font-bold flex items-center justify-end gap-0.5 ${displayChangePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {displayChangePct >= 0 ? '▲' : '▼'} {Math.abs(displayChangePct).toFixed(2)}%
                     </span>
                   </div>
                 </button>
