@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+axios.defaults.timeout = 8000; // 8 seconds global timeout for all requests
+
 const rawBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const BASE = rawBase.replace(/\/$/, '');
 console.log("[NiftyAI Diagnostics] API Base URL evaluates to:", BASE);
