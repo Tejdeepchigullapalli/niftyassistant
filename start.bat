@@ -7,7 +7,7 @@ echo.
 echo [1/2] Starting FastAPI Backend...
 cd backend
 pip install -r requirements.txt
-start "Backend" cmd /k "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+start "Backend" cmd /k "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 echo Backend started at http://localhost:8000
 cd ..
 
