@@ -396,14 +396,23 @@ export default function SettingsView() {
             </div>
 
             {/* DANGER ZONE */}
-            <div className="card p-4 bg-rose-950/10 border border-rose-900/30 rounded-2xl shadow-xl space-y-3">
-              <h3 className="text-xs font-bold text-rose-400 uppercase tracking-wider">Danger Zone</h3>
+            <div className="card p-4 bg-rose-950/5 border border-rose-900/30 rounded-2xl shadow-xl space-y-3">
+              <h3 className="text-xs font-bold text-rose-500 uppercase tracking-wider">Danger Zone</h3>
+              
               <button 
                 onClick={() => alert('Successfully logged out.')}
-                className="w-full flex items-center justify-between py-2 border-t border-rose-900/10 text-[10px] font-bold text-rose-400 hover:bg-rose-950/20 px-2 rounded-xl transition-all"
+                className="w-full text-left p-2.5 bg-rose-950/10 border border-rose-900/20 hover:bg-rose-950/20 rounded-xl transition-all flex justify-between items-center group"
               >
-                <span>🚪 Log Out</span>
-                <span>▶</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-rose-600/20 border border-rose-500/30 flex items-center justify-center font-bold text-rose-500 text-xs">
+                    🚪
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-bold text-slate-200 group-hover:text-rose-400">Log Out</h4>
+                    <p className="text-[8px] text-slate-500">Sign out from your account</p>
+                  </div>
+                </div>
+                <span className="text-rose-500 text-[10px] font-bold">▶</span>
               </button>
             </div>
 

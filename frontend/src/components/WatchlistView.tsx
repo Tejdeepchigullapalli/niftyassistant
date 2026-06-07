@@ -37,18 +37,18 @@ const PL_TREND_DATA = [
 
 // Watchlist Items
 const INITIAL_WATCHLIST = [
-  { symbol: 'RELIANCE', name: 'RELIANCE Industries Ltd.', price: 2936.12, change: 45.75, changePct: 1.58, volume: '1.24 Cr', marketCap: '18.45 L Cr', low52w: 2455.88, high52w: 3468.54, lowDay: 2905.00, highDay: 2945.40, isGainer: true, logo: 'relianceindustries.com' },
-  { symbol: 'TCS', name: 'TATA Consultancy Services', price: 3915.20, change: 33.10, changePct: 0.85, volume: '56.78 L', marketCap: '14.19 L Cr', low52w: 3297.65, high52w: 4399.00, lowDay: 3885.00, highDay: 3930.00, isGainer: true, logo: 'tcs.com' },
-  { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd.', price: 1682.40, change: -7.65, changePct: -0.45, volume: '89.32 L', marketCap: '12.89 L Cr', low52w: 1250.10, high52w: 1747.20, lowDay: 1670.50, highDay: 1695.20, isGainer: false, logo: 'hdfcbank.com' },
-  { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd.', price: 1285.90, change: 14.10, changePct: 1.10, volume: '1.03 Cr', marketCap: '8.79 L Cr', low52w: 944.50, high52w: 1343.55, lowDay: 1270.00, highDay: 1295.80, isGainer: true, logo: 'icicibank.com' },
-  { symbol: 'INFY', name: 'Infosys Ltd.', price: 1468.75, change: 13.85, changePct: 0.95, volume: '44.67 L', marketCap: '6.07 L Cr', low52w: 1250.30, high52w: 1589.00, lowDay: 1452.00, highDay: 1475.90, isGainer: true, logo: 'infosys.com' },
-  { symbol: 'SBIN', name: 'State Bank of India', price: 812.40, change: 4.98, changePct: 0.62, volume: '2.21 Cr', marketCap: '7.24 L Cr', low52w: 629.35, high52w: 912.45, lowDay: 804.00, highDay: 819.75, isGainer: true, logo: 'sbi.co.in' },
-  { symbol: 'LT', name: 'Larsen & Toubro Ltd.', price: 3625.80, change: 62.70, changePct: 1.88, volume: '38.90 L', marketCap: '5.09 L Cr', low52w: 2389.15, high52w: 3742.00, lowDay: 3560.00, highDay: 3640.00, isGainer: true, logo: 'larsentoubro.com' },
-  { symbol: 'AXISBANK', name: 'Axis Bank Ltd.', price: 1178.95, change: 9.35, changePct: 0.80, volume: '67.81 L', marketCap: '3.67 L Cr', low52w: 909.10, high52w: 1272.00, lowDay: 1166.00, highDay: 1186.50, isGainer: true, logo: 'axisbank.com' },
-  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd.', price: 1541.35, change: 32.40, changePct: 2.15, volume: '92.45 L', marketCap: '2.10 L Cr', low52w: 1032.20, high52w: 1612.00, lowDay: 1509.00, highDay: 1553.20, isGainer: true, logo: 'airtel.in' },
-  { symbol: 'ITC', name: 'ITC Ltd.', price: 476.80, change: 2.60, changePct: 0.55, volume: '1.12 Cr', marketCap: '5.94 L Cr', low52w: 389.50, high52w: 488.90, lowDay: 471.30, highDay: 479.90, isGainer: true, logo: 'itcportal.com' },
-  { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd.', price: 11478.50, change: 156.25, changePct: 1.38, volume: '18.90 L', marketCap: '3.39 L Cr', low52w: 8162.70, high52w: 11965.00, lowDay: 11350.00, highDay: 11560.00, isGainer: true, logo: 'ultratechcement.com' },
-  { symbol: 'ADANIPORTS', name: 'Adani Ports & SEZ', price: 1367.20, change: -12.45, changePct: -0.90, volume: '76.21 L', marketCap: '2.97 L Cr', low52w: 1013.35, high52w: 1512.00, lowDay: 1355.00, highDay: 1377.20, isGainer: false, logo: 'adaniports.com' }
+  { symbol: 'RELIANCE', name: 'RELIANCE Industries Ltd.', price: 2936.12, change: 45.75, changePct: 1.58, volume: '1.24 Cr', marketCap: '18.45 L Cr', low52w: 2455.88, high52w: 3468.54, lowDay: 2905.00, highDay: 2945.40, isGainer: true, logo: 'relianceindustries.com', isFavorite: true },
+  { symbol: 'TCS', name: 'TATA Consultancy Services', price: 3915.20, change: 33.10, changePct: 0.85, volume: '56.78 L', marketCap: '14.19 L Cr', low52w: 3297.65, high52w: 4399.00, lowDay: 3885.00, highDay: 3930.00, isGainer: true, logo: 'tcs.com', isFavorite: true },
+  { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd.', price: 1682.40, change: -7.65, changePct: -0.45, volume: '89.32 L', marketCap: '12.89 L Cr', low52w: 1250.10, high52w: 1747.20, lowDay: 1670.50, highDay: 1695.20, isGainer: false, logo: 'hdfcbank.com', isFavorite: true },
+  { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd.', price: 1285.90, change: 14.10, changePct: 1.10, volume: '1.03 Cr', marketCap: '8.79 L Cr', low52w: 944.50, high52w: 1343.55, lowDay: 1270.00, highDay: 1295.80, isGainer: true, logo: 'icicibank.com', isFavorite: true },
+  { symbol: 'INFY', name: 'Infosys Ltd.', price: 1468.75, change: 13.85, changePct: 0.95, volume: '44.67 L', marketCap: '6.07 L Cr', low52w: 1250.30, high52w: 1589.00, lowDay: 1452.00, highDay: 1475.90, isGainer: true, logo: 'infosys.com', isFavorite: true },
+  { symbol: 'SBIN', name: 'State Bank of India', price: 812.40, change: 4.98, changePct: 0.62, volume: '2.21 Cr', marketCap: '7.24 L Cr', low52w: 629.35, high52w: 912.45, lowDay: 804.00, highDay: 819.75, isGainer: true, logo: 'sbi.co.in', isFavorite: false },
+  { symbol: 'LT', name: 'Larsen & Toubro Ltd.', price: 3625.80, change: 62.70, changePct: 1.88, volume: '38.90 L', marketCap: '5.09 L Cr', low52w: 2389.15, high52w: 3742.00, lowDay: 3560.00, highDay: 3640.00, isGainer: true, logo: 'larsentoubro.com', isFavorite: false },
+  { symbol: 'AXISBANK', name: 'Axis Bank Ltd.', price: 1178.95, change: 9.35, changePct: 0.80, volume: '67.81 L', marketCap: '3.67 L Cr', low52w: 909.10, high52w: 1272.00, lowDay: 1166.00, highDay: 1186.50, isGainer: true, logo: 'axisbank.com', isFavorite: false },
+  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd.', price: 1541.35, change: 32.40, changePct: 2.15, volume: '92.45 L', marketCap: '2.10 L Cr', low52w: 1032.20, high52w: 1612.00, lowDay: 1509.00, highDay: 1553.20, isGainer: true, logo: 'airtel.in', isFavorite: false },
+  { symbol: 'ITC', name: 'ITC Ltd.', price: 476.80, change: 2.60, changePct: 0.55, volume: '1.12 Cr', marketCap: '5.94 L Cr', low52w: 389.50, high52w: 488.90, lowDay: 471.30, highDay: 479.90, isGainer: true, logo: 'itcportal.com', isFavorite: false },
+  { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd.', price: 11478.50, change: 156.25, changePct: 1.38, volume: '18.90 L', marketCap: '3.39 L Cr', low52w: 8162.70, high52w: 11965.00, lowDay: 11350.00, highDay: 11560.00, isGainer: true, logo: 'ultratechcement.com', isFavorite: false },
+  { symbol: 'ADANIPORTS', name: 'Adani Ports & SEZ', price: 1367.20, change: -12.45, changePct: -0.90, volume: '76.21 L', marketCap: '2.97 L Cr', low52w: 1013.35, high52w: 1512.00, lowDay: 1355.00, highDay: 1377.20, isGainer: false, logo: 'adaniports.com', isFavorite: false }
 ];
 
 export default function WatchlistView() {
@@ -69,6 +69,15 @@ export default function WatchlistView() {
     setWatchlist(watchlist.filter(w => w.symbol !== symbol));
   };
 
+  const handleToggleFavorite = (symbol: string) => {
+    setWatchlist(watchlist.map(w => {
+      if (w.symbol === symbol) {
+        return { ...w, isFavorite: !w.isFavorite };
+      }
+      return w;
+    }));
+  };
+
   const handleAddStockSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!addSymbol || !addPrice) return;
@@ -87,7 +96,8 @@ export default function WatchlistView() {
       lowDay: pr * 0.98,
       highDay: pr * 1.02,
       isGainer: Math.random() > 0.4,
-      logo: `${addSymbol.toLowerCase()}.com`
+      logo: `${addSymbol.toLowerCase()}.com`,
+      isFavorite: false
     };
 
     setWatchlist([...watchlist, newStock]);
@@ -113,7 +123,7 @@ export default function WatchlistView() {
         onError={(e) => {
           (e.target as HTMLImageElement).src = fallbackUrl;
         }}
-        className="w-5 h-5 rounded-lg bg-slate-900 border border-slate-800 object-contain p-0.5"
+        className="w-4 h-4 rounded bg-slate-950 border border-slate-850 object-contain p-0.5"
         alt={symbol}
       />
     );
@@ -137,54 +147,52 @@ export default function WatchlistView() {
   // Movers lists
   const moversGainers = [...watchlist].sort((a, b) => b.changePct - a.changePct).slice(0, 5);
   const moversLosers = [...watchlist].sort((a, b) => a.changePct - b.changePct).slice(0, 5);
-  const moversVal = [...watchlist].sort((a, b) => {
-    const aCap = parseFloat(a.marketCap.replace(/[^0-9.]/g, '')) || 0;
-    const bCap = parseFloat(b.marketCap.replace(/[^0-9.]/g, '')) || 0;
-    return bCap - aCap;
-  }).slice(0, 5);
 
   return (
     <div className="space-y-6 text-slate-100 animate-fade-in relative">
       
       {/* Watchlist Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight flex items-center gap-2">
-            ⭐ Watchlist <span className="text-[10px] bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full border border-violet-500/20">Indian Market</span>
+            ⭐ Watchlist <span className="text-[10px] text-slate-500 font-bold">ⓘ</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">Track your favorite stocks and market movers in one place.</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Quick Header Indicators */}
-          <div className="flex gap-4 bg-slate-950/40 border border-slate-850 p-2.5 rounded-2xl text-[10px] hidden sm:flex select-none mr-2">
-            <div>
-              <span className="text-slate-500 font-semibold block uppercase">Stocks</span>
-              <span className="font-extrabold text-slate-200 text-xs mt-0.5">{watchlist.length}</span>
-            </div>
-            <div className="border-l border-slate-850 pl-3">
-              <span className="text-slate-500 font-semibold block uppercase">Total Value</span>
-              <span className="font-extrabold text-slate-200 text-xs mt-0.5">₹2,14,560.35</span>
-            </div>
-            <div className="border-l border-slate-850 pl-3">
-              <span className="text-slate-500 font-semibold block uppercase">Today's P&L</span>
-              <span className="font-extrabold text-emerald-400 text-xs mt-0.5">+₹4,852.45 (+2.31%)</span>
-            </div>
+        {/* Premium Separate Header Cards aligned beautifully */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex gap-2">
+            {[
+              { icon: '💼', val: `${watchlist.length} Stocks` },
+              { icon: '💰', val: '₹2,14,560.35', label: 'Total Value' },
+              { icon: '📈', val: '+2.31%', label: "Today's Change", color: 'text-emerald-400' },
+              { icon: '💸', val: '+₹4,852.45', label: "Today's P&L", color: 'text-emerald-400' }
+            ].map((card, i) => (
+              <div key={i} className="bg-[#0d121f] border border-[#1f293d] rounded-xl px-3 py-1.5 flex items-center gap-2 text-[10.5px] font-bold shadow-md shadow-black/25">
+                <span>{card.icon}</span>
+                <div>
+                  <span className={card.color || 'text-slate-200'}>{card.val}</span>
+                  {card.label && <span className="text-[8px] text-slate-500 block font-semibold leading-tight">{card.label}</span>}
+                </div>
+              </div>
+            ))}
           </div>
 
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="text-xs font-bold px-4 py-2 bg-violet-600 hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all"
-          >
-            ➕ Add Stock
-          </button>
-          
-          <button
-            onClick={() => alert('Importing watchlist from CSV...')}
-            className="text-xs font-bold px-3.5 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-300 transition-all"
-          >
-            📥 Import Watchlist
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-[#8b5cf6] hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all"
+            >
+              ➕ Add Stock
+            </button>
+            <button
+              onClick={() => alert('Importing watchlist from CSV...')}
+              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-300 transition-all"
+            >
+              📥 Import Watchlist
+            </button>
+          </div>
         </div>
       </div>
 
@@ -250,6 +258,7 @@ export default function WatchlistView() {
                 <thead>
                   <tr className="border-b border-slate-850 text-slate-400 font-bold bg-[#0d121f] uppercase tracking-wider text-[9px] select-none">
                     <th className="py-3 px-4 w-8 text-center">#</th>
+                    <th className="py-3 px-1 w-6 text-center"></th>
                     <th className="py-3 px-3 cursor-pointer hover:text-white" onClick={() => handleSort('symbol')}>Company</th>
                     <th className="py-3 px-3 cursor-pointer text-right hover:text-white" onClick={() => handleSort('price')}>Price (₹)</th>
                     <th className="py-3 px-3 cursor-pointer text-right hover:text-white" onClick={() => handleSort('change')}>Change</th>
@@ -264,15 +273,42 @@ export default function WatchlistView() {
                 <tbody className="divide-y divide-slate-850">
                   {filteredList.map((item, idx) => {
                     const pricePosition = ((item.price - item.lowDay) / (item.highDay - item.lowDay)) * 100;
+                    const cappedPos = Math.max(0, Math.min(100, pricePosition));
+                    const trackColor = item.changePct >= 0 ? 'bg-emerald-500' : 'bg-rose-500';
+
+                    // Parse name to render symbol in bold, rest of name regular
+                    const displayName = item.name;
+                    const hasSymbolInName = displayName.toUpperCase().startsWith(item.symbol);
+                    const boldPart = hasSymbolInName ? item.symbol : '';
+                    const regularPart = hasSymbolInName ? displayName.substring(item.symbol.length) : displayName;
+
                     return (
                       <tr key={item.symbol} className="hover:bg-slate-900/40 transition-colors">
                         <td className="py-3.5 px-4 text-center text-slate-500 font-semibold">{idx + 1}</td>
+                        <td className="py-3.5 px-1 text-center">
+                          <button 
+                            onClick={() => handleToggleFavorite(item.symbol)}
+                            className="focus:outline-none transition-transform hover:scale-110"
+                          >
+                            {item.isFavorite ? (
+                              <span className="text-amber-400 text-[13px]">★</span>
+                            ) : (
+                              <span className="text-slate-600 text-[13px]">☆</span>
+                            )}
+                          </button>
+                        </td>
                         <td className="py-3.5 px-3 flex items-center gap-2.5">
                           {renderLogo(item.logo, item.symbol)}
-                          <div>
-                            <span className="font-extrabold text-slate-200 block">{item.symbol}</span>
-                            <span className="text-[9px] text-slate-500 block truncate max-w-[110px]">{item.name}</span>
-                          </div>
+                          <span className="text-[11px] font-semibold text-slate-200">
+                            {boldPart ? (
+                              <>
+                                <span className="font-extrabold text-white mr-1">{boldPart}</span>
+                                <span className="text-slate-400 font-medium">{regularPart}</span>
+                              </>
+                            ) : (
+                              <span className="text-slate-300 font-bold">{regularPart}</span>
+                            )}
+                          </span>
                         </td>
                         <td className="py-3.5 px-3 font-bold text-slate-200 text-right">
                           {item.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -286,20 +322,24 @@ export default function WatchlistView() {
                         <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.volume}</td>
                         <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.marketCap}</td>
                         <td className="py-3.5 px-3 text-slate-500 text-center text-[10px] whitespace-nowrap">
-                          <span className="text-slate-300 font-bold block">{item.high52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                          <span className="block text-[9px] mt-0.5">{item.low52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                          <span className="text-slate-300 font-bold block">₹{item.high52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                          <span className="block text-[9px] mt-0.5">₹{item.low52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                         </td>
                         
-                        {/* Day Range track slider */}
-                        <td className="py-3.5 px-4 text-center select-none">
+                        {/* Day Range track slider with dynamic colored track */}
+                        <td className="py-3.5 px-4 text-center select-none w-36">
                           <div className="flex items-center justify-between text-[8px] text-slate-500 mb-0.5 font-bold">
                             <span>₹{item.lowDay.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                             <span>₹{item.highDay.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                           </div>
                           <div className="w-full h-1 bg-slate-800 rounded-full relative overflow-visible">
                             <div 
-                              className="w-1.5 h-1.5 rounded-full bg-violet-400 absolute -top-0.5 border border-slate-900 shadow-md shadow-violet-500/20"
-                              style={{ left: `${Math.max(0, Math.min(100, pricePosition))}%` }}
+                              className={`absolute left-0 top-0 h-full rounded-l-full ${trackColor}`}
+                              style={{ width: `${cappedPos}%` }}
+                            />
+                            <div 
+                              className="w-1.5 h-1.5 rounded-full bg-slate-100 absolute -top-0.5 border border-slate-900 shadow-md shadow-black/45"
+                              style={{ left: `${cappedPos}%`, marginLeft: '-3px' }}
                             />
                           </div>
                         </td>
