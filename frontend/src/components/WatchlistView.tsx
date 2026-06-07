@@ -35,7 +35,7 @@ const PL_TREND_DATA = [
   { day: 'May 17', pl: 12745 }
 ];
 
-// Watchlist Items
+// Watchlist Items - Favorited index matching mockup (1, 2, 3, 4, 5, 8, 9 are favorited)
 const INITIAL_WATCHLIST = [
   { symbol: 'RELIANCE', name: 'RELIANCE Industries Ltd.', price: 2936.12, change: 45.75, changePct: 1.58, volume: '1.24 Cr', marketCap: '18.45 L Cr', low52w: 2455.88, high52w: 3468.54, lowDay: 2905.00, highDay: 2945.40, isGainer: true, logo: 'relianceindustries.com', isFavorite: true },
   { symbol: 'TCS', name: 'TATA Consultancy Services', price: 3915.20, change: 33.10, changePct: 0.85, volume: '56.78 L', marketCap: '14.19 L Cr', low52w: 3297.65, high52w: 4399.00, lowDay: 3885.00, highDay: 3930.00, isGainer: true, logo: 'tcs.com', isFavorite: true },
@@ -44,11 +44,18 @@ const INITIAL_WATCHLIST = [
   { symbol: 'INFY', name: 'Infosys Ltd.', price: 1468.75, change: 13.85, changePct: 0.95, volume: '44.67 L', marketCap: '6.07 L Cr', low52w: 1250.30, high52w: 1589.00, lowDay: 1452.00, highDay: 1475.90, isGainer: true, logo: 'infosys.com', isFavorite: true },
   { symbol: 'SBIN', name: 'State Bank of India', price: 812.40, change: 4.98, changePct: 0.62, volume: '2.21 Cr', marketCap: '7.24 L Cr', low52w: 629.35, high52w: 912.45, lowDay: 804.00, highDay: 819.75, isGainer: true, logo: 'sbi.co.in', isFavorite: false },
   { symbol: 'LT', name: 'Larsen & Toubro Ltd.', price: 3625.80, change: 62.70, changePct: 1.88, volume: '38.90 L', marketCap: '5.09 L Cr', low52w: 2389.15, high52w: 3742.00, lowDay: 3560.00, highDay: 3640.00, isGainer: true, logo: 'larsentoubro.com', isFavorite: false },
-  { symbol: 'AXISBANK', name: 'Axis Bank Ltd.', price: 1178.95, change: 9.35, changePct: 0.80, volume: '67.81 L', marketCap: '3.67 L Cr', low52w: 909.10, high52w: 1272.00, lowDay: 1166.00, highDay: 1186.50, isGainer: true, logo: 'axisbank.com', isFavorite: false },
-  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd.', price: 1541.35, change: 32.40, changePct: 2.15, volume: '92.45 L', marketCap: '2.10 L Cr', low52w: 1032.20, high52w: 1612.00, lowDay: 1509.00, highDay: 1553.20, isGainer: true, logo: 'airtel.in', isFavorite: false },
+  { symbol: 'AXISBANK', name: 'Axis Bank Ltd.', price: 1178.95, change: 9.35, changePct: 0.80, volume: '67.81 L', marketCap: '3.67 L Cr', low52w: 909.10, high52w: 1272.00, lowDay: 1166.00, highDay: 1186.50, isGainer: true, logo: 'axisbank.com', isFavorite: true },
+  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd.', price: 1541.35, change: 32.40, changePct: 2.15, volume: '92.45 L', marketCap: '2.10 L Cr', low52w: 1032.20, high52w: 1612.00, lowDay: 1509.00, highDay: 1553.20, isGainer: true, logo: 'airtel.in', isFavorite: true },
   { symbol: 'ITC', name: 'ITC Ltd.', price: 476.80, change: 2.60, changePct: 0.55, volume: '1.12 Cr', marketCap: '5.94 L Cr', low52w: 389.50, high52w: 488.90, lowDay: 471.30, highDay: 479.90, isGainer: true, logo: 'itcportal.com', isFavorite: false },
   { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd.', price: 11478.50, change: 156.25, changePct: 1.38, volume: '18.90 L', marketCap: '3.39 L Cr', low52w: 8162.70, high52w: 11965.00, lowDay: 11350.00, highDay: 11560.00, isGainer: true, logo: 'ultratechcement.com', isFavorite: false },
   { symbol: 'ADANIPORTS', name: 'Adani Ports & SEZ', price: 1367.20, change: -12.45, changePct: -0.90, volume: '76.21 L', marketCap: '2.97 L Cr', low52w: 1013.35, high52w: 1512.00, lowDay: 1355.00, highDay: 1377.20, isGainer: false, logo: 'adaniports.com', isFavorite: false }
+];
+
+// Donut data for the Watchlist Summary card
+const SUMMARY_DONUT_DATA = [
+  { name: 'Gainers', value: 9, color: '#10b981' },
+  { name: 'Losers', value: 2, color: '#ef4444' },
+  { name: 'Unchanged', value: 1, color: '#64748b' }
 ];
 
 export default function WatchlistView() {
@@ -57,7 +64,7 @@ export default function WatchlistView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('changePct');
   const [sortAsc, setSortAsc] = useState(false);
-  const [moversTab, setMoversTab] = useState<'Gainers' | 'Losers' | 'Value'>('Gainers');
+  const [moversTab, setMoversTab] = useState<'Gainers' | 'Losers'>('Gainers');
 
   // Modal settings for adding stock
   const [showAddModal, setShowAddModal] = useState(false);
@@ -123,7 +130,7 @@ export default function WatchlistView() {
         onError={(e) => {
           (e.target as HTMLImageElement).src = fallbackUrl;
         }}
-        className="w-4 h-4 rounded bg-slate-950 border border-slate-850 object-contain p-0.5"
+        className="w-4.5 h-4.5 rounded bg-slate-950 border border-slate-850 object-contain p-0.5"
         alt={symbol}
       />
     );
@@ -155,25 +162,25 @@ export default function WatchlistView() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight flex items-center gap-2">
-            ⭐ Watchlist <span className="text-[10px] text-slate-500 font-bold">ⓘ</span>
+            ⭐ Watchlist <span className="text-[10px] text-slate-500 font-bold bg-[#0d121f] border border-slate-800 p-1 rounded-full cursor-help" title="Watchlist Details">ⓘ</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">Track your favorite stocks and market movers in one place.</p>
         </div>
 
         {/* Premium Separate Header Cards aligned beautifully */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex gap-2">
             {[
               { icon: '💼', val: `${watchlist.length} Stocks` },
               { icon: '💰', val: '₹2,14,560.35', label: 'Total Value' },
-              { icon: '📈', val: '+2.31%', label: "Today's Change", color: 'text-emerald-400' },
-              { icon: '💸', val: '+₹4,852.45', label: "Today's P&L", color: 'text-emerald-400' }
+              { icon: '📈', val: '+2.31%', label: "Today's Change", color: 'text-emerald-455' },
+              { icon: '💸', val: '+₹4,852.45', label: "Today's P&L", color: 'text-emerald-455' }
             ].map((card, i) => (
-              <div key={i} className="bg-[#0d121f] border border-[#1f293d] rounded-xl px-3 py-1.5 flex items-center gap-2 text-[10.5px] font-bold shadow-md shadow-black/25">
-                <span>{card.icon}</span>
+              <div key={i} className="bg-[#0d121f] border border-[#1f293d] rounded-xl px-3.5 py-2 flex items-center gap-2.5 text-[10.5px] font-bold shadow-md shadow-black/20">
+                <span className="text-xs">{card.icon}</span>
                 <div>
                   <span className={card.color || 'text-slate-200'}>{card.val}</span>
-                  {card.label && <span className="text-[8px] text-slate-500 block font-semibold leading-tight">{card.label}</span>}
+                  {card.label && <span className="text-[8px] text-slate-500 block font-semibold leading-tight mt-0.5">{card.label}</span>}
                 </div>
               </div>
             ))}
@@ -182,7 +189,7 @@ export default function WatchlistView() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-[#8b5cf6] hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all"
+              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all"
             >
               ➕ Add Stock
             </button>
@@ -191,6 +198,12 @@ export default function WatchlistView() {
               className="text-[10.5px] font-bold px-3.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-300 transition-all"
             >
               📥 Import Watchlist
+            </button>
+            <button
+              onClick={() => alert('Watchlist Configuration Options')}
+              className="px-2.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-400 font-bold transition-all text-xs"
+            >
+              ⋮
             </button>
           </div>
         </div>
@@ -221,16 +234,19 @@ export default function WatchlistView() {
           
           {/* Table filters panel */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#0d121f] border border-[#1f293d] p-3 rounded-2xl">
-            <div className="flex gap-2 items-center w-full sm:w-auto">
+            <div className="flex gap-2.5 items-center w-full sm:w-auto">
               <select className="bg-[#080c14] border border-[#1f293d] rounded-xl px-3 py-1.5 text-xs text-slate-300 font-bold focus:outline-none">
                 <option>All Stocks ({watchlist.length})</option>
                 <option>Gainers</option>
                 <option>Losers</option>
               </select>
               
-              <div className="flex items-center bg-[#080c14] border border-[#1f293d] p-0.5 rounded-xl">
-                <button className="px-2 py-1 rounded-lg text-xs bg-slate-900 border border-slate-800">📊</button>
-                <button className="px-2 py-1 rounded-lg text-xs text-slate-500">📝</button>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-slate-500 font-bold px-1.5">View:</span>
+                <div className="flex items-center bg-[#080c14] border border-[#1f293d] p-0.5 rounded-xl">
+                  <button className="px-2.5 py-1 rounded-lg text-xs bg-violet-650 text-white shadow shadow-violet-500/20">📊</button>
+                  <button className="px-2.5 py-1 rounded-lg text-xs text-slate-500">📝</button>
+                </div>
               </div>
             </div>
 
@@ -248,6 +264,15 @@ export default function WatchlistView() {
 
               <button className="text-[10px] font-bold text-slate-400 bg-slate-950 border border-slate-850 px-3.5 py-1.5 rounded-xl hover:border-slate-700">Columns</button>
               <button className="text-[10px] font-bold text-slate-400 bg-slate-950 border border-slate-850 px-3.5 py-1.5 rounded-xl hover:border-slate-700">Filters</button>
+              
+              <select 
+                value={`Sort: ${sortField === 'changePct' ? '% Change' : 'Company'}`}
+                onChange={(e) => handleSort(e.target.value.includes('Change') ? 'changePct' : 'symbol')}
+                className="bg-[#080c14] border border-[#1f293d] rounded-xl px-2.5 py-1.5 text-[10px] text-slate-300 font-bold focus:outline-none"
+              >
+                <option>Sort: % Change</option>
+                <option>Sort: Company</option>
+              </select>
             </div>
           </div>
 
@@ -297,7 +322,7 @@ export default function WatchlistView() {
                             )}
                           </button>
                         </td>
-                        <td className="py-3.5 px-3 flex items-center gap-2.5">
+                        <td className="py-3.5 px-3 flex items-center gap-2">
                           {renderLogo(item.logo, item.symbol)}
                           <span className="text-[11px] font-semibold text-slate-200">
                             {boldPart ? (
@@ -322,42 +347,50 @@ export default function WatchlistView() {
                         <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.volume}</td>
                         <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.marketCap}</td>
                         <td className="py-3.5 px-3 text-slate-500 text-center text-[10px] whitespace-nowrap">
-                          <span className="text-slate-300 font-bold block">₹{item.high52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                          <span className="text-slate-350 font-bold block">₹{item.high52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                           <span className="block text-[9px] mt-0.5">₹{item.low52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                         </td>
                         
-                        {/* Day Range track slider with dynamic colored track */}
+                        {/* Day Range track slider with dynamic colored track and vertical white indicator line */}
                         <td className="py-3.5 px-4 text-center select-none w-36">
-                          <div className="flex items-center justify-between text-[8px] text-slate-500 mb-0.5 font-bold">
+                          <div className="flex items-center justify-between text-[8px] text-slate-500 mb-1 font-bold">
                             <span>₹{item.lowDay.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                             <span>₹{item.highDay.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                           </div>
-                          <div className="w-full h-1 bg-slate-800 rounded-full relative overflow-visible">
+                          <div className="w-full h-1 bg-[#1a2333] rounded-full relative overflow-visible">
                             <div 
                               className={`absolute left-0 top-0 h-full rounded-l-full ${trackColor}`}
                               style={{ width: `${cappedPos}%` }}
                             />
+                            {/* Vertical line indicator matching screenshot */}
                             <div 
-                              className="w-1.5 h-1.5 rounded-full bg-slate-100 absolute -top-0.5 border border-slate-900 shadow-md shadow-black/45"
-                              style={{ left: `${cappedPos}%`, marginLeft: '-3px' }}
+                              className="w-[2px] h-2 bg-slate-100 absolute -top-[2px] shadow shadow-black/60 rounded-sm"
+                              style={{ left: `${cappedPos}%`, marginLeft: '-1px' }}
                             />
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-right space-x-2.5 whitespace-nowrap">
                           <button
                             onClick={() => alert(`Setting Alert for ${item.symbol}`)}
-                            className="p-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
+                            className="text-slate-400 hover:text-slate-200 transition-colors"
                             title="Set Target Alert"
                           >
                             🔔
                           </button>
                           <button
-                            onClick={() => handleRemove(item.symbol)}
-                            className="p-1.5 rounded-lg bg-rose-950/15 border border-rose-900/25 hover:border-rose-700 text-rose-400 hover:text-rose-300 transition-colors"
-                            title="Remove from Watchlist"
+                            onClick={() => handleToggleFavorite(item.symbol)}
+                            className="text-slate-400 hover:text-slate-200 transition-colors"
+                            title="Star/Unstar"
                           >
-                            🗑️
+                            ⭐
+                          </button>
+                          <button
+                            onClick={() => handleRemove(item.symbol)}
+                            className="text-slate-400 hover:text-rose-400 transition-colors text-xs font-bold"
+                            title="Remove"
+                          >
+                            ⋮
                           </button>
                         </td>
                       </tr>
@@ -373,9 +406,15 @@ export default function WatchlistView() {
             
             {/* Watchlist Performance Trend */}
             <div className="card p-4 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
-              <div>
-                <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Watchlist Performance</h4>
-                <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">+2.31% This Week</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Watchlist Performance</h4>
+                  <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">+2.31% This Week</span>
+                </div>
+                <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-2 py-0.5 text-[9px] text-slate-400">
+                  <option>1W</option>
+                  <option>1M</option>
+                </select>
               </div>
               <div className="h-[120px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -393,15 +432,16 @@ export default function WatchlistView() {
             <div className="card p-4 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-3">
               <h4 className="text-xs font-bold text-slate-355 uppercase tracking-wider">Sector Allocation</h4>
               <div className="flex items-center justify-between gap-1 h-[120px]">
-                <div className="w-[85px] h-[85px] flex-shrink-0">
+                {/* Center text inside donut chart */}
+                <div className="w-[90px] h-[90px] flex-shrink-0 relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={SECTOR_ALLOCATION}
                         cx="50%"
                         cy="50%"
-                        innerRadius={22}
-                        outerRadius={30}
+                        innerRadius={28}
+                        outerRadius={38}
                         paddingAngle={2}
                         dataKey="value"
                       >
@@ -411,7 +451,12 @@ export default function WatchlistView() {
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-[7px] font-bold text-slate-500 uppercase">Total</span>
+                    <span className="text-[9.5px] font-bold text-slate-100">₹2.14 L Cr</span>
+                  </div>
                 </div>
+                
                 <div className="flex-1 space-y-1 overflow-y-auto max-h-[110px] pr-1 scrollbar-none text-[8.5px]">
                   {SECTOR_ALLOCATION.map((entry) => (
                     <div key={entry.name} className="flex justify-between items-center">
@@ -428,9 +473,15 @@ export default function WatchlistView() {
 
             {/* P&L Trend (Bar Chart) */}
             <div className="card p-4 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
-              <div>
-                <h4 className="text-xs font-bold text-slate-355 uppercase tracking-wider">P&L Trend</h4>
-                <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">+₹12,745.20 Overall P&L</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-355 uppercase tracking-wider">P&L Trend</h4>
+                  <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">+₹12,745.20 Overall P&L</span>
+                </div>
+                <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-2 py-0.5 text-[9px] text-slate-400">
+                  <option>1M</option>
+                  <option>3M</option>
+                </select>
               </div>
               <div className="h-[120px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -456,24 +507,52 @@ export default function WatchlistView() {
         {/* RIGHT COLUMN (Colspan 1) */}
         <div className="space-y-6">
           
-          {/* WATCHLIST SUMMARY DONUT */}
+          {/* WATCHLIST SUMMARY DONUT - Recharts Donut Widget inside Summary box */}
           <div className="card p-5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Watchlist Summary</h3>
             
-            <div className="flex items-center justify-around gap-4 bg-slate-950/40 border border-slate-850 p-4 rounded-2xl">
-              <div className="text-center">
-                <span className="text-[18px] font-black text-emerald-400">75%</span>
-                <span className="text-[8px] text-slate-500 uppercase font-bold block mt-0.5">Gainers (9)</span>
+            <div className="flex items-center justify-between gap-2 bg-[#080c14]/30 border border-[#1f293d] p-3 rounded-2xl">
+              {/* Donut chart */}
+              <div className="w-[78px] h-[78px] flex-shrink-0 relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={SUMMARY_DONUT_DATA}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={23}
+                      outerRadius={33}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {SUMMARY_DONUT_DATA.map((entry, idx) => (
+                        <Cell key={`cell-${idx}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Center text today's change */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-[10px] font-black text-emerald-450">+2.31%</span>
+                  <span className="text-[5.5px] font-bold text-slate-500 uppercase leading-none mt-0.5">Today's</span>
+                </div>
               </div>
-              <div className="border-l border-slate-850 h-8" />
-              <div className="text-center">
-                <span className="text-[18px] font-black text-rose-500">16.7%</span>
-                <span className="text-[8px] text-slate-500 uppercase font-bold block mt-0.5">Losers (2)</span>
-              </div>
-              <div className="border-l border-slate-850 h-8" />
-              <div className="text-center">
-                <span className="text-[18px] font-black text-slate-400">8.3%</span>
-                <span className="text-[8px] text-slate-500 uppercase font-bold block mt-0.5">Flat (1)</span>
+
+              {/* Legends */}
+              <div className="flex-1 space-y-1 pl-2 text-[9px] font-bold">
+                {[
+                  { label: 'Gainers (9)', val: '75%', color: '#10b981' },
+                  { label: 'Losers (2)', val: '16.7%', color: '#ef4444' },
+                  { label: 'Unchanged (1)', val: '8.3%', color: '#64748b' }
+                ].map((l) => (
+                  <div key={l.label} className="flex justify-between items-center">
+                    <span className="text-slate-400 font-semibold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: l.color }} />
+                      {l.label}
+                    </span>
+                    <span className="text-slate-300">{l.val}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -496,7 +575,7 @@ export default function WatchlistView() {
           {/* TOP MOVERS (TODAY) */}
           <div className="card p-5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-850 pb-2">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Top Movers</h3>
+              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Top Movers (Today)</h3>
               
               <div className="flex bg-[#080c14] border border-[#1f293d] p-0.5 rounded-lg">
                 {['Gainers', 'Losers'].map((tab) => (
@@ -536,7 +615,7 @@ export default function WatchlistView() {
           {/* WATCHLIST ALERTS */}
           <div className="card p-5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-850 pb-2">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Watchlist Alerts <span className="text-[9px] text-slate-500 font-semibold">(8)</span></h3>
+              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Watchlist Alerts (8)</h3>
               <button 
                 onClick={() => alert('Routing to Alerts Tab...')}
                 className="text-[9px] font-bold text-violet-400 hover:text-violet-300"
