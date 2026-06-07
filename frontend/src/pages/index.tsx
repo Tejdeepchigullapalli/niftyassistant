@@ -11,6 +11,8 @@ import WatchlistView from '../components/WatchlistView';
 import AlertsView from '../components/AlertsView';
 import ReportsView from '../components/ReportsView';
 import SettingsView from '../components/SettingsView';
+import { auth, googleProvider, isFirebaseConfigured } from '../utils/firebase';
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { 
   BarChart3, 
   Globe2, 
@@ -53,6 +55,79 @@ export default function Home() {
   const [isTopNiftyExpanded, setIsTopNiftyExpanded] = useState(true); // Default expanded
   const [niftyFilterLimit, setNiftyFilterLimit] = useState(50); // Default to Nifty 50
   const [chatPreQuery, setChatPreQuery] = useState('');
+  const [user, setUser] = useState<any | null>(null);
+
+  // Listen to Firebase authentication state
+  useEffect(() => {
+    if (!isFirebaseConfigured) {
+      // Failsafe: Start in demo fallback mode if env variables are not present
+      setUser({
+        displayName: 'Akash Verma',
+        email: 'akash.verma@email.com',
+        photoURL: null,
+        isDemo: true
+      });
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          displayName: firebaseUser.displayName,
+          email: firebaseUser.email,
+          photoURL: firebaseUser.photoURL,
+          isDemo: false
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignIn = async () => {
+    if (!isFirebaseConfigured) {
+      // Demo simulation login
+      setUser({
+        displayName: 'Akash Verma',
+        email: 'akash.verma@email.com',
+        photoURL: null,
+        isDemo: true
+      });
+      return;
+    }
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        setUser({
+          displayName: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          isDemo: false
+        });
+      }
+    } catch (error) {
+      console.error("Firebase Sign-In Error:", error);
+      alert("Failed to sign in with Google. Check console for details.");
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (!isFirebaseConfigured) {
+      // Demo simulation logout
+      setUser(null);
+      return;
+    }
+
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error("Firebase Sign-Out Error:", error);
+    }
+  };
 
   const [timeStr, setTimeStr] = useState('');
   useEffect(() => {
@@ -285,11 +360,25 @@ export default function Home() {
                     3
                   </span>
                 </button>
-                <button className="flex items-center gap-1.5">
-                  <div className="grid h-7 w-7 place-items-center rounded-full border border-[#33435f] bg-[#132038]">
-                    <UserCircle2 className="h-5 w-5 text-slate-300" />
-                  </div>
-                  <ChevronDown className="h-3 w-3 text-slate-550" />
+                <button className="flex items-center gap-1.5 group select-none">
+                  {user && user.photoURL ? (
+                    <img 
+                      src={user.photoURL} 
+                      alt={user.displayName || 'User'} 
+                      className="h-7 w-7 rounded-full border border-[#33435f] object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-7 w-7 place-items-center rounded-full border border-[#33435f] bg-[#132038]">
+                      {user && user.displayName ? (
+                        <span className="text-[10px] font-black text-violet-400">
+                          {user.displayName.charAt(0).toUpperCase()}
+                        </span>
+                      ) : (
+                        <UserCircle2 className="h-5 w-5 text-slate-300" />
+                      )}
+                    </div>
+                  )}
+                  <ChevronDown className="h-3 w-3 text-slate-550 group-hover:text-slate-300 transition-colors" />
                 </button>
               </div>
             </header>
@@ -350,7 +439,11 @@ export default function Home() {
                   <ReportsView />
                 )}
                 {activeTab === 9 && (
-                  <SettingsView />
+                  <SettingsView 
+                    user={user}
+                    onSignIn={handleSignIn}
+                    onSignOut={handleSignOut}
+                  />
                 )}
               </>
             )}
