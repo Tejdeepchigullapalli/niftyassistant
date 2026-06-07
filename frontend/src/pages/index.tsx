@@ -305,7 +305,7 @@ export default function Home() {
                   />
                 )}
                 {activeTab === 6 && (
-                  <WatchlistView />
+                  <WatchlistView quotes={quotes} />
                 )}
                 {activeTab === 7 && (
                   <AlertsView />

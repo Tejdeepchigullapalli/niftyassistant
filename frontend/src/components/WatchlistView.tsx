@@ -1,5 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, ReferenceLine } from 'recharts';
+import { 
+  Briefcase, 
+  Wallet, 
+  TrendingUp, 
+  ArrowUpRight, 
+  Star, 
+  Bell, 
+  Pin, 
+  MoreVertical, 
+  ChevronRight, 
+  Search, 
+  LayoutGrid, 
+  List, 
+  Table, 
+  Plus, 
+  Download, 
+  Activity, 
+  SlidersHorizontal, 
+  Filter 
+} from 'lucide-react';
 
 // Mock performance data (1W trend line)
 const WATCHLIST_PERF_DATA = [
@@ -35,7 +55,7 @@ const PL_TREND_DATA = [
   { day: 'May 17', pl: 12745 }
 ];
 
-// Watchlist Items - Favorited index matching mockup (1, 2, 3, 4, 5, 8, 9 are favorited)
+// Watchlist Items - Favorited index matching mockup (Reliance, TCS, HDFC, ICICI, Infosys, Axis, Airtel, UltraTech are favorited)
 const INITIAL_WATCHLIST = [
   { symbol: 'RELIANCE', name: 'RELIANCE Industries Ltd.', price: 2936.12, change: 45.75, changePct: 1.58, volume: '1.24 Cr', marketCap: '18.45 L Cr', low52w: 2455.88, high52w: 3468.54, lowDay: 2905.00, highDay: 2945.40, isGainer: true, logo: 'relianceindustries.com', isFavorite: true },
   { symbol: 'TCS', name: 'TATA Consultancy Services', price: 3915.20, change: 33.10, changePct: 0.85, volume: '56.78 L', marketCap: '14.19 L Cr', low52w: 3297.65, high52w: 4399.00, lowDay: 3885.00, highDay: 3930.00, isGainer: true, logo: 'tcs.com', isFavorite: true },
@@ -47,24 +67,17 @@ const INITIAL_WATCHLIST = [
   { symbol: 'AXISBANK', name: 'Axis Bank Ltd.', price: 1178.95, change: 9.35, changePct: 0.80, volume: '67.81 L', marketCap: '3.67 L Cr', low52w: 909.10, high52w: 1272.00, lowDay: 1166.00, highDay: 1186.50, isGainer: true, logo: 'axisbank.com', isFavorite: true },
   { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd.', price: 1541.35, change: 32.40, changePct: 2.15, volume: '92.45 L', marketCap: '2.10 L Cr', low52w: 1032.20, high52w: 1612.00, lowDay: 1509.00, highDay: 1553.20, isGainer: true, logo: 'airtel.in', isFavorite: true },
   { symbol: 'ITC', name: 'ITC Ltd.', price: 476.80, change: 2.60, changePct: 0.55, volume: '1.12 Cr', marketCap: '5.94 L Cr', low52w: 389.50, high52w: 488.90, lowDay: 471.30, highDay: 479.90, isGainer: true, logo: 'itcportal.com', isFavorite: false },
-  { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd.', price: 11478.50, change: 156.25, changePct: 1.38, volume: '18.90 L', marketCap: '3.39 L Cr', low52w: 8162.70, high52w: 11965.00, lowDay: 11350.00, highDay: 11560.00, isGainer: true, logo: 'ultratechcement.com', isFavorite: false },
+  { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd.', price: 11478.50, change: 156.25, changePct: 1.38, volume: '18.90 L', marketCap: '3.39 L Cr', low52w: 8162.70, high52w: 11965.00, lowDay: 11350.00, highDay: 11560.00, isGainer: true, logo: 'ultratechcement.com', isFavorite: true },
   { symbol: 'ADANIPORTS', name: 'Adani Ports & SEZ', price: 1367.20, change: -12.45, changePct: -0.90, volume: '76.21 L', marketCap: '2.97 L Cr', low52w: 1013.35, high52w: 1512.00, lowDay: 1355.00, highDay: 1377.20, isGainer: false, logo: 'adaniports.com', isFavorite: false }
 ];
 
-// Donut data for the Watchlist Summary card
-const SUMMARY_DONUT_DATA = [
-  { name: 'Gainers', value: 9, color: '#10b981' },
-  { name: 'Losers', value: 2, color: '#ef4444' },
-  { name: 'Unchanged', value: 1, color: '#64748b' }
-];
-
-export default function WatchlistView() {
+export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
   const [watchlist, setWatchlist] = useState(INITIAL_WATCHLIST);
   const [activeTab, setActiveTab] = useState('My Watchlist');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('changePct');
   const [sortAsc, setSortAsc] = useState(false);
-  const [moversTab, setMoversTab] = useState<'Gainers' | 'Losers'>('Gainers');
+  const [moversTab, setMoversTab] = useState<'Gainers' | 'Losers' | 'By Value'>('Gainers');
 
   // Modal settings for adding stock
   const [showAddModal, setShowAddModal] = useState(false);
@@ -121,7 +134,158 @@ export default function WatchlistView() {
     }
   };
 
-  // Renders domain favicons with fallbacks
+  // Merging live quotes into the watchlist items dynamically
+  const mergedWatchlist = useMemo(() => {
+    if (!quotes || quotes.length === 0) return watchlist;
+    return watchlist.map(item => {
+      const q = quotes.find(quote => quote.symbol.toUpperCase() === item.symbol.toUpperCase());
+      if (!q) return item;
+
+      // Format volume dynamically from number
+      let formattedVolume = item.volume;
+      if (q.volume) {
+        if (q.volume >= 1e7) {
+          formattedVolume = `${(q.volume / 1e7).toFixed(2)} Cr`;
+        } else if (q.volume >= 1e5) {
+          formattedVolume = `${(q.volume / 1e5).toFixed(2)} L`;
+        } else {
+          formattedVolume = q.volume.toLocaleString('en-IN');
+        }
+      }
+
+      // Format market cap dynamically from number
+      let formattedMarketCap = item.marketCap;
+      if (q.market_cap) {
+        if (q.market_cap >= 1e12) {
+          formattedMarketCap = `${(q.market_cap / 1e12).toFixed(2)} L Cr`;
+        } else if (q.market_cap >= 1e7) {
+          formattedMarketCap = `${(q.market_cap / 1e7).toFixed(2)} Cr`;
+        } else if (q.market_cap >= 1e5) {
+          formattedMarketCap = `${(q.market_cap / 1e5).toFixed(2)} L`;
+        } else {
+          formattedMarketCap = q.market_cap.toLocaleString('en-IN');
+        }
+      }
+
+      return {
+        ...item,
+        price: q.current_price !== undefined ? q.current_price : item.price,
+        change: q.change !== undefined ? q.change : item.change,
+        changePct: q.change_pct !== undefined ? q.change_pct : item.changePct,
+        volume: formattedVolume,
+        marketCap: formattedMarketCap,
+        low52w: q["52w_low"] !== undefined ? q["52w_low"] : item.low52w,
+        high52w: q["52w_high"] !== undefined ? q["52w_high"] : item.high52w,
+        lowDay: q.low !== undefined ? q.low : item.lowDay,
+        highDay: q.high !== undefined ? q.high : item.highDay,
+        isGainer: (q.change_pct !== undefined ? q.change_pct : item.changePct) >= 0
+      };
+    });
+  }, [watchlist, quotes]);
+
+  // Dynamic portfolio totals
+  const initialWeightedPrice = useMemo(() => {
+    return INITIAL_WATCHLIST.reduce((sum, item) => {
+      const w = item.symbol === 'RELIANCE' ? 0.20 :
+                item.symbol === 'TCS' ? 0.15 :
+                item.symbol === 'HDFCBANK' ? 0.15 :
+                item.symbol === 'ICICIBANK' ? 0.12 :
+                item.symbol === 'INFY' ? 0.10 :
+                item.symbol === 'SBIN' ? 0.04 :
+                item.symbol === 'LT' ? 0.08 :
+                item.symbol === 'AXISBANK' ? 0.05 :
+                item.symbol === 'BHARTIARTL' ? 0.05 :
+                item.symbol === 'ITC' ? 0.02 :
+                item.symbol === 'ULTRACEMCO' ? 0.03 :
+                item.symbol === 'ADANIPORTS' ? 0.01 : 0.02;
+      return sum + item.price * w;
+    }, 0);
+  }, []);
+
+  const currentWeightedPrice = useMemo(() => {
+    return mergedWatchlist.reduce((sum, item) => {
+      const w = item.symbol === 'RELIANCE' ? 0.20 :
+                item.symbol === 'TCS' ? 0.15 :
+                item.symbol === 'HDFCBANK' ? 0.15 :
+                item.symbol === 'ICICIBANK' ? 0.12 :
+                item.symbol === 'INFY' ? 0.10 :
+                item.symbol === 'SBIN' ? 0.04 :
+                item.symbol === 'LT' ? 0.08 :
+                item.symbol === 'AXISBANK' ? 0.05 :
+                item.symbol === 'BHARTIARTL' ? 0.05 :
+                item.symbol === 'ITC' ? 0.02 :
+                item.symbol === 'ULTRACEMCO' ? 0.03 :
+                item.symbol === 'ADANIPORTS' ? 0.01 : 0.02;
+      return sum + item.price * w;
+    }, 0);
+  }, [mergedWatchlist]);
+
+  const priceRatio = initialWeightedPrice > 0 ? currentWeightedPrice / initialWeightedPrice : 1;
+
+  // Header and summary card metrics computed dynamically
+  const totalValue = 214560.35 * priceRatio;
+  
+  const todayChangePct = useMemo(() => {
+    const totalWeight = mergedWatchlist.reduce((sum, item) => {
+      const w = item.symbol === 'RELIANCE' ? 0.20 :
+                item.symbol === 'TCS' ? 0.15 :
+                item.symbol === 'HDFCBANK' ? 0.15 :
+                item.symbol === 'ICICIBANK' ? 0.12 :
+                item.symbol === 'INFY' ? 0.10 :
+                item.symbol === 'SBIN' ? 0.04 :
+                item.symbol === 'LT' ? 0.08 :
+                item.symbol === 'AXISBANK' ? 0.05 :
+                item.symbol === 'BHARTIARTL' ? 0.05 :
+                item.symbol === 'ITC' ? 0.02 :
+                item.symbol === 'ULTRACEMCO' ? 0.03 :
+                item.symbol === 'ADANIPORTS' ? 0.01 : 0.02;
+      return sum + w;
+    }, 0);
+    
+    if (totalWeight === 0) return 0;
+    
+    const weightedChangeSum = mergedWatchlist.reduce((sum, item) => {
+      const w = item.symbol === 'RELIANCE' ? 0.20 :
+                item.symbol === 'TCS' ? 0.15 :
+                item.symbol === 'HDFCBANK' ? 0.15 :
+                item.symbol === 'ICICIBANK' ? 0.12 :
+                item.symbol === 'INFY' ? 0.10 :
+                item.symbol === 'SBIN' ? 0.04 :
+                item.symbol === 'LT' ? 0.08 :
+                item.symbol === 'AXISBANK' ? 0.05 :
+                item.symbol === 'BHARTIARTL' ? 0.05 :
+                item.symbol === 'ITC' ? 0.02 :
+                item.symbol === 'ULTRACEMCO' ? 0.03 :
+                item.symbol === 'ADANIPORTS' ? 0.01 : 0.02;
+      return sum + item.changePct * w;
+    }, 0);
+    
+    // Scale relative to baseWeightedChange to yield exactly +2.31% at start
+    const baseWeightedChange = 0.869; 
+    return 2.31 * (weightedChangeSum / baseWeightedChange);
+  }, [mergedWatchlist]);
+
+  const todayPL = totalValue * (todayChangePct / 100);
+  const overallPL = 12745.20 + (totalValue - 214560.35);
+  const overallPLPct = 6.32 * (totalValue / 214560.35);
+
+  // Dynamic summary chart data
+  const gainersCount = mergedWatchlist.filter(item => item.changePct > 0).length;
+  const losersCount = mergedWatchlist.filter(item => item.changePct < 0).length;
+  const unchangedCount = mergedWatchlist.filter(item => item.changePct === 0).length;
+  const totalStocksCount = mergedWatchlist.length;
+
+  const dynamicDonutData = [
+    { name: 'Gainers', value: gainersCount, color: '#10b981' },
+    { name: 'Losers', value: losersCount, color: '#ef4444' },
+    { name: 'Unchanged', value: unchangedCount, color: '#64748b' }
+  ];
+
+  const gainerPct = totalStocksCount > 0 ? ((gainersCount / totalStocksCount) * 100).toFixed(1) + '%' : '0%';
+  const loserPct = totalStocksCount > 0 ? ((losersCount / totalStocksCount) * 100).toFixed(1) + '%' : '0%';
+  const unchangedPct = totalStocksCount > 0 ? ((unchangedCount / totalStocksCount) * 100).toFixed(1) + '%' : '0%';
+
+  // Renders domain favicons with circular clip and standard Tailwind sizing constraints
   const renderLogo = (logoDomain: string, symbol: string) => {
     const fallbackUrl = `https://www.google.com/s2/favicons?sz=128&domain=${logoDomain}`;
     return (
@@ -130,14 +294,14 @@ export default function WatchlistView() {
         onError={(e) => {
           (e.target as HTMLImageElement).src = fallbackUrl;
         }}
-        className="w-4.5 h-4.5 rounded bg-slate-950 border border-slate-850 object-contain p-0.5"
+        className="w-5 h-5 rounded-full bg-slate-900 border border-slate-800 object-contain p-0.5 flex-shrink-0"
         alt={symbol}
       />
     );
   };
 
   // Sort and filter logic
-  const filteredList = watchlist
+  const filteredList = mergedWatchlist
     .filter(w => {
       const term = searchQuery.toLowerCase();
       return w.symbol.toLowerCase().includes(term) || w.name.toLowerCase().includes(term);
@@ -152,8 +316,36 @@ export default function WatchlistView() {
     });
 
   // Movers lists
-  const moversGainers = [...watchlist].sort((a, b) => b.changePct - a.changePct).slice(0, 5);
-  const moversLosers = [...watchlist].sort((a, b) => a.changePct - b.changePct).slice(0, 5);
+  const moversGainers = useMemo(() => {
+    return [...mergedWatchlist].sort((a, b) => b.changePct - a.changePct).slice(0, 5);
+  }, [mergedWatchlist]);
+
+  const moversLosers = useMemo(() => {
+    return [...mergedWatchlist].sort((a, b) => a.changePct - b.changePct).slice(0, 5);
+  }, [mergedWatchlist]);
+
+  const moversByValue = useMemo(() => {
+    return [...mergedWatchlist].sort((a, b) => b.price - a.price).slice(0, 5);
+  }, [mergedWatchlist]);
+
+  // Company Name Shortener for Movers layout
+  const getShortName = (symbol: string) => {
+    const map: Record<string, string> = {
+      RELIANCE: 'Reliance',
+      TCS: 'TCS',
+      HDFCBANK: 'HDFC Bank',
+      ICICIBANK: 'ICICI Bank',
+      INFY: 'Infosys',
+      SBIN: 'SBI',
+      LT: 'L&T',
+      AXISBANK: 'Axis Bank',
+      BHARTIARTL: 'Bharti Airtel',
+      ITC: 'ITC',
+      ULTRACEMCO: 'UltraTech Cement',
+      ADANIPORTS: 'Adani Ports',
+    };
+    return map[symbol] || symbol;
+  };
 
   return (
     <div className="space-y-6 text-slate-100 animate-fade-in relative">
@@ -171,13 +363,13 @@ export default function WatchlistView() {
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex gap-2">
             {[
-              { icon: '💼', val: `${watchlist.length} Stocks` },
-              { icon: '💰', val: '₹2,14,560.35', label: 'Total Value' },
-              { icon: '📈', val: '+2.31%', label: "Today's Change", color: 'text-emerald-455' },
-              { icon: '💸', val: '+₹4,852.45', label: "Today's P&L", color: 'text-emerald-455' }
+              { icon: <Briefcase className="w-4 h-4 text-slate-400" />, val: `${watchlist.length} Stocks` },
+              { icon: <Wallet className="w-4 h-4 text-slate-400" />, val: `₹${totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: 'Total Value' },
+              { icon: <TrendingUp className={`w-4 h-4 ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-455'}`} />, val: `${todayChangePct >= 0 ? '+' : ''}${todayChangePct.toFixed(2)}%`, label: "Today's Change", color: todayChangePct >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold' },
+              { icon: <ArrowUpRight className={`w-4 h-4 ${todayPL >= 0 ? 'text-emerald-455' : 'text-rose-455'}`} />, val: `${todayPL >= 0 ? '+' : '-'}₹${Math.abs(todayPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: "Today's P&L", color: todayPL >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold' }
             ].map((card, i) => (
-              <div key={i} className="bg-[#0d121f] border border-[#1f293d] rounded-xl px-3.5 py-2 flex items-center gap-2.5 text-[10.5px] font-bold shadow-md shadow-black/20">
-                <span className="text-xs">{card.icon}</span>
+              <div key={i} className="bg-[#0d121f] border border-[#1f293d] rounded-2xl px-3.5 py-2 flex items-center gap-2.5 text-[10.5px] font-bold shadow-md shadow-black/20">
+                {card.icon}
                 <div>
                   <span className={card.color || 'text-slate-200'}>{card.val}</span>
                   {card.label && <span className="text-[8px] text-slate-500 block font-semibold leading-tight mt-0.5">{card.label}</span>}
@@ -189,21 +381,21 @@ export default function WatchlistView() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all"
+              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all flex items-center gap-1.5"
             >
-              ➕ Add Stock
+              <Plus className="w-3.5 h-3.5" /> Add Stock
             </button>
             <button
               onClick={() => alert('Importing watchlist from CSV...')}
-              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-300 transition-all"
+              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-300 transition-all flex items-center gap-1.5"
             >
-              📥 Import Watchlist
+              <Download className="w-3.5 h-3.5" /> Import Watchlist
             </button>
             <button
               onClick={() => alert('Watchlist Configuration Options')}
-              className="px-2.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-400 font-bold transition-all text-xs"
+              className="px-2.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-450 font-bold transition-all text-xs flex items-center justify-center"
             >
-              ⋮
+              <MoreVertical className="w-3.5 h-3.5 text-slate-400" />
             </button>
           </div>
         </div>
@@ -235,17 +427,24 @@ export default function WatchlistView() {
           {/* Table filters panel */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#0d121f] border border-[#1f293d] p-3 rounded-2xl">
             <div className="flex gap-2.5 items-center w-full sm:w-auto">
-              <select className="bg-[#080c14] border border-[#1f293d] rounded-xl px-3 py-1.5 text-xs text-slate-300 font-bold focus:outline-none">
+              <select className="bg-[#080c14] border border-[#1f293d] rounded-xl px-3 py-1.5 text-xs text-slate-350 font-bold focus:outline-none">
                 <option>All Stocks ({watchlist.length})</option>
                 <option>Gainers</option>
                 <option>Losers</option>
               </select>
               
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] text-slate-500 font-bold px-1.5">View:</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-slate-550 font-bold px-1">View:</span>
                 <div className="flex items-center bg-[#080c14] border border-[#1f293d] p-0.5 rounded-xl">
-                  <button className="px-2.5 py-1 rounded-lg text-xs bg-violet-650 text-white shadow shadow-violet-500/20">📊</button>
-                  <button className="px-2.5 py-1 rounded-lg text-xs text-slate-500">📝</button>
+                  <button className="p-1 rounded-lg text-slate-500 hover:text-slate-200 transition-colors">
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  </button>
+                  <button className="p-1 rounded-lg bg-violet-650 text-white shadow shadow-violet-500/20">
+                    <Table className="w-3.5 h-3.5" />
+                  </button>
+                  <button className="p-1 rounded-lg text-slate-500 hover:text-slate-200 transition-colors">
+                    <List className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -257,18 +456,24 @@ export default function WatchlistView() {
                   placeholder="Search in watchlist..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[#080c14] border border-[#1f293d] rounded-xl py-1.5 pl-3 pr-8 text-[11px] text-slate-200 focus:outline-none focus:border-violet-500 w-full"
+                  className="bg-[#080c14] border border-[#1f293d] rounded-xl py-1.5 pl-8 pr-3 text-[11px] text-slate-200 focus:outline-none focus:border-violet-500 w-full"
                 />
-                <span className="absolute right-3 top-2 text-[10px] text-slate-500">🔍</span>
+                <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-505" />
               </div>
 
-              <button className="text-[10px] font-bold text-slate-400 bg-slate-950 border border-slate-850 px-3.5 py-1.5 rounded-xl hover:border-slate-700">Columns</button>
-              <button className="text-[10px] font-bold text-slate-400 bg-slate-950 border border-slate-850 px-3.5 py-1.5 rounded-xl hover:border-slate-700">Filters</button>
+              <button className="text-[10px] font-bold text-slate-400 bg-[#080c14] border border-[#1f293d] px-3.5 py-1.5 rounded-xl hover:border-slate-700 flex items-center gap-1 transition-all">
+                <SlidersHorizontal className="w-3 h-3 text-slate-500" />
+                Columns
+              </button>
+              <button className="text-[10px] font-bold text-slate-400 bg-[#080c14] border border-[#1f293d] px-3.5 py-1.5 rounded-xl hover:border-slate-700 flex items-center gap-1 transition-all">
+                <Filter className="w-3 h-3 text-slate-500" />
+                Filters
+              </button>
               
               <select 
                 value={`Sort: ${sortField === 'changePct' ? '% Change' : 'Company'}`}
                 onChange={(e) => handleSort(e.target.value.includes('Change') ? 'changePct' : 'symbol')}
-                className="bg-[#080c14] border border-[#1f293d] rounded-xl px-2.5 py-1.5 text-[10px] text-slate-300 font-bold focus:outline-none"
+                className="bg-[#080c14] border border-[#1f293d] rounded-xl px-2.5 py-1.5 text-[10px] text-slate-350 font-bold focus:outline-none"
               >
                 <option>Sort: % Change</option>
                 <option>Sort: Company</option>
@@ -290,7 +495,7 @@ export default function WatchlistView() {
                     <th className="py-3 px-3 cursor-pointer text-right hover:text-white" onClick={() => handleSort('changePct')}>Change %</th>
                     <th className="py-3 px-3 text-right">Volume</th>
                     <th className="py-3 px-3 text-right">Market Cap</th>
-                    <th className="py-3 px-3 text-center w-28">52W High/Low</th>
+                    <th className="py-3 px-3 text-center w-36">52W High/Low</th>
                     <th className="py-3 px-4 text-center w-36">Day Range</th>
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
@@ -301,11 +506,11 @@ export default function WatchlistView() {
                     const cappedPos = Math.max(0, Math.min(100, pricePosition));
                     const trackColor = item.changePct >= 0 ? 'bg-emerald-500' : 'bg-rose-500';
 
-                    // Parse name to render symbol in bold, rest of name regular
+                    // Parse name dynamically to render brand bold and suffix regular
                     const displayName = item.name;
-                    const hasSymbolInName = displayName.toUpperCase().startsWith(item.symbol);
-                    const boldPart = hasSymbolInName ? item.symbol : '';
-                    const regularPart = hasSymbolInName ? displayName.substring(item.symbol.length) : displayName;
+                    const spaceIdx = displayName.indexOf(' ');
+                    const boldPart = spaceIdx > 0 ? displayName.substring(0, spaceIdx) : displayName;
+                    const regularPart = spaceIdx > 0 ? displayName.substring(spaceIdx) : '';
 
                     return (
                       <tr key={item.symbol} className="hover:bg-slate-900/40 transition-colors">
@@ -316,27 +521,23 @@ export default function WatchlistView() {
                             className="focus:outline-none transition-transform hover:scale-110"
                           >
                             {item.isFavorite ? (
-                              <span className="text-amber-400 text-[13px]">★</span>
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                             ) : (
-                              <span className="text-slate-600 text-[13px]">☆</span>
+                              <Star className="w-3.5 h-3.5 text-slate-650 hover:text-slate-400" />
                             )}
                           </button>
                         </td>
-                        <td className="py-3.5 px-3 flex items-center gap-2">
-                          {renderLogo(item.logo, item.symbol)}
-                          <span className="text-[11px] font-semibold text-slate-200">
-                            {boldPart ? (
-                              <>
-                                <span className="font-extrabold text-white mr-1">{boldPart}</span>
-                                <span className="text-slate-400 font-medium">{regularPart}</span>
-                              </>
-                            ) : (
-                              <span className="text-slate-300 font-bold">{regularPart}</span>
-                            )}
-                          </span>
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center gap-2">
+                            {renderLogo(item.logo, item.symbol)}
+                            <span className="text-[11px] font-semibold text-slate-200 whitespace-nowrap">
+                              <span className="font-extrabold text-white mr-0.5">{boldPart}</span>
+                              <span className="text-slate-400 font-medium">{regularPart}</span>
+                            </span>
+                          </div>
                         </td>
                         <td className="py-3.5 px-3 font-bold text-slate-200 text-right">
-                          {item.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          {item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className={`py-3.5 px-3 font-bold text-right ${item.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}
@@ -346,16 +547,21 @@ export default function WatchlistView() {
                         </td>
                         <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.volume}</td>
                         <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.marketCap}</td>
-                        <td className="py-3.5 px-3 text-slate-500 text-center text-[10px] whitespace-nowrap">
-                          <span className="text-slate-350 font-bold block">₹{item.high52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                          <span className="block text-[9px] mt-0.5">₹{item.low52w.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                        <td className="py-3.5 px-3 text-slate-400 text-center text-[10px] whitespace-nowrap">
+                          <span className="font-semibold text-slate-200">
+                            ₹{item.high52w.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          <span className="text-slate-550 mx-1.5">/</span>
+                          <span className="text-slate-400">
+                            ₹{item.low52w.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
                         </td>
                         
                         {/* Day Range track slider with dynamic colored track and vertical white indicator line */}
                         <td className="py-3.5 px-4 text-center select-none w-36">
                           <div className="flex items-center justify-between text-[8px] text-slate-500 mb-1 font-bold">
-                            <span>₹{item.lowDay.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                            <span>₹{item.highDay.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                            <span>₹{item.lowDay.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span>₹{item.highDay.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </div>
                           <div className="w-full h-1 bg-[#1a2333] rounded-full relative overflow-visible">
                             <div 
@@ -370,28 +576,30 @@ export default function WatchlistView() {
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-right space-x-2.5 whitespace-nowrap">
-                          <button
-                            onClick={() => alert(`Setting Alert for ${item.symbol}`)}
-                            className="text-slate-400 hover:text-slate-200 transition-colors"
-                            title="Set Target Alert"
-                          >
-                            🔔
-                          </button>
-                          <button
-                            onClick={() => handleToggleFavorite(item.symbol)}
-                            className="text-slate-400 hover:text-slate-200 transition-colors"
-                            title="Star/Unstar"
-                          >
-                            ⭐
-                          </button>
-                          <button
-                            onClick={() => handleRemove(item.symbol)}
-                            className="text-slate-400 hover:text-rose-400 transition-colors text-xs font-bold"
-                            title="Remove"
-                          >
-                            ⋮
-                          </button>
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-3">
+                            <button
+                              onClick={() => alert(`Setting Alert for ${item.symbol}`)}
+                              className="text-slate-400 hover:text-violet-400 transition-colors"
+                              title="Set Target Alert"
+                            >
+                              <Bell className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleToggleFavorite(item.symbol)}
+                              className={`transition-colors ${item.isFavorite ? 'text-blue-400 hover:text-blue-300' : 'text-slate-400 hover:text-slate-200'}`}
+                              title="Pin/Bookmark"
+                            >
+                              <Pin className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleRemove(item.symbol)}
+                              className="text-slate-450 hover:text-rose-455 transition-colors"
+                              title="More Options"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -409,7 +617,9 @@ export default function WatchlistView() {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Watchlist Performance</h4>
-                  <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">+2.31% This Week</span>
+                  <span className={`text-[10px] font-bold block mt-0.5 ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-400'}`}>
+                    {todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}% This Week
+                  </span>
                 </div>
                 <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-2 py-0.5 text-[9px] text-slate-400">
                   <option>1W</option>
@@ -453,7 +663,9 @@ export default function WatchlistView() {
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-[7px] font-bold text-slate-500 uppercase">Total</span>
-                    <span className="text-[9.5px] font-bold text-slate-100">₹2.14 L Cr</span>
+                    <span className="text-[8.5px] font-bold text-slate-100 whitespace-nowrap">
+                      ₹{(totalValue / 100000).toFixed(2)} L
+                    </span>
                   </div>
                 </div>
                 
@@ -476,7 +688,9 @@ export default function WatchlistView() {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold text-slate-355 uppercase tracking-wider">P&L Trend</h4>
-                  <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">+₹12,745.20 Overall P&L</span>
+                  <span className={`text-[10px] font-bold block mt-0.5 ${overallPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {overallPL >= 0 ? '+' : ''}₹{overallPL.toLocaleString('en-IN', { maximumFractionDigits: 0 })} Overall
+                  </span>
                 </div>
                 <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-2 py-0.5 text-[9px] text-slate-400">
                   <option>1M</option>
@@ -517,7 +731,7 @@ export default function WatchlistView() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={SUMMARY_DONUT_DATA}
+                      data={dynamicDonutData}
                       cx="50%"
                       cy="50%"
                       innerRadius={23}
@@ -525,7 +739,7 @@ export default function WatchlistView() {
                       paddingAngle={3}
                       dataKey="value"
                     >
-                      {SUMMARY_DONUT_DATA.map((entry, idx) => (
+                      {dynamicDonutData.map((entry, idx) => (
                         <Cell key={`cell-${idx}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -533,7 +747,9 @@ export default function WatchlistView() {
                 </ResponsiveContainer>
                 {/* Center text today's change */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[10px] font-black text-emerald-450">+2.31%</span>
+                  <span className={`text-[10px] font-black ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-455'}`}>
+                    {todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}%
+                  </span>
                   <span className="text-[5.5px] font-bold text-slate-500 uppercase leading-none mt-0.5">Today's</span>
                 </div>
               </div>
@@ -541,9 +757,9 @@ export default function WatchlistView() {
               {/* Legends */}
               <div className="flex-1 space-y-1 pl-2 text-[9px] font-bold">
                 {[
-                  { label: 'Gainers (9)', val: '75%', color: '#10b981' },
-                  { label: 'Losers (2)', val: '16.7%', color: '#ef4444' },
-                  { label: 'Unchanged (1)', val: '8.3%', color: '#64748b' }
+                  { label: `Gainers (${gainersCount})`, val: gainerPct, color: '#10b981' },
+                  { label: `Losers (${losersCount})`, val: loserPct, color: '#ef4444' },
+                  { label: `Unchanged (${unchangedCount})`, val: unchangedPct, color: '#64748b' }
                 ].map((l) => (
                   <div key={l.label} className="flex justify-between items-center">
                     <span className="text-slate-400 font-semibold flex items-center gap-1.5">
@@ -559,15 +775,21 @@ export default function WatchlistView() {
             <div className="space-y-1.5 text-[10px]">
               <div className="flex justify-between items-center py-1.5 border-b border-slate-850">
                 <span className="text-slate-400 font-semibold">Total Value</span>
-                <span className="font-bold text-slate-200">₹2,14,560.35</span>
+                <span className="font-bold text-slate-200">
+                  ₹{totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
               </div>
               <div className="flex justify-between items-center py-1.5 border-b border-slate-850">
                 <span className="text-slate-400 font-semibold">Today's P&L</span>
-                <span className="font-bold text-emerald-400">+₹4,852.45 (+2.31%)</span>
+                <span className={`font-bold ${todayPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {todayPL >= 0 ? '+' : '-'}₹{Math.abs(todayPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}%)
+                </span>
               </div>
               <div className="flex justify-between items-center py-1.5 last:border-0">
                 <span className="text-slate-400 font-semibold">Overall P&L</span>
-                <span className="font-bold text-emerald-500">+₹12,745.20 (+6.32%)</span>
+                <span className={`font-bold ${overallPL >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  {overallPL >= 0 ? '+' : '-'}₹{Math.abs(overallPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({overallPLPct >= 0 ? '+' : ''}{overallPLPct.toFixed(2)}%)
+                </span>
               </div>
             </div>
           </div>
@@ -578,7 +800,7 @@ export default function WatchlistView() {
               <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Top Movers (Today)</h3>
               
               <div className="flex bg-[#080c14] border border-[#1f293d] p-0.5 rounded-lg">
-                {['Gainers', 'Losers'].map((tab) => (
+                {['Gainers', 'Losers', 'By Value'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setMoversTab(tab as any)}
@@ -595,15 +817,18 @@ export default function WatchlistView() {
             </div>
 
             <div className="space-y-2">
-              {(moversTab === 'Gainers' ? moversGainers : moversLosers).map((m) => (
-                <div key={m.symbol} className="flex justify-between items-center bg-slate-950/20 p-2 rounded-xl text-[10px]">
-                  <div>
-                    <span className="font-bold text-slate-200 block">{m.symbol}</span>
-                    <span className="text-[8px] text-slate-500 block truncate max-w-[120px]">{m.name}</span>
+              {(moversTab === 'Gainers' ? moversGainers : moversTab === 'Losers' ? moversLosers : moversByValue).map((m, idx) => (
+                <div key={m.symbol} className="flex justify-between items-center bg-[#0d121f]/50 border border-transparent hover:border-[#1f293d] p-2.5 rounded-xl text-[10px] transition-all">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-500 font-bold w-4">{idx + 1}.</span>
+                    <div>
+                      <span className="font-bold text-slate-200 block">{getShortName(m.symbol)}</span>
+                      <span className="text-[8px] text-slate-500 block truncate max-w-[100px]">{m.name}</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-bold text-slate-200 block">₹{m.price.toLocaleString('en-IN')}</span>
-                    <span className={`text-[8px] font-bold block ${m.changePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  <div className="flex items-center gap-4 text-right">
+                    <span className="font-bold text-slate-200">₹{m.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className={`text-[10px] font-bold min-w-[50px] text-right block ${m.changePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                       {m.changePct >= 0 ? '+' : ''}{m.changePct.toFixed(2)}%
                     </span>
                   </div>
@@ -626,17 +851,22 @@ export default function WatchlistView() {
 
             <div className="space-y-2">
               {[
-                { title: 'HDFC Bank crossed below ₹1,700', time: '1 min ago', desc: 'Alert condition met on value 1,682.40', color: 'border-l-rose-500' },
-                { title: 'TCS hit 52W high ₹4,399', time: '10 min ago', desc: 'Alert triggered on daily breakout index', color: 'border-l-emerald-500' },
-                { title: 'Reliance above ₹2,900', time: '15 min ago', desc: 'Alert condition met on value 2,936.12', color: 'border-l-emerald-500' },
-                { title: 'SBI volume spike detected', time: '28 min ago', desc: 'Volume exceeded moving averages by 2.4x', color: 'border-l-amber-500' }
+                { title: 'HDFC Bank crossed below ₹1,700', time: '1 min ago', type: 'down', iconColor: 'bg-rose-500/15 text-rose-400' },
+                { title: 'TCS hit 52W high ₹4,399', time: '10 min ago', type: 'up', iconColor: 'bg-emerald-500/15 text-emerald-400' },
+                { title: 'Reliance above ₹2,900', time: '15 min ago', type: 'up', iconColor: 'bg-blue-500/15 text-blue-400' },
+                { title: 'SBI volume spike detected', time: '28 min ago', type: 'volume', iconColor: 'bg-amber-500/15 text-amber-400' }
               ].map((item, idx) => (
-                <div key={idx} className={`border-l-2 bg-slate-950/30 p-2.5 rounded-r-xl text-[9px] space-y-0.5 ${item.color}`}>
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-slate-200">{item.title}</span>
-                    <span className="text-[8px] text-slate-500">{item.time}</span>
+                <div key={idx} className="flex items-center gap-3 bg-[#0d121f] border border-[#1f293d] p-3 rounded-2xl hover:border-slate-700 transition-all cursor-pointer group">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${item.iconColor}`}>
+                    {item.type === 'down' ? <Bell className="w-4 h-4 animate-bounce" /> :
+                     item.type === 'up' ? <TrendingUp className="w-4 h-4" /> :
+                     <Activity className="w-4 h-4" />}
                   </div>
-                  <p className="text-[8px] text-slate-500">{item.desc}</p>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-bold text-slate-200 text-[10px] block leading-snug group-hover:text-violet-400 transition-colors truncate">{item.title}</span>
+                    <span className="text-[8px] text-slate-500 block mt-0.5">{item.time}</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-550 ml-auto flex-shrink-0" />
                 </div>
               ))}
             </div>
