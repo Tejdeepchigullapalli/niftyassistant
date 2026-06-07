@@ -22,7 +22,10 @@
   --purple: #8b5cf6;
 }
 
-* { box-sizing: border-box; }
+*, ::before, ::after { 
+  box-sizing: border-box; 
+  border-color: #152036;
+}
 
 body {
   background-color: var(--bg-primary);

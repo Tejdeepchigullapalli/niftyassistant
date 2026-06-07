@@ -11,6 +11,22 @@ import WatchlistView from '../components/WatchlistView';
 import AlertsView from '../components/AlertsView';
 import ReportsView from '../components/ReportsView';
 import SettingsView from '../components/SettingsView';
+import { 
+  BarChart3, 
+  Globe2, 
+  TrendingUp, 
+  CircleDollarSign, 
+  Briefcase, 
+  Bot, 
+  Star, 
+  Bell, 
+  FileText, 
+  Settings, 
+  Search, 
+  RefreshCw, 
+  UserCircle2, 
+  ChevronDown 
+} from 'lucide-react';
 
 const SIDEBAR_TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -37,6 +53,40 @@ export default function Home() {
   const [isTopNiftyExpanded, setIsTopNiftyExpanded] = useState(true); // Default expanded
   const [niftyFilterLimit, setNiftyFilterLimit] = useState(50); // Default to Nifty 50
   const [chatPreQuery, setChatPreQuery] = useState('');
+
+  const [timeStr, setTimeStr] = useState('');
+  useEffect(() => {
+    setTimeStr(new Date().toLocaleTimeString('en-IN'));
+    const timer = setInterval(() => {
+      setTimeStr(new Date().toLocaleTimeString('en-IN'));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, isActive: activeTab === 0 && niftyFilterLimit !== 50 },
+    { id: 'market-overview', label: 'Market Overview', icon: Globe2, isActive: activeTab === 1 },
+    { id: 'stock-analysis', label: 'Stock Analysis', icon: TrendingUp, isActive: activeTab === 2 },
+    { id: 'top-companies', label: 'Top Fifty Nifty', icon: CircleDollarSign, isActive: activeTab === 0 && niftyFilterLimit === 50 },
+    { id: 'portfolio', label: 'Portfolio', icon: Briefcase, isActive: activeTab === 4 },
+    { id: 'ai-assistant', label: 'AI Assistant', icon: Bot, badge: 'NEW', isActive: activeTab === 5 },
+    { id: 'watchlist', label: 'Watchlist', icon: Star, isActive: activeTab === 6 },
+    { id: 'alerts', label: 'Alerts', icon: Bell, count: 8, isActive: activeTab === 7 },
+    { id: 'reports', label: 'Reports', icon: FileText, isActive: activeTab === 8 },
+    { id: 'settings', label: 'Settings', icon: Settings, isActive: activeTab === 9 }
+  ];
+
+  const handleNavClick = (id: string, index: number) => {
+    if (id === 'top-companies') {
+      setNiftyFilterLimit(50);
+      setActiveTab(0);
+    } else if (id === 'dashboard') {
+      setNiftyFilterLimit(10);
+      setActiveTab(0);
+    } else {
+      setActiveTab(index);
+    }
+  };
 
   const handleNavigateToChat = (query?: string, symbol?: string) => {
     if (symbol) {
@@ -102,164 +152,150 @@ export default function Home() {
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>" />
       </Head>
 
-      <div className="min-h-screen flex text-slate-100 bg-[#080c14] relative overflow-x-hidden">
-        
-        {/* Persistent Left Sidebar */}
-        <aside className="w-64 bg-[#0d121f] border-r border-[#1f293d] flex flex-col justify-between p-4 flex-shrink-0 sticky top-0 h-screen z-40 hidden md:flex">
-          
-          <div className="space-y-6">
-            {/* Sidebar Logo */}
-            <div className="flex items-center gap-2.5 px-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-violet-500/20">
-                📈
+      <div className="h-screen overflow-hidden bg-[#020712] text-slate-100 selection:bg-violet-500/30">
+        <div className="flex h-full overflow-hidden">
+          {/* Left Sidebar */}
+          <aside className="fixed inset-y-0 left-0 z-40 hidden w-[205px] border-r border-[#152036] bg-[#07101f] lg:flex lg:flex-col">
+            <div className="flex h-[72px] items-center gap-3 border-b border-[#152036] px-4 select-none">
+              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 via-indigo-500 to-cyan-400 shadow-lg shadow-violet-900/40">
+                <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-base font-extrabold tracking-tight">
-                  Nifty<span className="text-violet-400">AI</span>
-                </h1>
-                <p className="text-[9px] text-slate-500">Your AI Investment Assistant</p>
+                <div className="text-[20px] font-black tracking-tight text-white leading-none">
+                  Nifty<span className="text-cyan-400">AI</span>
+                </div>
+                <div className="text-[9px] font-medium text-slate-500 mt-1">
+                  AI Investment Assistant
+                </div>
               </div>
             </div>
 
-            {/* Sidebar Nav Tabs */}
-            <nav className="space-y-1">
-              {SIDEBAR_TABS.map((tab, idx) => {
-                const isActive = activeTab === idx;
-                const isTopNifty = tab.id === 'top-companies';
-                return (
-                  <div key={tab.id}>
-                    <button
-                      onClick={() => handleSidebarTabClick(idx)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                        isActive 
-                          ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20' 
-                          : 'text-slate-400 hover:bg-slate-950/40 hover:text-slate-200'
-                      }`}
-                    >
-                      <span>{tab.icon}</span>
-                      <span className="flex-1 text-left">{tab.label}</span>
-                      {tab.isNew && (
-                        <span className="text-[7px] bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 font-extrabold px-1.5 py-0.5 rounded-full uppercase scale-90">
-                          New
-                        </span>
-                      )}
-                      {tab.id === 'alerts' && (
-                        <span className="text-[8.5px] bg-rose-600 border border-rose-500 text-white font-black px-1.5 py-0.5 rounded-full scale-90 ml-auto mr-1">
-                          8
-                        </span>
-                      )}
-                      {tab.hasDropdown && (
-                        <span className="text-slate-500 text-[8px] ml-auto transition-transform" style={{ transform: isTopNiftyExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                          ▼
-                        </span>
-                      )}
-                    </button>
-                    {isTopNifty && isTopNiftyExpanded && (
-                      <div className="pl-6 space-y-1 mt-1 transition-all">
-                        {[10, 20, 30, 40, 50].map((limit) => {
-                          const isFilterActive = activeTab === 0 && niftyFilterLimit === limit;
-                          return (
-                            <button
-                              key={limit}
-                              onClick={() => {
-                                setNiftyFilterLimit(limit);
-                                setActiveTab(0); // Switch to Dashboard view
-                              }}
-                              className={`w-full text-left px-3 py-1 rounded-lg text-[11px] font-medium flex items-center gap-2 transition-colors ${
-                                isFilterActive
-                                  ? 'bg-violet-600/20 text-violet-300 border-l-2 border-violet-500 pl-2'
-                                  : 'text-slate-550 hover:text-slate-300'
-                              }`}
-                            >
-                              <span className="text-[6px]">•</span> Top {limit}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-4">
+              {navItems.map(({ id, label, icon: Icon, badge, count, isActive }, idx) => (
+                <button
+                  key={id}
+                  onClick={() => handleNavClick(id, idx)}
+                  className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[12px] font-semibold transition ${
+                    isActive 
+                      ? "bg-gradient-to-r from-violet-700 to-violet-600 text-white shadow-lg shadow-violet-950/40" 
+                      : "text-slate-400 hover:bg-white/[0.04] hover:text-white"
+                  }`}
+                >
+                  <Icon
+                    className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-550 group-hover:text-cyan-400"}`}
+                  />
+                  <span className="flex-1">{label}</span>
+                  {badge && (
+                    <span className="rounded-full bg-violet-600 px-1.5 py-0.5 text-[7px] font-black text-white">
+                      {badge}
+                    </span>
+                  )}
+                  {count && (
+                    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-rose-500 px-1 text-[8px] font-black text-white">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              ))}
             </nav>
-          </div>
 
-          <div className="space-y-4">
-            {/* Market Snapshot in Sidebar */}
-            <div className="bg-slate-950/40 border border-slate-800 p-3 rounded-2xl space-y-2">
-              <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider block">Market Snapshot</span>
+            <div className="m-3 rounded-2xl border border-[#1d2a43] bg-[#0c1628] p-3 select-none">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-300">
+                  Market Snapshot
+                </span>
+                <span className="flex items-center gap-1 text-[8px] font-bold text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Live
+                </span>
+              </div>
               {[
-                { name: 'NIFTY 50', val: '22,517.60', change: '+0.85%', isUp: true },
-                { name: 'SENSEX', val: '74,340.09', change: '+0.73%', isUp: true },
-                { name: 'NIFTY BANK', val: '48,153.15', change: '+1.24%', isUp: true },
-                { name: 'INDIA VIX', val: '12.45', change: '-0.65%', isUp: false },
-              ].map((m) => (
-                <div key={m.name} className="flex justify-between items-center text-[9px]">
-                  <span className="text-slate-400 font-semibold">{m.name}</span>
-                  <div className="text-right">
-                    <span className="text-slate-200 font-bold block">{m.val}</span>
-                    <span className={`text-[8px] font-bold block ${m.isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {m.change}
+                ["NIFTY 50", "22,517.60", "+0.85%"],
+                ["SENSEX", "74,340.09", "+0.73%"],
+                ["NIFTY BANK", "48,153.15", "+1.24%"],
+                ["INDIA VIX", "12.45", "-0.65%"],
+              ].map(([name, value, change]) => (
+                <div key={name} className="mb-3 last:mb-0">
+                  <div className="text-[7px] font-bold tracking-wide text-slate-500">
+                    {name}
+                  </div>
+                  <div className="mt-0.5 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-200">
+                      {value}
+                    </span>
+                    <span
+                      className={`text-[9px] font-bold ${change.startsWith("-") ? "text-rose-450" : "text-emerald-400"}`}
+                    >
+                      {change}
                     </span>
                   </div>
                 </div>
               ))}
             </div>
+          </aside>
 
-          </div>
-
-        </aside>
-
-        {/* Main Content Pane */}
-        <div className="flex-1 flex flex-col min-w-0">
-          
-          {/* Header */}
-          <header className="bg-[#0d121f] border-b border-[#1f293d] sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold md:hidden">
-              <span className="text-lg">📈</span>
-              <span className="font-extrabold text-slate-100">NiftyAI</span>
-            </div>
+          {/* Main Content Pane */}
+          <div className="min-w-0 flex-1 lg:ml-[205px] flex flex-col h-full overflow-hidden">
             
-            {/* Search Placeholder */}
-            <div className="relative w-72 hidden md:block">
-              <input
-                type="text"
-                placeholder="Search for companies, stocks, or ask anything..."
-                className="w-full bg-[#080c14] border border-[#1f293d] rounded-xl py-1.5 pl-4 pr-8 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setActiveTab(4); // Switch to Chatbot Assistant
-                  }
-                }}
-              />
-              <span className="absolute right-3 top-2.5 text-xs text-slate-500">🔍</span>
-            </div>
-
-            {/* Right Header Status indicators */}
-            <div className="flex items-center gap-4">
-              {lastUpdated && (
-                <span className="text-[10px] text-slate-500 hidden sm:inline">
-                  Last Updated: {lastUpdated}
-                </span>
-              )}
-              <div className={`flex items-center gap-1.5 text-[10px] font-bold px-3 py-1 rounded-full border ${
-                backendOnline 
-                  ? 'bg-emerald-950/20 border-emerald-900/40 text-emerald-400' 
-                  : 'bg-rose-950/20 border-rose-900/40 text-rose-400'
-              }`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${backendOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
-                {backendOnline ? 'Online' : 'Offline'}
+            {/* Header */}
+            <header className="sticky top-0 z-30 flex h-[48px] items-center justify-between border-b border-[#152036] bg-[#06101e]/95 px-4 backdrop-blur-xl">
+              <div className="relative w-full max-w-[355px] hidden md:block">
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-550" />
+                <input
+                  className="h-8 w-full rounded-full border border-[#22304a] bg-[#050c17] pl-9 pr-9 text-[10px] text-slate-205 outline-none placeholder:text-slate-600 focus:border-violet-500"
+                  placeholder="Search companies, stocks or anything..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setActiveTab(5); // Switch to AI Assistant Chat
+                    }
+                  }}
+                />
+                <div className="absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-full border border-[#22304a] cursor-pointer">
+                  <Search className="h-2.5 w-2.5 text-slate-500" />
+                </div>
               </div>
-              <button
-                onClick={fetchData}
-                className="text-[10px] px-3.5 py-1.5 rounded-xl font-bold bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-md shadow-violet-500/10"
-              >
-                Refresh
-              </button>
-            </div>
-          </header>
+              
+              <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold md:hidden">
+                <span className="text-lg">📈</span>
+                <span className="font-extrabold text-slate-100">NiftyAI</span>
+              </div>
 
-          {/* Core App Main */}
-          <main className="flex-1 p-4 md:p-6 max-w-screen-2xl w-full mx-auto pb-20 md:pb-6">
+              {/* Right Header Status indicators */}
+              <div className="ml-4 flex items-center gap-5 whitespace-nowrap">
+                <span className="hidden items-center gap-1.5 text-[10px] text-slate-300 md:flex select-none">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  Market: <b className="text-emerald-400 font-extrabold">Open</b>
+                </span>
+                <span className="hidden text-[10px] font-semibold text-slate-300 xl:block select-none">
+                  {timeStr || '02:38:38 PM'}
+                </span>
+                <button 
+                  onClick={fetchData}
+                  className="flex h-8 items-center gap-1.5 rounded-lg bg-violet-750 px-3 text-[10px] font-bold text-white hover:bg-violet-600 transition-colors shadow shadow-violet-500/10"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Refresh
+                </button>
+                <button 
+                  onClick={() => setActiveTab(7)}
+                  className="relative text-slate-400 hover:text-white"
+                >
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[7px] font-black text-white">
+                    3
+                  </span>
+                </button>
+                <button className="flex items-center gap-1.5">
+                  <div className="grid h-7 w-7 place-items-center rounded-full border border-[#33435f] bg-[#132038]">
+                    <UserCircle2 className="h-5 w-5 text-slate-300" />
+                  </div>
+                  <ChevronDown className="h-3 w-3 text-slate-550" />
+                </button>
+              </div>
+            </header>
+
+            {/* Core App Main */}
+            <main className="flex-1 overflow-y-auto p-3 xl:p-4 pb-16 md:pb-4">
             {loading ? (
               <div className="flex items-center justify-center h-[500px]">
                 <div className="text-center space-y-4">
@@ -318,17 +354,20 @@ export default function Home() {
                 )}
               </>
             )}
+            {![6, 7, 8].includes(activeTab) && (
+              <footer className="py-4 text-center border-t border-[#152036] mt-6">
+                <p className="text-[10px] text-slate-550 leading-snug">
+                  Nifty AI Investment Assistant · Developed for research purposes only · Not financial advice
+                </p>
+              </footer>
+            )}
           </main>
-
-          <footer className="py-6 text-center border-t border-[#1f293d] mt-auto">
-            <p className="text-[10px] text-slate-500 leading-snug">
-              Nifty AI Investment Assistant · Developed for research purposes only · Not financial advice
-            </p>
-          </footer>
 
         </div>
 
       </div>
+
+    </div>
 
       {/* Mobile Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0d121f]/95 backdrop-blur-md border-t border-[#1f293d] py-2 px-4 flex justify-around items-center z-50 md:hidden shadow-lg shadow-black/40">

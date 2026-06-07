@@ -18,7 +18,9 @@ import {
   Download, 
   Activity, 
   SlidersHorizontal, 
-  Filter 
+  Filter,
+  Trash2,
+  Smile
 } from 'lucide-react';
 
 // Mock performance data (1W trend line)
@@ -348,66 +350,66 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
   };
 
   return (
-    <div className="space-y-6 text-slate-100 animate-fade-in relative">
+    <div className="space-y-2.5 text-slate-100 animate-fade-in relative">
       
       {/* Watchlist Header Row */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
         <div>
-          <h2 className="text-xl font-extrabold tracking-tight flex items-center gap-2">
-            ⭐ Watchlist <span className="text-[10px] text-slate-500 font-bold bg-[#0d121f] border border-slate-800 p-1 rounded-full cursor-help" title="Watchlist Details">ⓘ</span>
+          <h2 className="text-lg font-extrabold tracking-tight flex items-center gap-1.5">
+            ⭐ Watchlist <span className="text-[9px] text-slate-500 font-bold bg-[#0d121f] border border-slate-800 p-0.5 rounded-full cursor-help" title="Watchlist Details">ⓘ</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">Track your favorite stocks and market movers in one place.</p>
+          <p className="text-[11px] text-slate-400 mt-0">Track your favorite stocks and market movers in one place.</p>
         </div>
 
         {/* Premium Separate Header Cards aligned beautifully */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex gap-1.5">
             {[
-              { icon: <Briefcase className="w-4 h-4 text-slate-400" />, val: `${watchlist.length} Stocks` },
-              { icon: <Wallet className="w-4 h-4 text-slate-400" />, val: `₹${totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: 'Total Value' },
-              { icon: <TrendingUp className={`w-4 h-4 ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-455'}`} />, val: `${todayChangePct >= 0 ? '+' : ''}${todayChangePct.toFixed(2)}%`, label: "Today's Change", color: todayChangePct >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold' },
-              { icon: <ArrowUpRight className={`w-4 h-4 ${todayPL >= 0 ? 'text-emerald-455' : 'text-rose-455'}`} />, val: `${todayPL >= 0 ? '+' : '-'}₹${Math.abs(todayPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: "Today's P&L", color: todayPL >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold' }
+              { icon: <Briefcase className="w-3.5 h-3.5 text-slate-455" />, val: watchlist.length.toString(), label: 'Stocks' },
+              { icon: <Wallet className="w-3.5 h-3.5 text-slate-455" />, val: `₹${totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: 'Total Value' },
+              { icon: <TrendingUp className={`w-3.5 h-3.5 ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-455'}`} />, val: `${todayChangePct >= 0 ? '+' : ''}${todayChangePct.toFixed(2)}%`, label: "Today's Change", color: todayChangePct >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold' },
+              { icon: <Smile className={`w-3.5 h-3.5 ${todayPL >= 0 ? 'text-emerald-455' : 'text-rose-455'}`} />, val: `${todayPL >= 0 ? '+' : '-'}₹${Math.abs(todayPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: "Today's P&L", color: todayPL >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold' }
             ].map((card, i) => (
-              <div key={i} className="bg-[#0d121f] border border-[#1f293d] rounded-2xl px-3.5 py-2 flex items-center gap-2.5 text-[10.5px] font-bold shadow-md shadow-black/20">
+              <div key={i} className="bg-[#0c1628] border border-[#1d2a43] rounded-xl px-2.5 py-1 flex items-center gap-2 text-[9.5px] font-bold shadow-md shadow-black/20">
                 {card.icon}
-                <div>
+                <div className="flex flex-col text-left">
                   <span className={card.color || 'text-slate-200'}>{card.val}</span>
-                  {card.label && <span className="text-[8px] text-slate-500 block font-semibold leading-tight mt-0.5">{card.label}</span>}
+                  <span className="text-[7.5px] text-slate-500 block font-semibold leading-none mt-0.5">{card.label}</span>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <button
               onClick={() => setShowAddModal(true)}
-              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all flex items-center gap-1.5"
+              className="text-[9.5px] font-bold px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 rounded-xl text-white shadow shadow-violet-500/10 transition-all flex items-center gap-1.5"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Stock
+              <Plus className="w-3 h-3" /> Add Stock
             </button>
             <button
               onClick={() => alert('Importing watchlist from CSV...')}
-              className="text-[10.5px] font-bold px-3.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-300 transition-all flex items-center gap-1.5"
+              className="text-[9.5px] font-bold px-2.5 py-1.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-300 transition-all flex items-center gap-1.5"
             >
-              <Download className="w-3.5 h-3.5" /> Import Watchlist
+              <Download className="w-3 h-3" /> Import Watchlist
             </button>
             <button
               onClick={() => alert('Watchlist Configuration Options')}
-              className="px-2.5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-450 font-bold transition-all text-xs flex items-center justify-center"
+              className="px-1.5 py-1.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-450 font-bold transition-all text-xs flex items-center justify-center"
             >
-              <MoreVertical className="w-3.5 h-3.5 text-slate-400" />
+              <MoreVertical className="w-3 h-3 text-slate-400" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Categories sub menu */}
-      <div className="flex border-b border-slate-800 gap-2 overflow-x-auto whitespace-nowrap pb-0.5 select-none scrollbar-none">
+      <div className="flex border-b border-slate-800 gap-2 overflow-x-auto whitespace-nowrap pb-0 select-none scrollbar-none">
         {['My Watchlist', 'Indices Watchlist', 'Custom Watchlists'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all relative ${
+            className={`px-3.5 py-1 text-xs font-semibold border-b-2 transition-all relative ${
               activeTab === tab
                 ? 'border-violet-500 text-violet-400 font-bold'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -419,61 +421,60 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
       </div>
 
       {/* Main Grid Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 items-start">
         
         {/* LEFT/MAIN WATCHLIST TABLE (Colspan 3) */}
-        <div className="lg:col-span-2 xl:col-span-3 space-y-4">
-          
-          {/* Table filters panel */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#0d121f] border border-[#1f293d] p-3 rounded-2xl">
-            <div className="flex gap-2.5 items-center w-full sm:w-auto">
-              <select className="bg-[#080c14] border border-[#1f293d] rounded-xl px-3 py-1.5 text-xs text-slate-350 font-bold focus:outline-none">
+        <div className="lg:col-span-2 xl:col-span-3 space-y-2.5">
+             {/* Table filters panel */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#0d121f] border border-[#152036] p-1.5 rounded-2xl">
+            <div className="flex gap-2 items-center w-full sm:w-auto">
+              <select className="bg-[#080c14] border border-[#152036] rounded-xl px-2 py-0.5 text-xs text-slate-350 font-bold focus:outline-none">
                 <option>All Stocks ({watchlist.length})</option>
                 <option>Gainers</option>
                 <option>Losers</option>
               </select>
               
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-slate-550 font-bold px-1">View:</span>
-                <div className="flex items-center bg-[#080c14] border border-[#1f293d] p-0.5 rounded-xl">
-                  <button className="p-1 rounded-lg text-slate-500 hover:text-slate-200 transition-colors">
-                    <LayoutGrid className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1">
+                <span className="text-[9.5px] text-slate-550 font-bold px-0.5">View:</span>
+                <div className="flex items-center bg-[#080c14] border border-[#152036] p-0.5 rounded-lg">
+                  <button className="p-1 rounded text-slate-500 hover:text-slate-200 transition-colors">
+                    <LayoutGrid className="w-3 h-3" />
                   </button>
-                  <button className="p-1 rounded-lg bg-violet-650 text-white shadow shadow-violet-500/20">
-                    <Table className="w-3.5 h-3.5" />
+                  <button className="p-1 rounded bg-violet-650 text-white shadow shadow-violet-500/20">
+                    <Table className="w-3 h-3" />
                   </button>
-                  <button className="p-1 rounded-lg text-slate-500 hover:text-slate-200 transition-colors">
-                    <List className="w-3.5 h-3.5" />
+                  <button className="p-1 rounded text-slate-500 hover:text-slate-200 transition-colors">
+                    <List className="w-3 h-3" />
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-48">
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-44">
                 <input
                   type="text"
                   placeholder="Search in watchlist..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[#080c14] border border-[#1f293d] rounded-xl py-1.5 pl-8 pr-3 text-[11px] text-slate-200 focus:outline-none focus:border-violet-500 w-full"
+                  className="bg-[#080c14] border border-[#152036] rounded-xl py-0.5 pl-6 pr-2.5 text-[10px] text-slate-200 focus:outline-none focus:border-violet-500 w-full"
                 />
-                <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-505" />
+                <Search className="absolute left-2 top-1.5 w-3 h-3 text-slate-505" />
               </div>
 
-              <button className="text-[10px] font-bold text-slate-400 bg-[#080c14] border border-[#1f293d] px-3.5 py-1.5 rounded-xl hover:border-slate-700 flex items-center gap-1 transition-all">
-                <SlidersHorizontal className="w-3 h-3 text-slate-500" />
+              <button className="text-[9px] font-bold text-slate-400 bg-[#080c14] border border-[#152036] px-2 py-0.5 rounded-xl hover:border-slate-700 flex items-center gap-1 transition-all">
+                <SlidersHorizontal className="w-2.5 h-2.5 text-slate-500" />
                 Columns
               </button>
-              <button className="text-[10px] font-bold text-slate-400 bg-[#080c14] border border-[#1f293d] px-3.5 py-1.5 rounded-xl hover:border-slate-700 flex items-center gap-1 transition-all">
-                <Filter className="w-3 h-3 text-slate-500" />
+              <button className="text-[9px] font-bold text-slate-400 bg-[#080c14] border border-[#152036] px-2 py-0.5 rounded-xl hover:border-slate-700 flex items-center gap-1 transition-all">
+                <Filter className="w-2.5 h-2.5 text-slate-500" />
                 Filters
               </button>
               
               <select 
                 value={`Sort: ${sortField === 'changePct' ? '% Change' : 'Company'}`}
                 onChange={(e) => handleSort(e.target.value.includes('Change') ? 'changePct' : 'symbol')}
-                className="bg-[#080c14] border border-[#1f293d] rounded-xl px-2.5 py-1.5 text-[10px] text-slate-350 font-bold focus:outline-none"
+                className="bg-[#080c14] border border-[#152036] rounded-xl px-1.5 py-0.5 text-[9px] text-slate-350 font-bold focus:outline-none"
               >
                 <option>Sort: % Change</option>
                 <option>Sort: Company</option>
@@ -482,22 +483,22 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
           </div>
 
           {/* STOCKS TABLE */}
-          <div className="card bg-[#0d121f] border border-[#1f293d] rounded-2xl overflow-hidden shadow-2xl">
+          <div className="card bg-[#0d121f] border border-[#152036] rounded-2xl overflow-hidden shadow-2xl">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-[11px] border-collapse">
+              <table className="w-full text-left text-[10px] border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-850 text-slate-400 font-bold bg-[#0d121f] uppercase tracking-wider text-[9px] select-none">
-                    <th className="py-3 px-4 w-8 text-center">#</th>
-                    <th className="py-3 px-1 w-6 text-center"></th>
-                    <th className="py-3 px-3 cursor-pointer hover:text-white" onClick={() => handleSort('symbol')}>Company</th>
-                    <th className="py-3 px-3 cursor-pointer text-right hover:text-white" onClick={() => handleSort('price')}>Price (₹)</th>
-                    <th className="py-3 px-3 cursor-pointer text-right hover:text-white" onClick={() => handleSort('change')}>Change</th>
-                    <th className="py-3 px-3 cursor-pointer text-right hover:text-white" onClick={() => handleSort('changePct')}>Change %</th>
-                    <th className="py-3 px-3 text-right">Volume</th>
-                    <th className="py-3 px-3 text-right">Market Cap</th>
-                    <th className="py-3 px-3 text-center w-36">52W High/Low</th>
-                    <th className="py-3 px-4 text-center w-36">Day Range</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                  <tr className="border-b border-slate-850 text-slate-400 font-bold bg-[#0d121f] uppercase tracking-wider text-[8px] select-none">
+                    <th className="py-1.5 px-3 w-7 text-center">#</th>
+                    <th className="py-1.5 px-1 w-5 text-center"></th>
+                    <th className="py-1.5 px-2.5 cursor-pointer hover:text-white" onClick={() => handleSort('symbol')}>Company</th>
+                    <th className="py-1.5 px-2 cursor-pointer text-right hover:text-white" onClick={() => handleSort('price')}>Price (₹)</th>
+                    <th className="py-1.5 px-2 cursor-pointer text-right hover:text-white" onClick={() => handleSort('change')}>Change</th>
+                    <th className="py-1.5 px-2 cursor-pointer text-right hover:text-white" onClick={() => handleSort('changePct')}>Change %</th>
+                    <th className="py-1.5 px-2 text-right">Volume</th>
+                    <th className="py-1.5 px-2 text-right">Market Cap</th>
+                    <th className="py-1.5 px-2 text-center w-32">52W High/Low</th>
+                    <th className="py-1.5 px-3 text-center w-32">Day Range</th>
+                    <th className="py-1.5 px-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-850">
@@ -514,52 +515,52 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
 
                     return (
                       <tr key={item.symbol} className="hover:bg-slate-900/40 transition-colors">
-                        <td className="py-3.5 px-4 text-center text-slate-500 font-semibold">{idx + 1}</td>
-                        <td className="py-3.5 px-1 text-center">
+                        <td className="py-1 px-3 text-center text-slate-500 font-semibold">{idx + 1}</td>
+                        <td className="py-1 px-1 text-center">
                           <button 
                             onClick={() => handleToggleFavorite(item.symbol)}
                             className="focus:outline-none transition-transform hover:scale-110"
                           >
                             {item.isFavorite ? (
-                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
                             ) : (
-                              <Star className="w-3.5 h-3.5 text-slate-650 hover:text-slate-400" />
+                              <Star className="w-2.5 h-2.5 text-slate-650 hover:text-slate-400" />
                             )}
                           </button>
                         </td>
-                        <td className="py-3.5 px-3">
-                          <div className="flex items-center gap-2">
+                        <td className="py-1 px-2.5">
+                          <div className="flex items-center gap-1.5">
                             {renderLogo(item.logo, item.symbol)}
-                            <span className="text-[11px] font-semibold text-slate-200 whitespace-nowrap">
+                            <span className="text-[10px] font-semibold text-slate-200 whitespace-nowrap">
                               <span className="font-extrabold text-white mr-0.5">{boldPart}</span>
                               <span className="text-slate-400 font-medium">{regularPart}</span>
                             </span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-3 font-bold text-slate-200 text-right">
+                        <td className="py-1 px-2 font-bold text-slate-200 text-right">
                           {item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
-                        <td className={`py-3.5 px-3 font-bold text-right ${item.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <td className={`py-1 px-2 font-bold text-right ${item.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}
                         </td>
-                        <td className={`py-3.5 px-3 font-bold text-right ${item.changePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <td className={`py-1 px-2 font-bold text-right ${item.changePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {item.changePct >= 0 ? '+' : ''}{item.changePct.toFixed(2)}%
                         </td>
-                        <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.volume}</td>
-                        <td className="py-3.5 px-3 text-slate-400 font-semibold text-right">{item.marketCap}</td>
-                        <td className="py-3.5 px-3 text-slate-400 text-center text-[10px] whitespace-nowrap">
+                        <td className="py-1 px-2 text-slate-400 font-semibold text-right">{item.volume}</td>
+                        <td className="py-1 px-2 text-slate-400 font-semibold text-right">{item.marketCap}</td>
+                        <td className="py-1 px-2 text-slate-400 text-center text-[9px] whitespace-nowrap">
                           <span className="font-semibold text-slate-200">
                             ₹{item.high52w.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
-                          <span className="text-slate-550 mx-1.5">/</span>
+                          <span className="text-slate-555 mx-1">/</span>
                           <span className="text-slate-400">
                             ₹{item.low52w.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
                         </td>
                         
                         {/* Day Range track slider with dynamic colored track and vertical white indicator line */}
-                        <td className="py-3.5 px-4 text-center select-none w-36">
-                          <div className="flex items-center justify-between text-[8px] text-slate-500 mb-1 font-bold">
+                        <td className="py-1 px-3 text-center select-none w-32">
+                          <div className="flex items-center justify-between text-[7px] text-slate-500 mb-0.5 font-bold">
                             <span>₹{item.lowDay.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             <span>₹{item.highDay.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </div>
@@ -576,28 +577,28 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-3">
+                        <td className="py-1 px-3 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => alert(`Setting Alert for ${item.symbol}`)}
-                              className="text-slate-400 hover:text-violet-400 transition-colors"
+                              className="text-slate-450 hover:text-violet-400 transition-colors"
                               title="Set Target Alert"
                             >
-                              <Bell className="w-4 h-4" />
+                              <Bell className="w-3 h-3" />
                             </button>
                             <button
                               onClick={() => handleToggleFavorite(item.symbol)}
-                              className={`transition-colors ${item.isFavorite ? 'text-blue-400 hover:text-blue-300' : 'text-slate-400 hover:text-slate-200'}`}
+                              className={`transition-colors ${item.isFavorite ? 'text-blue-400 hover:text-blue-300' : 'text-slate-450 hover:text-slate-200'}`}
                               title="Pin/Bookmark"
                             >
-                              <Pin className="w-4 h-4" />
+                              <Pin className="w-3 h-3" />
                             </button>
                             <button
                               onClick={() => handleRemove(item.symbol)}
-                              className="text-slate-450 hover:text-rose-455 transition-colors"
-                              title="More Options"
+                              className="text-slate-450 hover:text-rose-400 transition-colors"
+                              title="Delete Stock"
                             >
-                              <MoreVertical className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         </td>
@@ -610,27 +611,30 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
           </div>
 
           {/* THREE CHARTS ROW */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             
             {/* Watchlist Performance Trend */}
-            <div className="card p-4 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
+            <div className="card p-2.5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Watchlist Performance</h4>
-                  <span className={`text-[10px] font-bold block mt-0.5 ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-400'}`}>
-                    {todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}% This Week
-                  </span>
+                  <h4 className="text-[10px] font-bold text-slate-350 uppercase tracking-wider">Watchlist Performance</h4>
+                  <div className="mt-1 flex items-baseline gap-1">
+                    <span className={`text-[11px] font-extrabold ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-455'}`}>
+                      {todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}%
+                    </span>
+                    <span className="text-[7.5px] text-slate-500 font-semibold leading-none">This Week</span>
+                  </div>
                 </div>
-                <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-2 py-0.5 text-[9px] text-slate-400">
+                <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-1.5 py-0.5 text-[8px] text-slate-400 focus:outline-none">
                   <option>1W</option>
                   <option>1M</option>
                 </select>
               </div>
-              <div className="h-[120px] w-full">
+              <div className="h-[80px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={WATCHLIST_PERF_DATA} margin={{ top: 5, right: 5, left: -35, bottom: 5 }}>
-                    <XAxis dataKey="date" stroke="#64748b" fontSize={8} tickLine={false} />
-                    <YAxis stroke="#64748b" fontSize={8} tickLine={false} domain={['dataMin - 0.1', 'dataMax + 0.1']} />
+                  <LineChart data={WATCHLIST_PERF_DATA} margin={{ top: 5, right: 5, left: -38, bottom: 0 }}>
+                    <XAxis dataKey="date" stroke="#64748b" fontSize={7} tickLine={false} />
+                    <YAxis stroke="#64748b" fontSize={7} tickLine={false} domain={['dataMin - 0.1', 'dataMax + 0.1']} />
                     <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1f293d', borderRadius: '10px', fontSize: '9px' }} />
                     <Line type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} dot={false} />
                   </LineChart>
@@ -639,20 +643,20 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
             </div>
 
             {/* Sector Allocation Distribution */}
-            <div className="card p-4 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-3">
-              <h4 className="text-xs font-bold text-slate-355 uppercase tracking-wider">Sector Allocation</h4>
-              <div className="flex items-center justify-between gap-1 h-[120px]">
+            <div className="card p-2.5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-2">
+              <h4 className="text-[10px] font-bold text-slate-355 uppercase tracking-wider">Sector Allocation</h4>
+              <div className="flex items-center justify-between gap-1 h-[80px]">
                 {/* Center text inside donut chart */}
-                <div className="w-[90px] h-[90px] flex-shrink-0 relative">
+                <div className="w-[68px] h-[68px] flex-shrink-0 relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={SECTOR_ALLOCATION}
                         cx="50%"
                         cy="50%"
-                        innerRadius={28}
-                        outerRadius={38}
-                        paddingAngle={2}
+                        innerRadius={20}
+                        outerRadius={28}
+                        paddingAngle={1.5}
                         dataKey="value"
                       >
                         {SECTOR_ALLOCATION.map((entry, index) => (
@@ -662,18 +666,18 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-[7px] font-bold text-slate-500 uppercase">Total</span>
-                    <span className="text-[8.5px] font-bold text-slate-100 whitespace-nowrap">
-                      ₹{(totalValue / 100000).toFixed(2)} L
+                    <span className="text-[5px] font-bold text-slate-500 uppercase leading-none">Total</span>
+                    <span className="text-[7.5px] font-bold text-slate-100 whitespace-nowrap mt-0.5">
+                      ₹{(totalValue / 100000).toFixed(2)} L Cr
                     </span>
                   </div>
                 </div>
                 
-                <div className="flex-1 space-y-1 overflow-y-auto max-h-[110px] pr-1 scrollbar-none text-[8.5px]">
+                <div className="flex-1 space-y-0.5 overflow-y-auto max-h-[75px] pr-1 scrollbar-none text-[7.5px]">
                   {SECTOR_ALLOCATION.map((entry) => (
                     <div key={entry.name} className="flex justify-between items-center">
-                      <span className="text-slate-400 font-semibold truncate max-w-[65px] flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                      <span className="text-slate-400 font-semibold truncate max-w-[62px] flex items-center gap-1">
+                        <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
                         {entry.name}
                       </span>
                       <span className="text-slate-200 font-bold">{entry.value}%</span>
@@ -684,24 +688,27 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
             </div>
 
             {/* P&L Trend (Bar Chart) */}
-            <div className="card p-4 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
+            <div className="card p-2.5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-355 uppercase tracking-wider">P&L Trend</h4>
-                  <span className={`text-[10px] font-bold block mt-0.5 ${overallPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {overallPL >= 0 ? '+' : ''}₹{overallPL.toLocaleString('en-IN', { maximumFractionDigits: 0 })} Overall
-                  </span>
+                  <h4 className="text-[10px] font-bold text-slate-355 uppercase tracking-wider">P&L Trend</h4>
+                  <div className="mt-1 flex items-baseline gap-1">
+                    <span className={`text-[11px] font-extrabold ${overallPL >= 0 ? 'text-emerald-450' : 'text-rose-455'}`}>
+                      {overallPL >= 0 ? '+' : '-'}₹{Math.abs(overallPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                    <span className="text-[7.5px] text-slate-500 font-semibold leading-none">Overall P&L</span>
+                  </div>
                 </div>
-                <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-2 py-0.5 text-[9px] text-slate-400">
+                <select className="bg-[#080c14] border border-[#1f293d] rounded-lg px-1.5 py-0.5 text-[8px] text-slate-400 focus:outline-none">
                   <option>1M</option>
                   <option>3M</option>
                 </select>
               </div>
-              <div className="h-[120px] w-full">
+              <div className="h-[80px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={PL_TREND_DATA} margin={{ top: 5, right: 5, left: -30, bottom: 5 }}>
-                    <XAxis dataKey="day" stroke="#64748b" fontSize={8} tickLine={false} />
-                    <YAxis stroke="#64748b" fontSize={8} tickLine={false} />
+                  <BarChart data={PL_TREND_DATA} margin={{ top: 5, right: 5, left: -32, bottom: 0 }}>
+                    <XAxis dataKey="day" stroke="#64748b" fontSize={7} tickLine={false} />
+                    <YAxis stroke="#64748b" fontSize={7} tickLine={false} />
                     <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1f293d', borderRadius: '10px', fontSize: '9px' }} />
                     <ReferenceLine y={0} stroke="#1f293d" />
                     <Bar dataKey="pl" fill="#8b5cf6">
@@ -719,24 +726,24 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
         </div>
 
         {/* RIGHT COLUMN (Colspan 1) */}
-        <div className="space-y-6">
+        <div className="space-y-3">
           
           {/* WATCHLIST SUMMARY DONUT - Recharts Donut Widget inside Summary box */}
-          <div className="card p-5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Watchlist Summary</h3>
+          <div className="card p-3 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-3">
+            <h3 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Watchlist Summary</h3>
             
-            <div className="flex items-center justify-between gap-2 bg-[#080c14]/30 border border-[#1f293d] p-3 rounded-2xl">
+            <div className="flex items-center justify-between gap-1 bg-[#080c14]/30 border border-[#1f293d] p-1.5 rounded-2xl">
               {/* Donut chart */}
-              <div className="w-[78px] h-[78px] flex-shrink-0 relative">
+              <div className="w-[60px] h-[60px] flex-shrink-0 relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={dynamicDonutData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={23}
-                      outerRadius={33}
-                      paddingAngle={3}
+                      innerRadius={15}
+                      outerRadius={23}
+                      paddingAngle={2.5}
                       dataKey="value"
                     >
                       {dynamicDonutData.map((entry, idx) => (
@@ -747,67 +754,73 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
                 </ResponsiveContainer>
                 {/* Center text today's change */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className={`text-[10px] font-black ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-455'}`}>
+                  <span className={`text-[7.5px] font-black ${todayChangePct >= 0 ? 'text-emerald-450' : 'text-rose-455'}`}>
                     {todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}%
                   </span>
-                  <span className="text-[5.5px] font-bold text-slate-500 uppercase leading-none mt-0.5">Today's</span>
+                  <span className="text-[4px] font-bold text-slate-500 uppercase leading-none mt-0.5">Today's</span>
                 </div>
               </div>
 
               {/* Legends */}
-              <div className="flex-1 space-y-1 pl-2 text-[9px] font-bold">
+              <div className="flex-1 space-y-0.5 pl-1 text-[7.5px] font-bold">
                 {[
                   { label: `Gainers (${gainersCount})`, val: gainerPct, color: '#10b981' },
                   { label: `Losers (${losersCount})`, val: loserPct, color: '#ef4444' },
                   { label: `Unchanged (${unchangedCount})`, val: unchangedPct, color: '#64748b' }
                 ].map((l) => (
                   <div key={l.label} className="flex justify-between items-center">
-                    <span className="text-slate-400 font-semibold flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: l.color }} />
+                    <span className="text-slate-400 font-semibold flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full" style={{ backgroundColor: l.color }} />
                       {l.label}
                     </span>
-                    <span className="text-slate-300">{l.val}</span>
+                    <span className="text-slate-350">{l.val}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-1.5 text-[10px]">
-              <div className="flex justify-between items-center py-1.5 border-b border-slate-850">
-                <span className="text-slate-400 font-semibold">Total Value</span>
-                <span className="font-bold text-slate-200">
+            <div className="grid grid-cols-3 gap-1 text-center pt-2.5 border-t border-slate-850">
+              <div className="flex flex-col items-center">
+                <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-wider leading-none">Total Value</span>
+                <span className="text-[10px] font-extrabold text-white mt-1.5 block leading-tight">
                   ₹{totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-1.5 border-b border-slate-850">
-                <span className="text-slate-400 font-semibold">Today's P&L</span>
-                <span className={`font-bold ${todayPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {todayPL >= 0 ? '+' : '-'}₹{Math.abs(todayPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}%)
+              <div className="flex flex-col items-center border-l border-slate-850 px-0.5">
+                <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-wider leading-none">Today's P&L</span>
+                <span className={`text-[10px] font-extrabold mt-1.5 block leading-tight ${todayPL >= 0 ? 'text-emerald-450' : 'text-rose-455'}`}>
+                  {todayPL >= 0 ? '+' : '-'}₹{Math.abs(todayPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className={`text-[7px] font-bold block leading-none mt-0.5 ${todayChangePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  ({todayChangePct >= 0 ? '+' : ''}{todayChangePct.toFixed(2)}%)
                 </span>
               </div>
-              <div className="flex justify-between items-center py-1.5 last:border-0">
-                <span className="text-slate-400 font-semibold">Overall P&L</span>
-                <span className={`font-bold ${overallPL >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {overallPL >= 0 ? '+' : '-'}₹{Math.abs(overallPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({overallPLPct >= 0 ? '+' : ''}{overallPLPct.toFixed(2)}%)
+              <div className="flex flex-col items-center border-l border-slate-850 pl-0.5">
+                <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-wider leading-none">Overall P&L</span>
+                <span className={`text-[10px] font-extrabold mt-1.5 block leading-tight ${overallPL >= 0 ? 'text-emerald-500' : 'text-rose-550'}`}>
+                  {overallPL >= 0 ? '+' : '-'}₹{Math.abs(overallPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className={`text-[7px] font-bold block leading-none mt-0.5 ${overallPLPct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  ({overallPLPct >= 0 ? '+' : ''}{overallPLPct.toFixed(2)}%)
                 </span>
               </div>
             </div>
           </div>
 
           {/* TOP MOVERS (TODAY) */}
-          <div className="card p-5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-850 pb-2">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Top Movers (Today)</h3>
+          <div className="card p-3 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-2.5">
+            <div className="flex items-center justify-between border-b border-slate-850 pb-1.5">
+              <h3 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Top Movers (Today)</h3>
               
               <div className="flex bg-[#080c14] border border-[#1f293d] p-0.5 rounded-lg">
                 {['Gainers', 'Losers', 'By Value'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setMoversTab(tab as any)}
-                    className={`px-2 py-0.5 rounded-md text-[8px] font-bold transition-all ${
+                    className={`px-1.5 py-0.5 rounded text-[7px] font-bold transition-all ${
                       moversTab === tab 
                         ? 'bg-violet-600 text-white' 
-                        : 'text-slate-500 hover:text-slate-350'
+                        : 'text-slate-500 hover:text-slate-355'
                     }`}
                   >
                     {tab}
@@ -816,19 +829,19 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               {(moversTab === 'Gainers' ? moversGainers : moversTab === 'Losers' ? moversLosers : moversByValue).map((m, idx) => (
-                <div key={m.symbol} className="flex justify-between items-center bg-[#0d121f]/50 border border-transparent hover:border-[#1f293d] p-2.5 rounded-xl text-[10px] transition-all">
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-500 font-bold w-4">{idx + 1}.</span>
+                <div key={m.symbol} className="flex justify-between items-center bg-[#0d121f]/50 border border-transparent hover:border-[#1f293d] p-1 rounded-xl text-[9px] transition-all">
+                  <div className="flex items-center gap-1">
+                    <span className="text-slate-500 font-bold w-3">{idx + 1}.</span>
                     <div>
                       <span className="font-bold text-slate-200 block">{getShortName(m.symbol)}</span>
-                      <span className="text-[8px] text-slate-500 block truncate max-w-[100px]">{m.name}</span>
+                      <span className="text-[7px] text-slate-500 block truncate max-w-[85px]">{m.name}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-right">
+                  <div className="flex items-center gap-2 text-right">
                     <span className="font-bold text-slate-200">₹{m.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <span className={`text-[10px] font-bold min-w-[50px] text-right block ${m.changePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    <span className={`text-[9px] font-bold min-w-[42px] text-right block ${m.changePct >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                       {m.changePct >= 0 ? '+' : ''}{m.changePct.toFixed(2)}%
                     </span>
                   </div>
@@ -838,42 +851,41 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
           </div>
 
           {/* WATCHLIST ALERTS */}
-          <div className="card p-5 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-850 pb-2">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Watchlist Alerts (8)</h3>
+          <div className="card p-3 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-2.5">
+            <div className="flex items-center justify-between border-b border-slate-850 pb-1.5">
+              <h3 className="text-xs font-bold text-slate-355 uppercase tracking-wider">Watchlist Alerts (8)</h3>
               <button 
                 onClick={() => alert('Routing to Alerts Tab...')}
-                className="text-[9px] font-bold text-violet-400 hover:text-violet-300"
+                className="text-[8px] font-bold text-violet-400 hover:text-violet-300"
               >
                 View All
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               {[
                 { title: 'HDFC Bank crossed below ₹1,700', time: '1 min ago', type: 'down', iconColor: 'bg-rose-500/15 text-rose-400' },
                 { title: 'TCS hit 52W high ₹4,399', time: '10 min ago', type: 'up', iconColor: 'bg-emerald-500/15 text-emerald-400' },
                 { title: 'Reliance above ₹2,900', time: '15 min ago', type: 'up', iconColor: 'bg-blue-500/15 text-blue-400' },
                 { title: 'SBI volume spike detected', time: '28 min ago', type: 'volume', iconColor: 'bg-amber-500/15 text-amber-400' }
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3 bg-[#0d121f] border border-[#1f293d] p-3 rounded-2xl hover:border-slate-700 transition-all cursor-pointer group">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${item.iconColor}`}>
-                    {item.type === 'down' ? <Bell className="w-4 h-4 animate-bounce" /> :
-                     item.type === 'up' ? <TrendingUp className="w-4 h-4" /> :
-                     <Activity className="w-4 h-4" />}
+                <div key={idx} className="flex items-center gap-1.5 bg-[#0d121f] border border-[#1f293d] p-1.5 rounded-2xl hover:border-slate-700 transition-all cursor-pointer group">
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${item.iconColor}`}>
+                    {item.type === 'down' ? <Bell className="w-3 h-3 animate-bounce" /> :
+                     item.type === 'up' ? <TrendingUp className="w-3 h-3" /> :
+                     <Activity className="w-3 h-3" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="font-bold text-slate-200 text-[10px] block leading-snug group-hover:text-violet-400 transition-colors truncate">{item.title}</span>
-                    <span className="text-[8px] text-slate-500 block mt-0.5">{item.time}</span>
+                    <span className="font-bold text-slate-200 text-[8.5px] block leading-snug group-hover:text-violet-400 transition-colors truncate">{item.title}</span>
+                    <span className="text-[7px] text-slate-500 block mt-0.5">{item.time}</span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-550 ml-auto flex-shrink-0" />
+                  <ChevronRight className="w-2.5 h-2.5 text-slate-550 ml-auto flex-shrink-0" />
                 </div>
               ))}
             </div>
           </div>
 
         </div>
-
       </div>
 
       {/* ADD STOCK DIALOG MODAL */}
