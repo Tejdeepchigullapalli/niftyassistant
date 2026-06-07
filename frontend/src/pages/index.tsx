@@ -7,6 +7,10 @@ import PortfolioView from '../components/PortfolioView';
 import DashboardView from '../components/DashboardView';
 import AIAssistantPage from '../components/AIAssistantPage';
 import AIChatbot from '../components/AIChatbot';
+import WatchlistView from '../components/WatchlistView';
+import AlertsView from '../components/AlertsView';
+import ReportsView from '../components/ReportsView';
+import SettingsView from '../components/SettingsView';
 
 const SIDEBAR_TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -87,11 +91,6 @@ export default function Home() {
       setIsTopNiftyExpanded(!isTopNiftyExpanded);
       return;
     }
-    // If clicking placeholders (Watchlist, Alerts, Reports, Settings) which are indices 6, 7, 8, 9
-    if (index >= 6) {
-      alert(`${clickedTab.label} feature is coming soon with live Nifty 50 push notifications!`);
-      return;
-    }
     setActiveTab(index);
   };
 
@@ -142,6 +141,11 @@ export default function Home() {
                       {tab.isNew && (
                         <span className="text-[7px] bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 font-extrabold px-1.5 py-0.5 rounded-full uppercase scale-90">
                           New
+                        </span>
+                      )}
+                      {tab.id === 'alerts' && (
+                        <span className="text-[8.5px] bg-rose-600 border border-rose-500 text-white font-black px-1.5 py-0.5 rounded-full scale-90 ml-auto mr-1">
+                          8
                         </span>
                       )}
                       {tab.hasDropdown && (
@@ -299,6 +303,18 @@ export default function Home() {
                     initialQuery={chatPreQuery}
                     clearPreQuery={() => setChatPreQuery('')}
                   />
+                )}
+                {activeTab === 6 && (
+                  <WatchlistView />
+                )}
+                {activeTab === 7 && (
+                  <AlertsView />
+                )}
+                {activeTab === 8 && (
+                  <ReportsView />
+                )}
+                {activeTab === 9 && (
+                  <SettingsView />
                 )}
               </>
             )}
