@@ -55,7 +55,8 @@ const COMPANY_DOMAINS: Record<string, string> = {
   HDFCLIFE: 'hdfclife.com',
   TMPV: 'tatamotors.com',
   WIPRO: 'wipro.com',
-  ADANIENT: 'adani.com'
+  ADANIENT: 'adani.com',
+  NIFTY: 'nseindia.com'
 };
 
 const LOCAL_LOGOS: Record<string, string> = {

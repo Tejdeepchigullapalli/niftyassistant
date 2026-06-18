@@ -6,7 +6,7 @@ const rawBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const BASE = rawBase.replace(/\/$/, '');
 console.log("[NiftyAI Diagnostics] API Base URL evaluates to:", BASE);
 
-const COMPANIES_METADATA = [
+export const COMPANIES_METADATA = [
   { symbol: 'RELIANCE', name: 'Reliance Industries Ltd', sector: 'Energy & Retail', industry: 'Conglomerate', color: '#e11d48', basePrice: 2936.12 },
   { symbol: 'TCS',      name: 'Tata Consultancy Services', sector: 'Information Technology', industry: 'IT Services', color: '#2563eb', basePrice: 3915.20 },
   { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd', sector: 'Banking & Financial', industry: 'Private Bank', color: '#7c3aed', basePrice: 1682.40 },
@@ -355,6 +355,38 @@ export const api = {
           avoid: allRecs.filter(r => ['Reduce', 'Sell'].includes(r.recommendation)),
           portfolio_avg_score: 74,
           all_recommendations: allRecs
+        };
+      }
+    ),
+  getMarketStatus: () => 
+    safeCall(
+      () => axios.get(`${BASE}/stocks/market-status`),
+      () => {
+        const now = new Date();
+        const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+        const ist = new Date(utc + 3600000 * 5.5);
+        const day = ist.getDay(); 
+        const minutes = ist.getHours() * 60 + ist.getMinutes();
+        
+        let status = "Closed";
+        let isOpen = false;
+        
+        if (day !== 0 && day !== 6) {
+          if (minutes >= 555 && minutes <= 930) {
+            status = "Open";
+            isOpen = true;
+          } else if (minutes >= 540 && minutes <= 548) {
+            status = "Pre-Open";
+          } else if (minutes > 930 && minutes <= 960) {
+            status = "Closing";
+          }
+        }
+        
+        return {
+          status,
+          is_open: isOpen,
+          ist_time: ist.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
+          weekday: ist.toLocaleString('en-US', { weekday: 'long' })
         };
       }
     ),

@@ -22,6 +22,8 @@ import {
   Trash2,
   Smile
 } from 'lucide-react';
+import { COMPANIES_METADATA } from '../utils/api';
+import { CompanyLogo } from './DashboardView';
 
 // Mock performance data (1W trend line)
 const WATCHLIST_PERF_DATA = [
@@ -125,6 +127,15 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
     setWatchlist([...watchlist, newStock]);
     setShowAddModal(false);
     setAddPrice('');
+  };
+
+  const handleSelectCompany = (symbol: string) => {
+    setAddSymbol(symbol);
+    const found = COMPANIES_METADATA.find(c => c.symbol === symbol);
+    if (found) {
+      setAddName(found.name);
+      setAddPrice(String(found.basePrice));
+    }
   };
 
   const handleSort = (field: string) => {
@@ -289,16 +300,8 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
 
   // Renders domain favicons with circular clip and standard Tailwind sizing constraints
   const renderLogo = (logoDomain: string, symbol: string) => {
-    const fallbackUrl = `https://www.google.com/s2/favicons?sz=128&domain=${logoDomain}`;
     return (
-      <img
-        src={`https://logo.clearbit.com/${logoDomain}`}
-        onError={(e) => {
-          (e.target as HTMLImageElement).src = fallbackUrl;
-        }}
-        className="w-5 h-5 rounded-full bg-slate-900 border border-slate-800 object-contain p-0.5 flex-shrink-0"
-        alt={symbol}
-      />
+      <CompanyLogo symbol={symbol} className="w-5 h-5 text-[8px]" size="sm" />
     );
   };
 
@@ -903,6 +906,20 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
             </div>
             
             <form onSubmit={handleAddStockSubmit} className="space-y-4 text-left">
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Nifty 50 Company</label>
+                <select
+                  value={COMPANIES_METADATA.some(c => c.symbol === addSymbol) ? addSymbol : ''}
+                  onChange={(e) => handleSelectCompany(e.target.value)}
+                  className="w-full bg-[#080c14] border border-[#1f293d] rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-violet-500 cursor-pointer mb-2"
+                >
+                  <option value="">-- Select or type manually --</option>
+                  {COMPANIES_METADATA.map((c) => (
+                    <option key={c.symbol} value={c.symbol}>{c.symbol} - {c.name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Stock Code</label>
                 <input

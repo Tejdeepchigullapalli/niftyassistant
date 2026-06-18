@@ -28,6 +28,7 @@ import {
   Wallet,
   FolderOpen
 } from 'lucide-react';
+import { CompanyLogo } from './DashboardView';
 
 // Portfolio timeline performance chart mock data
 const PERFORMANCE_DATA = [
@@ -99,16 +100,8 @@ export default function ReportsView() {
 
   // Renders logo dynamically with Google favicon API fallback
   const renderLogo = (logoDomain: string, symbol: string, sizeClass = 'w-5 h-5') => {
-    const fallbackUrl = `https://www.google.com/s2/favicons?sz=128&domain=${logoDomain}`;
     return (
-      <img
-        src={`https://logo.clearbit.com/${logoDomain}`}
-        onError={(e) => {
-          (e.target as HTMLImageElement).src = fallbackUrl;
-        }}
-        className={`${sizeClass} rounded-full object-contain bg-slate-900 border border-slate-800 p-0.5 flex-shrink-0`}
-        alt={symbol}
-      />
+      <CompanyLogo symbol={symbol} className={sizeClass} size="sm" />
     );
   };
 

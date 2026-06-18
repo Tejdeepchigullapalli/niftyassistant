@@ -18,6 +18,8 @@ import {
   Clock,
   PauseCircle
 } from 'lucide-react';
+import { COMPANIES_METADATA } from '../utils/api';
+import { CompanyLogo } from './DashboardView';
 
 // Generates exactly 41 initial alerts to match the pagination of the mockup ("Showing 1 to 8 of 41 alerts")
 const INITIAL_ALERTS = [
@@ -32,7 +34,7 @@ const INITIAL_ALERTS = [
   // Alerts 9-41: Generated to achieve the exact page numbers and count metrics
   { id: '9', symbol: 'BHARTIARTL', name: 'BHARTIARTL Price Alert', company: 'Bharti Airtel Ltd.', condition: 'Price above', value: '₹1,400.00', rawValue: 1400, current: '₹1,385.20', change: '+0.42%', isGreen: true, status: 'Active', createdOn: '16 May 2024 02:10 PM', logo: 'airtel.in' },
   { id: '10', symbol: 'ITC', name: 'ITC % Change Alert', company: 'ITC Ltd.', condition: 'Change above', value: '3.00%', rawValue: 3, current: '+1.10%', change: '', isGreen: true, status: 'Active', createdOn: '16 May 2024 01:15 PM', logo: 'itcportal.com' },
-  { id: '11', symbol: 'TATAMOTORS', name: 'TATAMOTORS Price Alert', company: 'Tata Motors Ltd.', condition: 'Price below', value: '₹950.00', rawValue: 950, current: '₹968.40', change: '-0.30%', isGreen: false, status: 'Active', createdOn: '16 May 2024 11:30 AM', logo: 'tatamotors.com' },
+  { id: '11', symbol: 'TMPV', name: 'TMPV Price Alert', company: 'Tata Motors Passenger Vehicles', condition: 'Price below', value: '₹950.00', rawValue: 950, current: '₹968.40', change: '-0.30%', isGreen: false, status: 'Active', createdOn: '16 May 2024 11:30 AM', logo: 'tatamotors.com' },
   { id: '12', symbol: 'AXISBANK', name: 'AXISBANK RSI Alert', company: 'Axis Bank Ltd.', condition: 'RSI above (70)', value: '70', rawValue: 70, current: '68.50', change: '', isGreen: true, status: 'Active', createdOn: '16 May 2024 10:00 AM', logo: 'axisbank.com' },
   { id: '13', symbol: 'WIPRO', name: 'WIPRO Volume Alert', company: 'Wipro Ltd.', condition: 'Volume above', value: '50,00,000', rawValue: 5000000, current: '42,10,500', change: '', isGreen: true, status: 'Active', createdOn: '15 May 2024 04:30 PM', logo: 'wipro.com' },
   { id: '14', symbol: 'KOTAKBANK', name: 'KOTAKBANK Price Alert', company: 'Kotak Mahindra Bank Ltd.', condition: 'Price above', value: '₹1,800.00', rawValue: 1800, current: '₹1,788.10', change: '+0.25%', isGreen: true, status: 'Active', createdOn: '15 May 2024 02:20 PM', logo: 'kotak.com' },
@@ -47,7 +49,7 @@ const INITIAL_ALERTS = [
   { id: '23', symbol: 'LT', name: 'LT Volume Alert', company: 'Larsen & Toubro Ltd.', condition: 'Volume above', value: '25,00,000', rawValue: 2500000, current: '18,50,000', change: '', isGreen: true, status: 'Active', createdOn: '13 May 2024 11:30 AM', logo: 'larsentoubro.com' },
   { id: '24', symbol: 'BHARTIARTL', name: 'BHARTIARTL RSI Alert', company: 'Bharti Airtel Ltd.', condition: 'RSI above (70)', value: '70', rawValue: 70, current: '58.40', change: '', isGreen: true, status: 'Active', createdOn: '12 May 2024 03:20 PM', logo: 'airtel.in' },
   { id: '25', symbol: 'ITC', name: 'ITC Price Alert', company: 'ITC Ltd.', condition: 'Price below', value: '₹410.05', rawValue: 410, current: '₹428.10', change: '', isGreen: true, status: 'Active', createdOn: '12 May 2024 01:45 PM', logo: 'itcportal.com' },
-  { id: '26', symbol: 'TATAMOTORS', name: 'TATAMOTORS RSI Alert', company: 'Tata Motors Ltd.', condition: 'RSI below (35)', value: '35', rawValue: 35, current: '42.10', change: '', isGreen: true, status: 'Active', createdOn: '12 May 2024 11:00 AM', logo: 'tatamotors.com' },
+  { id: '26', symbol: 'TMPV', name: 'TMPV RSI Alert', company: 'Tata Motors Passenger Vehicles', condition: 'RSI below (35)', value: '35', rawValue: 35, current: '42.10', change: '', isGreen: true, status: 'Active', createdOn: '12 May 2024 11:00 AM', logo: 'tatamotors.com' },
   { id: '27', symbol: 'AXISBANK', name: 'AXISBANK Price Alert', company: 'Axis Bank Ltd.', condition: 'Price above', value: '₹1,200.00', rawValue: 1200, current: '₹1,175.50', change: '', isGreen: true, status: 'Active', createdOn: '11 May 2024 04:30 PM', logo: 'axisbank.com' },
   { id: '28', symbol: 'WIPRO', name: 'WIPRO Price Alert', company: 'Wipro Ltd.', condition: 'Price below', value: '₹430.00', rawValue: 430, current: '₹452.10', change: '', isGreen: true, status: 'Active', createdOn: '11 May 2024 02:15 PM', logo: 'wipro.com' },
   { id: '29', symbol: 'KOTAKBANK', name: 'KOTAKBANK Volume Alert', company: 'Kotak Mahindra Bank Ltd.', condition: 'Volume above', value: '40,00,000', rawValue: 4000000, current: '32,40,000', change: '', isGreen: true, status: 'Active', createdOn: '11 May 2024 10:00 AM', logo: 'kotak.com' },
@@ -62,7 +64,7 @@ const INITIAL_ALERTS = [
   { id: '38', symbol: 'LT', name: 'LT RSI Alert', company: 'Larsen & Toubro Ltd.', condition: 'RSI below (30)', value: '30', rawValue: 30, current: '44.80', change: '', isGreen: true, status: 'Active', createdOn: '08 May 2024 10:00 AM', logo: 'larsentoubro.com' },
   { id: '39', symbol: 'BHARTIARTL', name: 'BHARTIARTL Price Alert', company: 'Bharti Airtel Ltd.', condition: 'Price below', value: '₹1,250.00', rawValue: 1250, current: '₹1,280.00', change: '', isGreen: true, status: 'Active', createdOn: '07 May 2024 04:30 PM', logo: 'airtel.in' },
   { id: '40', symbol: 'ITC', name: 'ITC Volume Alert', company: 'ITC Ltd.', condition: 'Volume above', value: '1,50,00,000', rawValue: 15000000, current: '1,28,40,000', change: '', isGreen: true, status: 'Active', createdOn: '07 May 2024 02:15 PM', logo: 'itcportal.com' },
-  { id: '41', symbol: 'TATAMOTORS', name: 'TATAMOTORS Price Alert', company: 'Tata Motors Ltd.', condition: 'Price above', value: '₹1,000.00', rawValue: 1000, current: '₹968.40', change: '', isGreen: true, status: 'Active', createdOn: '07 May 2024 10:00 AM', logo: 'tatamotors.com' },
+  { id: '41', symbol: 'TMPV', name: 'TMPV Price Alert', company: 'Tata Motors Passenger Vehicles', condition: 'Price above', value: '₹1,000.00', rawValue: 1000, current: '₹968.40', change: '', isGreen: true, status: 'Active', createdOn: '07 May 2024 10:00 AM', logo: 'tatamotors.com' },
 ];
 
 const COMPANY_LOGOS: Record<string, string> = {
@@ -76,7 +78,7 @@ const COMPANY_LOGOS: Record<string, string> = {
   LT: 'larsentoubro.com',
   BHARTIARTL: 'airtel.in',
   ITC: 'itcportal.com',
-  TATAMOTORS: 'tatamotors.com',
+  TMPV: 'tatamotors.com',
   AXISBANK: 'axisbank.com',
   WIPRO: 'wipro.com',
   KOTAKBANK: 'kotak.com',
@@ -95,7 +97,7 @@ const COMPANY_NAMES: Record<string, string> = {
   LT: 'Larsen & Toubro Ltd.',
   BHARTIARTL: 'Bharti Airtel Ltd.',
   ITC: 'ITC Ltd.',
-  TATAMOTORS: 'Tata Motors Ltd.',
+  TMPV: 'Tata Motors Passenger Vehicles',
   AXISBANK: 'Axis Bank Ltd.',
   WIPRO: 'Wipro Ltd.',
   KOTAKBANK: 'Kotak Mahindra Bank Ltd.',
@@ -158,7 +160,10 @@ export default function AlertsView() {
   };
 
   const getCompanyName = (symbol: string) => {
-    return COMPANY_NAMES[symbol.toUpperCase()] || `${symbol} India Ltd.`;
+    const sym = symbol.toUpperCase().trim();
+    const found = COMPANIES_METADATA.find(c => c.symbol === sym);
+    if (found) return found.name;
+    return COMPANY_NAMES[sym] || `${symbol} India Ltd.`;
   };
 
   const handleCreateAlert = (e: React.FormEvent) => {
@@ -230,16 +235,8 @@ export default function AlertsView() {
 
   // Renders logo dynamically with Google favicon API fallback
   const renderLogo = (logoDomain: string, symbol: string, sizeClass = 'w-6 h-6') => {
-    const fallbackUrl = `https://www.google.com/s2/favicons?sz=128&domain=${logoDomain}`;
     return (
-      <img
-        src={`https://logo.clearbit.com/${logoDomain}`}
-        onError={(e) => {
-          (e.target as HTMLImageElement).src = fallbackUrl;
-        }}
-        className={`${sizeClass} rounded-full object-contain bg-slate-900 border border-slate-800 p-0.5 flex-shrink-0`}
-        alt={symbol}
-      />
+      <CompanyLogo symbol={symbol} className={sizeClass} size="sm" />
     );
   };
 
@@ -796,8 +793,8 @@ export default function AlertsView() {
                   disabled={isViewOnly}
                   className="w-full bg-[#080c14] border border-[#152036] rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-violet-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {['RELIANCE', 'TCS', 'HDFCBANK', 'ICICIBANK', 'INFY', 'SBIN', 'LT', 'BHARTIARTL', 'ITC', 'TATAMOTORS', 'WIPRO', 'HINDUNILVR', 'KOTAKBANK', 'ASIANPAINT', 'AXISBANK'].map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                  {COMPANIES_METADATA.map((c) => (
+                    <option key={c.symbol} value={c.symbol}>{c.symbol} - {c.name}</option>
                   ))}
                 </select>
               </div>

@@ -5,7 +5,29 @@ from datetime import datetime, timedelta
 from utils.constants import NIFTY_TOP_10, SYMBOL_MAP
 import random
 import time
+import math
 from concurrent.futures import ThreadPoolExecutor
+
+def get_ist_time() -> datetime:
+    """India Standard Time (IST) is always UTC + 5:30. India has no DST."""
+    return datetime.utcnow() + timedelta(hours=5, minutes=30)
+
+def stable_hash(s: str) -> int:
+    """Returns a stable 32-bit integer hash for a string to prevent Python 3 hash randomization issues."""
+    import hashlib
+    return int(hashlib.md5(s.encode('utf-8')).hexdigest(), 16) & 0xffffffff
+
+def is_market_open() -> bool:
+    """Returns True if the current time in IST is Monday-Friday, between 9:15 AM and 3:30 PM."""
+    ist_now = get_ist_time()
+    # Monday is 0, Sunday is 6
+    if ist_now.weekday() >= 5:
+        return False
+    
+    # 9:15 is 9*60 + 15 = 555 minutes
+    # 15:30 is 15*60 + 30 = 930 minutes
+    minutes_since_midnight = ist_now.hour * 60 + ist_now.minute
+    return 555 <= minutes_since_midnight <= 930
 
 # In-memory thread-safe caches to prevent Yahoo Finance API rate limits and keep response times fast
 _QUOTE_CACHE = {}  # symbol -> (timestamp, data)
@@ -83,21 +105,117 @@ def get_stock_quote(symbol: str) -> dict:
 
 
 def _mock_stock_quote(symbol: str, company: dict) -> dict:
-    """Fallback mock data if API fails."""
+    """Deterministic simulation of stock quotes depending on market open/closed status."""
     price = company.get("base_price", 1000)
-    change = random.uniform(-30, 30)
+    ist_now = get_ist_time()
+    
+    # 1. Determine the effective trading day
+    # If it is Saturday/Sunday, the effective trading day is the previous Friday
+    # If it is Monday-Friday:
+    # - If before 9:15 AM, the effective trading day is the previous trading day
+    # - If after 9:15 AM, the effective trading day is today
+    
+    is_weekend = ist_now.weekday() >= 5
+    is_before_open = (ist_now.hour * 60 + ist_now.minute) < 555  # 9:15 AM is 555 mins
+    
+    if is_weekend or (ist_now.weekday() < 5 and is_before_open):
+        # We need the previous trading date
+        effective_date = ist_now - timedelta(days=1)
+        if is_weekend:
+            days_to_subtract = 1 if ist_now.weekday() == 5 else 2
+            effective_date = ist_now - timedelta(days=days_to_subtract)
+        else:
+            if ist_now.weekday() == 0:  # Monday
+                effective_date = ist_now - timedelta(days=3)  # go back to Friday
+            else:
+                effective_date = ist_now - timedelta(days=1)
+        
+        # Market is closed, freeze at the closing price of the effective date
+        date_str = effective_date.strftime("%Y-%m-%d")
+        
+        # Calculate deterministic open and close prices for the effective date
+        seed_open = stable_hash(symbol + date_str + "open") % (2**32)
+        random.seed(seed_open)
+        open_pct = random.uniform(-0.015, 0.015)
+        open_price = price * (1 + open_pct)
+        
+        seed_close = stable_hash(symbol + date_str + "close") % (2**32)
+        random.seed(seed_close)
+        close_pct = random.uniform(-0.02, 0.025)
+        current_price = open_price * (1 + close_pct)
+        
+        # Reset seed
+        random.seed()
+        
+        change = current_price - price
+        change_pct = (change / price) * 100
+        
+        open_val = open_price
+        high_val = max(open_price, current_price) * 1.01
+        low_val = min(open_price, current_price) * 0.99
+    
+    else:
+        # Market day is today!
+        date_str = ist_now.strftime("%Y-%m-%d")
+        
+        # Calculate deterministic open price for today
+        seed_open = stable_hash(symbol + date_str + "open") % (2**32)
+        random.seed(seed_open)
+        open_pct = random.uniform(-0.015, 0.015)
+        open_price = price * (1 + open_pct)
+        
+        # Calculate deterministic close price for today
+        seed_close = stable_hash(symbol + date_str + "close") % (2**32)
+        random.seed(seed_close)
+        close_pct = random.uniform(-0.02, 0.025)
+        close_price = open_price * (1 + close_pct)
+        
+        # Reset seed
+        random.seed()
+        
+        # Check if market is currently open
+        is_open = is_market_open()
+        
+        if is_open:
+            # Calculate interpolation ratio based on current time
+            # 9:15 AM (555 minutes) to 3:30 PM (930 minutes)
+            total_seconds = (930 - 555) * 60  # 22500 seconds
+            current_seconds = (ist_now.hour * 60 + ist_now.minute) * 60 + ist_now.second - (555 * 60)
+            ratio = max(0.0, min(1.0, current_seconds / total_seconds))
+            
+            # Interpolated base price
+            int_price = open_price + (close_price - open_price) * ratio
+            
+            # Intraday waves (up to 0.4% up/down, dynamically moving every second)
+            wave = math.sin(current_seconds / 150.0) * 0.003 + math.cos(current_seconds / 600.0) * 0.002
+            current_price = int_price * (1 + wave)
+        else:
+            # Market is closed (after 3:30 PM), freeze at close_price
+            current_price = close_price
+            
+        change = current_price - price
+        change_pct = (change / price) * 100
+        
+        open_val = open_price
+        high_val = max(open_price, current_price) * 1.012
+        low_val = min(open_price, current_price) * 0.988
+
+    # Ensure logical consistency
+    high_val = max(high_val, open_val, current_price)
+    low_val = min(low_val, open_val, current_price)
+
     return {
         "symbol": symbol,
         "name": company["name"],
         "sector": company["sector"],
-        "current_price": round(price + change, 2),
-        "previous_close": price,
+        "current_price": round(current_price, 2),
+        "previous_close": round(price, 2),
         "change": round(change, 2),
-        "change_pct": round(change / price * 100, 2),
-        "open": round(price + random.uniform(-10, 10), 2),
-        "high": round(price + abs(change) + random.uniform(5, 20), 2),
-        "low": round(price - abs(change) - random.uniform(5, 20), 2),
-        "volume": random.randint(1000000, 15000000),
+        "change_pct": round(change_pct, 2),
+        "open": round(open_val, 2),
+        "high": round(high_val, 2),
+        "low": round(low_val, 2),
+        "volume": random.randint(1000000, 15000000) if is_market_open() else 2500000,
         "market_cap": random.randint(500000000000, 20000000000000),
         "pe_ratio": round(random.uniform(15, 45), 2),
         "pb_ratio": round(random.uniform(1.5, 8), 2),

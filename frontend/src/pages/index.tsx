@@ -130,6 +130,7 @@ export default function Home() {
   };
 
   const [timeStr, setTimeStr] = useState('');
+  const [marketStatus, setMarketStatus] = useState<any>({ status: 'Closed', is_open: false });
   useEffect(() => {
     setTimeStr(new Date().toLocaleTimeString('en-IN'));
     const timer = setInterval(() => {
@@ -181,11 +182,13 @@ export default function Home() {
       const online = await api.checkHealth();
       setBackendOnline(online);
 
-      const [qRes, pRes] = await Promise.all([
+      const [qRes, pRes, mRes] = await Promise.all([
         api.getAllQuotes(),
         api.getPortfolio(),
+        api.getMarketStatus(),
       ]);
       setQuotes(qRes.data.quotes || []);
+      setMarketStatus(mRes.data);
       const recMap: Record<string, any> = {};
       for (const r of pRes.data.all_recommendations || []) {
         recMap[r.symbol] = r;
@@ -338,8 +341,18 @@ export default function Home() {
               {/* Right Header Status indicators */}
               <div className="ml-4 flex items-center gap-5 whitespace-nowrap">
                 <span className="hidden items-center gap-1.5 text-[10px] text-slate-300 md:flex select-none">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  Market: <b className="text-emerald-400 font-extrabold">Open</b>
+                  <span className={`h-2 w-2 rounded-full ${
+                    marketStatus.status === 'Open' ? 'bg-emerald-400' :
+                    marketStatus.status === 'Pre-Open' ? 'bg-amber-400 animate-pulse' :
+                    marketStatus.status === 'Closing' ? 'bg-orange-400 animate-pulse' :
+                    'bg-rose-500'
+                  }`} />
+                  Market: <b className={`${
+                    marketStatus.status === 'Open' ? 'text-emerald-400' :
+                    marketStatus.status === 'Pre-Open' ? 'text-amber-400' :
+                    marketStatus.status === 'Closing' ? 'text-orange-400' :
+                    'text-rose-500'
+                  } font-extrabold`}>{marketStatus.status || 'Closed'}</b>
                 </span>
                 <span className="hidden text-[10px] font-semibold text-slate-300 xl:block select-none">
                   {timeStr || '02:38:38 PM'}
