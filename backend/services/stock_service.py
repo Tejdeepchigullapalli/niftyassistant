@@ -4,9 +4,22 @@ import numpy as np
 from datetime import datetime, timedelta
 from utils.constants import NIFTY_TOP_10, SYMBOL_MAP
 import random
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+# In-memory thread-safe caches to prevent Yahoo Finance API rate limits and keep response times fast
+_QUOTE_CACHE = {}  # symbol -> (timestamp, data)
+_HISTORY_CACHE = {}  # (symbol, period) -> (timestamp, data)
+CACHE_EXPIRY_SECONDS = 300  # 5 minutes cache expiration
 
 def get_stock_quote(symbol: str) -> dict:
-    """Fetch real-time stock quote from Yahoo Finance."""
+    """Fetch real-time stock quote from Yahoo Finance with caching."""
+    now = time.time()
+    if symbol in _QUOTE_CACHE:
+        cached_time, cached_data = _QUOTE_CACHE[symbol]
+        if now - cached_time < CACHE_EXPIRY_SECONDS:
+            return cached_data
+
     company = SYMBOL_MAP.get(symbol)
     if not company:
         return {}
@@ -15,12 +28,25 @@ def get_stock_quote(symbol: str) -> dict:
         info = ticker.info
         hist = ticker.history(period="2d")
         
-        current_price = info.get("currentPrice") or info.get("regularMarketPrice", 0)
-        prev_close = info.get("previousClose", current_price)
+        current_price = info.get("currentPrice") or info.get("regularMarketPrice")
+        if current_price is None:
+            # Fallback to history if info is missing price
+            if not hist.empty:
+                current_price = hist["Close"].iloc[-1]
+            else:
+                current_price = company.get("base_price", 1000)
+                
+        prev_close = info.get("previousClose")
+        if prev_close is None:
+            if not hist.empty and len(hist) > 1:
+                prev_close = hist["Close"].iloc[-2]
+            else:
+                prev_close = current_price
+
         change = current_price - prev_close
         change_pct = (change / prev_close * 100) if prev_close else 0
         
-        return {
+        data = {
             "symbol": symbol,
             "name": company["name"],
             "sector": company["sector"],
@@ -28,37 +54,37 @@ def get_stock_quote(symbol: str) -> dict:
             "previous_close": round(prev_close, 2),
             "change": round(change, 2),
             "change_pct": round(change_pct, 2),
-            "open": info.get("open", current_price),
-            "high": info.get("dayHigh", current_price),
-            "low": info.get("dayLow", current_price),
-            "volume": info.get("volume", 0),
-            "market_cap": info.get("marketCap", 0),
-            "pe_ratio": info.get("trailingPE", 0),
-            "pb_ratio": info.get("priceToBook", 0),
-            "dividend_yield": info.get("dividendYield", 0),
-            "52w_high": info.get("fiftyTwoWeekHigh", 0),
-            "52w_low": info.get("fiftyTwoWeekLow", 0),
-            "avg_volume": info.get("averageVolume", 0),
-            "eps": info.get("trailingEps", 0),
-            "roe": info.get("returnOnEquity", 0),
-            "debt_equity": info.get("debtToEquity", 0),
-            "revenue_growth": info.get("revenueGrowth", 0),
-            "earnings_growth": info.get("earningsGrowth", 0),
-            "free_cashflow": info.get("freeCashflow", 0),
+            "open": info.get("open") or current_price,
+            "high": info.get("dayHigh") or current_price,
+            "low": info.get("dayLow") or current_price,
+            "volume": info.get("volume") or 0,
+            "market_cap": info.get("marketCap") or 0,
+            "pe_ratio": info.get("trailingPE") or 0,
+            "pb_ratio": info.get("priceToBook") or 0,
+            "dividend_yield": info.get("dividendYield") or 0,
+            "52w_high": info.get("fiftyTwoWeekHigh") or 0,
+            "52w_low": info.get("fiftyTwoWeekLow") or 0,
+            "avg_volume": info.get("averageVolume") or 0,
+            "eps": info.get("trailingEps") or 0,
+            "roe": info.get("returnOnEquity") or 0,
+            "debt_equity": info.get("debtToEquity") or 0,
+            "revenue_growth": info.get("revenueGrowth") or 0,
+            "earnings_growth": info.get("earningsGrowth") or 0,
+            "free_cashflow": info.get("freeCashflow") or 0,
             "timestamp": datetime.now().isoformat()
         }
+        _QUOTE_CACHE[symbol] = (now, data)
+        return data
     except Exception as e:
-        return _mock_stock_quote(symbol, company)
+        # Fallback to mock data on error
+        mock_data = _mock_stock_quote(symbol, company)
+        _QUOTE_CACHE[symbol] = (now, mock_data)
+        return mock_data
 
 
 def _mock_stock_quote(symbol: str, company: dict) -> dict:
     """Fallback mock data if API fails."""
-    base_prices = {
-        "RELIANCE": 2850, "TCS": 3920, "HDFCBANK": 1680, "BHARTIARTL": 1540,
-        "ICICIBANK": 1280, "INFY": 1890, "SBIN": 820, "HINDUNILVR": 2340,
-        "ITC": 480, "LT": 3650
-    }
-    price = base_prices.get(symbol, 1000)
+    price = company.get("base_price", 1000)
     change = random.uniform(-30, 30)
     return {
         "symbol": symbol,
@@ -90,7 +116,14 @@ def _mock_stock_quote(symbol: str, company: dict) -> dict:
 
 
 def get_historical_data(symbol: str, period: str = "1y") -> dict:
-    """Fetch historical OHLCV data."""
+    """Fetch historical OHLCV data with caching."""
+    now = time.time()
+    cache_key = (symbol, period)
+    if cache_key in _HISTORY_CACHE:
+        cached_time, cached_data = _HISTORY_CACHE[cache_key]
+        if now - cached_time < CACHE_EXPIRY_SECONDS:
+            return cached_data
+
     company = SYMBOL_MAP.get(symbol)
     if not company:
         return {}
@@ -108,20 +141,20 @@ def get_historical_data(symbol: str, period: str = "1y") -> dict:
                 "close": round(row["Close"], 2),
                 "volume": int(row["Volume"])
             })
-        return {"symbol": symbol, "period": period, "data": records}
+        data = {"symbol": symbol, "period": period, "data": records}
+        _HISTORY_CACHE[cache_key] = (now, data)
+        return data
     except Exception as e:
-        return _mock_historical_data(symbol, period)
+        mock_data = _mock_historical_data(symbol, period)
+        _HISTORY_CACHE[cache_key] = (now, mock_data)
+        return mock_data
 
 
 def _mock_historical_data(symbol: str, period: str) -> dict:
-    base_prices = {
-        "RELIANCE": 2850, "TCS": 3920, "HDFCBANK": 1680, "BHARTIARTL": 1540,
-        "ICICIBANK": 1280, "INFY": 1890, "SBIN": 820, "HINDUNILVR": 2340,
-        "ITC": 480, "LT": 3650
-    }
+    company = SYMBOL_MAP.get(symbol, {})
+    price = company.get("base_price", 1000)
     days = {"1mo": 30, "3mo": 90, "6mo": 180, "1y": 365, "2y": 730}
     num_days = days.get(period, 365)
-    price = base_prices.get(symbol, 1000)
     records = []
     current = price * 0.75
     end = datetime.now()
@@ -144,5 +177,7 @@ def _mock_historical_data(symbol: str, period: str) -> dict:
 
 
 def get_all_quotes() -> list:
-    """Fetch quotes for all Nifty Top 10 companies."""
-    return [get_stock_quote(c["symbol"]) for c in NIFTY_TOP_10]
+    """Fetch quotes for all Nifty companies concurrently using ThreadPoolExecutor."""
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        results = list(executor.map(lambda c: get_stock_quote(c["symbol"]), NIFTY_TOP_10))
+    return results

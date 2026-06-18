@@ -105,12 +105,15 @@ def generate_recommendation(symbol: str) -> dict:
 
 
 def get_portfolio_recommendation(symbols: list = None) -> dict:
-    """Generate portfolio-level recommendation."""
+    """Generate portfolio-level recommendation in parallel."""
     from utils.constants import NIFTY_TOP_10
+    from concurrent.futures import ThreadPoolExecutor
     if not symbols:
         symbols = [c["symbol"] for c in NIFTY_TOP_10]
     
-    recs = [generate_recommendation(s) for s in symbols]
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        recs = list(executor.map(generate_recommendation, symbols))
+        
     recs.sort(key=lambda x: x.get("ai_investment_score", 0), reverse=True)
 
     top_picks = [r for r in recs if r["recommendation"] in ["Strong Buy", "Buy"]][:3]

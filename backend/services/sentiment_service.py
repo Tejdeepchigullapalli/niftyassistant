@@ -82,7 +82,18 @@ def get_sentiment(symbol: str) -> dict:
     if not company:
         return {}
 
-    news_items = NEWS_TEMPLATES.get(symbol, [])
+    news_items = NEWS_TEMPLATES.get(symbol)
+    if not news_items:
+        # Dynamically generate 5 simulated news headlines for fallback
+        name = company.get("name", symbol)
+        sector = company.get("sector", "market")
+        news_items = [
+            (f"{name} announces strategic expansion plans in the {sector} sector", "positive", 0.78),
+            (f"{name} reports solid financial performance and margin improvements", "positive", 0.82),
+            (f"Analysts raise price targets for {symbol} following positive outlook", "positive", 0.74),
+            (f"{name} launches new operational R&D centers across India", "positive", 0.68),
+            (f"Short-term raw material inflation could impact margins for {symbol}", "negative", -0.42),
+        ]
     
     # Pick 3-4 random news items
     selected = random.sample(news_items, min(len(news_items), random.randint(3, 4)))
@@ -201,8 +212,31 @@ def get_corporate_intelligence(symbol: str) -> dict:
         },
     }
     
-    data = CORPORATE_DATA.get(symbol, {})
     company = SYMBOL_MAP.get(symbol, {})
+    data = CORPORATE_DATA.get(symbol)
+    if not data:
+        name = company.get("name", symbol)
+        sector = company.get("sector", "primary industry")
+        data = {
+            "goals": [
+                f"Expand market share in the {sector} sector by 15%",
+                f"Transition 30% of energy requirements to eco-friendly resources",
+                f"Achieve carbon-neutral operational milestones ahead of schedule"
+            ],
+            "expansion": [
+                f"Establish secondary smart production lines and regional hubs",
+                f"Deploy retail channels in Tier-3 and Tier-4 urban localities",
+                f"Boost international joint venture distributions"
+            ],
+            "rd_initiatives": [
+                "Integrate AI diagnostics and automated supply chains",
+                "Pioneer clean tech materials and packaging light-weighting"
+            ],
+            "ma_activities": [
+                "Acquire niche digital startups for asset synergies",
+                "Establish strategic partnerships with specialized logistics providers"
+            ],
+        }
     
     growth_score = random.randint(62, 92)
     
