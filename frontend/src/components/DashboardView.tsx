@@ -6,56 +6,109 @@ import {
 } from 'recharts';
 
 const COMPANY_DOMAINS: Record<string, string> = {
-  RELIANCE: 'relianceindustries.com',
-  TCS: 'tcs.com',
   HDFCBANK: 'hdfcbank.com',
-  BHARTIARTL: 'airtel.in',
+  RELIANCE: 'relianceindustries.com',
   ICICIBANK: 'icicibank.com',
+  BHARTIARTL: 'airtel.in',
   INFY: 'infosys.com',
-  SBIN: 'sbi.co.in',
-  HINDUNILVR: 'hul.co.in',
-  ITC: 'itcportal.com',
   LT: 'larsentoubro.com',
-  HCLTECH: 'hcltech.com',
+  SBIN: 'sbi.co.in',
   AXISBANK: 'axisbank.com',
-  SUNPHARMA: 'sunpharma.com',
-  MARUTI: 'marutisuzuki.com',
-  KOTAKBANK: 'kotak.com',
-  ULTRACEMCO: 'ultratechcement.com',
-  NTPC: 'ntpc.co.in',
-  TATAMOTORS: 'tatamotors.com',
-  ONGC: 'ongcindia.com',
-  COALINDIA: 'coalindia.in',
-  POWERGRID: 'powergrid.in',
-  TITAN: 'titancompany.in',
-  ADANIENT: 'adani.com',
-  ADANIPORTS: 'adaniports.com',
+  ITC: 'itcportal.com',
   'M&M': 'mahindra.com',
-  JSWSTEEL: 'jsw.in',
-  ASIANPAINT: 'asianpaints.com',
-  HINDALCO: 'hindalco.com',
+  KOTAKBANK: 'kotak.com',
+  TCS: 'tcs.com',
+  BAJFINANCE: 'bajajfinance.in',
+  SUNPHARMA: 'sunpharma.com',
+  HINDUNILVR: 'hul.co.in',
+  NTPC: 'ntpc.co.in',
+  ETERNAL: 'eternal.com',
+  TITAN: 'titancompany.in',
+  MARUTI: 'marutisuzuki.com',
   TATASTEEL: 'tatasteel.com',
+  BEL: 'bel-india.in',
+  HCLTECH: 'hcltech.com',
+  POWERGRID: 'powergrid.in',
+  HINDALCO: 'hindalco.com',
+  ULTRACEMCO: 'ultratechcement.com',
+  SHRIRAMFIN: 'shriramfinance.in',
+  ONGC: 'ongcindia.com',
+  JSWSTEEL: 'jsw.in',
+  COALINDIA: 'coalindia.in',
+  ASIANPAINT: 'asianpaints.com',
   GRASIM: 'grasim.com',
-  WIPRO: 'wipro.com',
+  'BAJAJ-AUTO': 'bajajauto.com',
+  ADANIPORTS: 'adaniports.com',
+  BAJAJFINSV: 'bajajfinserv.in',
+  INDIGO: 'goindigo.in',
   TECHM: 'techmahindra.com',
   NESTLEIND: 'nestle.in',
-  LTIM: 'ltimindtree.com',
-  INDUSINDBK: 'indusind.com',
-  BAJFINANCE: 'bajajfinance.in',
-  BAJAJFINSV: 'bajajfinserv.in',
-  CIPLA: 'cipla.com',
-  DRREDDY: 'drreddys.com',
-  APOLLOHOSP: 'apollohospitals.com',
   SBILIFE: 'sbilife.co.in',
-  EICHERMOT: 'eichermotors.com',
-  BPCL: 'bharatpetroleum.in',
-  DIVISLAB: 'divislabs.com',
-  HEROCOCO: 'heromotocorp.com',
-  BRITANNIA: 'britannia.co.in',
+  APOLLOHOSP: 'apollohospitals.com',
+  DRREDDY: 'drreddys.com',
   JIOFIN: 'jiofinancial.com',
-  SHREECEM: 'shreecement.com',
-  BEL: 'bel-india.in',
-  HAL: 'hal-india.co.in'
+  TRENT: 'trentlimited.com',
+  MAXHEALTH: 'maxhealthcare.in',
+  EICHERMOT: 'eichermotors.com',
+  CIPLA: 'cipla.com',
+  TATACONSUM: 'tataconsumerproducts.com',
+  HDFCLIFE: 'hdfclife.com',
+  TMPV: 'tatamotors.com',
+  WIPRO: 'wipro.com',
+  ADANIENT: 'adani.com'
+};
+
+const LOCAL_LOGOS: Record<string, string> = {
+  RELIANCE: 'Reliance.png',
+  TCS: 'Tata_Consultancy_Services_Logo_2020_full_stacked.png',
+  HDFCBANK: 'hdfc-bank-logo.png',
+  BHARTIARTL: 'Airtel_logo_PNG2.png',
+  ICICIBANK: 'icici-bank-logo.png',
+  INFY: 'infosys-logo.png',
+  SBIN: 'sbi-logo.png',
+  HINDUNILVR: 'Hindustan-Unilever-Limited-logo.png',
+  ITC: 'itc-limited-logo-black-and-white.png',
+  LT: 'Larsen__Toubro_Logo.png',
+  HCLTECH: 'HLC_logo_PNG3.png',
+  AXISBANK: 'axis-bank-logo.png',
+  SUNPHARMA: 'sun pharma.png',
+  MARUTI: 'Maruti-Suzuki-Logo-png.png',
+  KOTAKBANK: 'Kotak_Mahindra_Bank_logo.png',
+  ULTRACEMCO: 'ultratech-cement-logo-png.png',
+  NTPC: 'NTPC_Logo.png',
+  TMPV: 'tata motors sharing.png',
+  ONGC: 'Oil_and_Natural_Gas_Corporation-Logo.wine.png',
+  COALINDIA: 'Coal_India.svg',
+  POWERGRID: 'POWERGRID.NS.png',
+  TITAN: 'titan-logo.png',
+  ADANIENT: 'adani.png',
+  ADANIPORTS: 'Adani_Ports_Logo.svg',
+  'M&M': 'mahindra-auto-seeklogo.png',
+  JSWSTEEL: 'jswsteel-og-1.webp',
+  ASIANPAINT: 'asian-paints-logo.png',
+  HINDALCO: 'hindalco.png',
+  TATASTEEL: 'Tata Steel.svg',
+  GRASIM: 'Grasim.svg',
+  WIPRO: 'wipro-logo-png.png',
+  TECHM: 'tech mahindra.png',
+  NESTLEIND: 'NESTLE INDIA.png',
+  'BAJAJ-AUTO': 'Bajaj-Logo.png',
+  BAJFINANCE: 'Bajaj_Finance_Limited_Logo.png',
+  BAJAJFINSV: 'Bajaj_Finserv_Logo.png',
+  CIPLA: 'Cipla.avif',
+  DRREDDY: "Dr.Reddy's_logo.png",
+  APOLLOHOSP: 'Apollo_Hospitals_Logo.png',
+  SBILIFE: 'sbi life insurance.jpg',
+  EICHERMOT: 'eicher-logo-png_.png',
+  JIOFIN: 'jio financial.png',
+  BEL: 'Bharat_Electronics_Limited_Logo.png',
+  TRENT: 'marketing-strategy-of-trent-trent-limited-logo-.png',
+  MAXHEALTH: 'max health care.png',
+  INDIGO: 'IndiGo-Logo.png',
+  SHRIRAMFIN: 'shriram finance.jpg',
+  TATACONSUM: 'TATA-Consumer.png',
+  HDFCLIFE: 'HDFC life insurance.png',
+  ETERNAL: 'zomato-eternal.png'
 };
 
 interface CompanyLogoProps {
@@ -70,23 +123,35 @@ export function CompanyLogo({ symbol, className = '', size = 'md' }: CompanyLogo
   const domain = COMPANY_DOMAINS[sym];
   
   const [imgSrc, setImgSrc] = useState<string | null>(null);
-  const [fallbackLevel, setFallbackLevel] = useState(0); // 0 = Clearbit, 1 = Google Favicon, 2 = Monogram Text
+  // 0 = Local Logo, 1 = Clearbit, 2 = Google Favicon, 3 = Monogram Text
+  const [fallbackLevel, setFallbackLevel] = useState(0);
 
   useEffect(() => {
-    if (domain) {
-      setImgSrc(`https://logo.clearbit.com/${domain}`);
+    const localFile = LOCAL_LOGOS[sym];
+    if (localFile) {
+      setImgSrc(`/logos/${localFile}`);
       setFallbackLevel(0);
+    } else if (domain) {
+      setImgSrc(`https://logo.clearbit.com/${domain}`);
+      setFallbackLevel(1);
     } else {
-      setFallbackLevel(2);
+      setFallbackLevel(3);
     }
   }, [domain, sym]);
 
   const handleImageError = () => {
-    if (fallbackLevel === 0 && domain) {
+    if (fallbackLevel === 0) {
+      if (domain) {
+        setImgSrc(`https://logo.clearbit.com/${domain}`);
+        setFallbackLevel(1);
+      } else {
+        setFallbackLevel(3);
+      }
+    } else if (fallbackLevel === 1 && domain) {
       setImgSrc(`https://www.google.com/s2/favicons?sz=128&domain=${domain}`);
-      setFallbackLevel(1);
-    } else {
       setFallbackLevel(2);
+    } else {
+      setFallbackLevel(3);
     }
   };
 
@@ -112,18 +177,24 @@ export function CompanyLogo({ symbol, className = '', size = 'md' }: CompanyLogo
     lg: 'w-10 h-10 text-[11px]'
   };
 
-  if (fallbackLevel < 2 && imgSrc) {
+  const padClasses = {
+    sm: 'p-0.5',
+    md: 'p-1',
+    lg: 'p-1.5'
+  };
+
+  if (fallbackLevel < 3 && imgSrc) {
     return (
       <div 
-        className={`rounded-full overflow-hidden flex items-center justify-center bg-slate-950 border border-slate-800/80 flex-shrink-0 ${sizeClasses[size]} ${className}`}
+        className={`rounded-full overflow-hidden flex items-center justify-center bg-white border border-slate-200 flex-shrink-0 ${padClasses[size]} ${sizeClasses[size]} ${className}`}
         style={{
-          boxShadow: `0 0 10px rgba(0,0,0,0.4)`
+          boxShadow: `0 2px 8px rgba(0,0,0,0.1)`
         }}
       >
         <img 
           src={imgSrc} 
           alt={`${sym} logo`}
-          className="w-[75%] h-[75%] object-contain"
+          className="w-full h-full object-contain"
           onError={handleImageError}
         />
       </div>
@@ -163,7 +234,7 @@ const NIFTY_50_COMPANIES = [
   { symbol: 'KOTAKBANK',name: 'Kotak Mahindra Bank', logo: '🔴', color: '#b91c1c', basePrice: 1721.40, changePct: -0.65, rank: 15, sector: 'Banking & Financial', industry: 'Private Bank' },
   { symbol: 'ULTRACEMCO',name: 'UltraTech Cement Ltd', logo: '🧱', color: '#4b5563', basePrice: 9840.50, changePct: 0.35, rank: 16, sector: 'Materials', industry: 'Cement' },
   { symbol: 'NTPC',     name: 'NTPC Ltd', logo: '⚡', color: '#047857', basePrice: 362.40, changePct: -0.80, rank: 17, sector: 'Utilities', industry: 'Power Generation' },
-  { symbol: 'TATAMOTORS',name: 'Tata Motors Ltd', logo: '🚚', color: '#1d4ed8', basePrice: 942.30, changePct: 1.65, rank: 18, sector: 'Automobile', industry: 'Commercial Vehicles' },
+  { symbol: 'TMPV',     name: 'Tata Motors Passenger Vehicles', logo: '🚗', color: '#1d4ed8', basePrice: 450.0, changePct: 1.65, rank: 18, sector: 'Automobile', industry: 'Passenger Vehicles' },
   { symbol: 'ONGC',     name: 'Oil & Natural Gas Corp', logo: '🔥', color: '#b45309', basePrice: 275.60, changePct: -1.10, rank: 19, sector: 'Utilities', industry: 'Oil exploration' },
   { symbol: 'COALINDIA',name: 'Coal India Ltd', logo: '⬛', color: '#111827', basePrice: 462.15, changePct: 0.85, rank: 20, sector: 'Utilities', industry: 'Coal Mining' },
   { symbol: 'POWERGRID',name: 'Power Grid Corp', logo: '🎛️', color: '#0369a1', basePrice: 312.45, changePct: 0.25, rank: 21, sector: 'Utilities', industry: 'Power Transmission' },
@@ -179,23 +250,23 @@ const NIFTY_50_COMPANIES = [
   { symbol: 'WIPRO',    name: 'Wipro Ltd', logo: '🌈', color: '#1e40af', basePrice: 462.15, changePct: -0.15, rank: 31, sector: 'Information Technology', industry: 'IT Services' },
   { symbol: 'TECHM',    name: 'Tech Mahindra Ltd', logo: '🌐', color: '#be123c', basePrice: 1242.30, changePct: -0.75, rank: 32, sector: 'Information Technology', industry: 'IT Services' },
   { symbol: 'NESTLEIND',name: 'Nestle India Ltd', logo: '☕', color: '#4b5563', basePrice: 24500.60, changePct: 0.40, rank: 33, sector: 'FMCG', industry: 'Packaged Foods' },
-  { symbol: 'LTIM',     name: 'LTIMindtree Ltd', logo: '🏢', color: '#2e1065', basePrice: 4850.25, changePct: 0.65, rank: 34, sector: 'Information Technology', industry: 'IT Services' },
-  { symbol: 'INDUSINDBK',name: 'IndusInd Bank Ltd', logo: '🦁', color: '#c2410c', basePrice: 1421.40, changePct: -0.30, rank: 35, sector: 'Banking & Financial', industry: 'Private Bank' },
-  { symbol: 'BAJFINANCE',name: 'Bajaj Finance Ltd', logo: '💵', color: '#0369a1', basePrice: 6842.10, changePct: -1.45, rank: 36, sector: 'Banking & Financial', industry: 'NBFC' },
-  { symbol: 'BAJAJFINSV',name: 'Bajaj Finserv Ltd', logo: '🛡️', color: '#0284c7', basePrice: 1542.30, changePct: -1.25, rank: 37, sector: 'Banking & Financial', industry: 'NBFC' },
-  { symbol: 'CIPLA',    name: 'Cipla Ltd', logo: '🔬', color: '#047857', basePrice: 1425.40, changePct: 0.80, rank: 38, sector: 'Healthcare', industry: 'Pharmaceuticals' },
-  { symbol: 'DRREDDY',  name: 'Dr Reddys Laboratories', logo: '🧪', color: '#065f46', basePrice: 5845.20, changePct: 1.10, rank: 39, sector: 'Healthcare', industry: 'Pharmaceuticals' },
-  { symbol: 'APOLLOHOSP',name: 'Apollo Hospitals', logo: '🏥', color: '#991b1b', basePrice: 5940.50, changePct: 1.85, rank: 40, sector: 'Healthcare', industry: 'Hospitals' },
-  { symbol: 'SBILIFE',  name: 'SBI Life Insurance', logo: '🛡️', color: '#0369a1', basePrice: 1420.20, changePct: 0.35, rank: 41, sector: 'Banking & Financial', industry: 'Life Insurance' },
-  { symbol: 'EICHERMOT',name: 'Eicher Motors Ltd', logo: '🏍️', color: '#854d0e', basePrice: 4540.60, changePct: 1.45, rank: 42, sector: 'Automobile', industry: 'Motorcycles' },
-  { symbol: 'BPCL',     name: 'Bharat Petroleum', logo: '⛽', color: '#0369a1', basePrice: 612.40, changePct: 0.15, rank: 43, sector: 'Utilities', industry: 'Oil Refining' },
-  { symbol: 'DIVISLAB', name: 'Divis Laboratories', logo: '🧪', color: '#15803d', basePrice: 3840.50, changePct: -0.90, rank: 44, sector: 'Healthcare', industry: 'Biotechnologies' },
-  { symbol: 'HEROCOCO', name: 'Hero MotoCorp Ltd', logo: '🛵', color: '#991b1b', basePrice: 4842.10, changePct: 0.65, rank: 45, sector: 'Automobile', industry: 'Motorcycles' },
-  { symbol: 'BRITANNIA',name: 'Britannia Industries', logo: '🍪', color: '#854d0e', basePrice: 5240.20, changePct: 1.30, rank: 46, sector: 'FMCG', industry: 'Packaged Foods' },
-  { symbol: 'JIOFIN',   name: 'Jio Financial Services', logo: '💎', color: '#4338ca', basePrice: 362.45, changePct: 2.10, rank: 47, sector: 'Banking & Financial', industry: 'NBFC' },
-  { symbol: 'SHREECEM', name: 'Shree Cement Ltd', logo: '🧱', color: '#374151', basePrice: 24500.20, changePct: -0.45, rank: 48, sector: 'Materials', industry: 'Cement' },
-  { symbol: 'BEL',      name: 'Bharat Electronics Ltd', logo: '📡', color: '#047857', basePrice: 285.40, changePct: 3.10, rank: 49, sector: 'Infrastructure', industry: 'Defense Tech' },
-  { symbol: 'HAL',      name: 'Hindustan Aeronautics', logo: '✈️', color: '#0369a1', basePrice: 4242.10, changePct: 3.45, rank: 50, sector: 'Infrastructure', industry: 'Aerospace & Defense' }
+  { symbol: 'BAJAJ-AUTO',name: 'Bajaj Auto Ltd', logo: '🏍️', color: '#1d4ed8', basePrice: 9400.0, changePct: 1.45, rank: 34, sector: 'Automobile', industry: 'Two & Three Wheelers' },
+  { symbol: 'BAJFINANCE',name: 'Bajaj Finance Ltd', logo: '💵', color: '#0369a1', basePrice: 6842.10, changePct: -1.45, rank: 35, sector: 'Banking & Financial', industry: 'NBFC' },
+  { symbol: 'BAJAJFINSV',name: 'Bajaj Finserv Ltd', logo: '🛡️', color: '#0284c7', basePrice: 1542.30, changePct: -1.25, rank: 36, sector: 'Banking & Financial', industry: 'NBFC' },
+  { symbol: 'CIPLA',    name: 'Cipla Ltd', logo: '🔬', color: '#047857', basePrice: 1425.40, changePct: 0.80, rank: 37, sector: 'Healthcare', industry: 'Pharmaceuticals' },
+  { symbol: 'DRREDDY',  name: 'Dr Reddys Laboratories', logo: '🧪', color: '#065f46', basePrice: 5845.20, changePct: 1.10, rank: 38, sector: 'Healthcare', industry: 'Pharmaceuticals' },
+  { symbol: 'APOLLOHOSP',name: 'Apollo Hospitals', logo: '🏥', color: '#991b1b', basePrice: 5940.50, changePct: 1.85, rank: 39, sector: 'Healthcare', industry: 'Hospitals' },
+  { symbol: 'SBILIFE',  name: 'SBI Life Insurance', logo: '🛡️', color: '#0369a1', basePrice: 1420.20, changePct: 0.35, rank: 40, sector: 'Banking & Financial', industry: 'Life Insurance' },
+  { symbol: 'EICHERMOT',name: 'Eicher Motors Ltd', logo: '🏍️', color: '#854d0e', basePrice: 4540.60, changePct: 1.45, rank: 41, sector: 'Automobile', industry: 'Motorcycles' },
+  { symbol: 'JIOFIN',   name: 'Jio Financial Services', logo: '💎', color: '#4338ca', basePrice: 362.45, changePct: 2.10, rank: 42, sector: 'Banking & Financial', industry: 'NBFC' },
+  { symbol: 'BEL',      name: 'Bharat Electronics Ltd', logo: '📡', color: '#047857', basePrice: 285.40, changePct: 3.10, rank: 43, sector: 'Infrastructure', industry: 'Defense Tech' },
+  { symbol: 'TRENT',    name: 'Trent Ltd', logo: '🛍️', color: '#4b5563', basePrice: 4700.0, changePct: 2.65, rank: 44, sector: 'Consumer Services', industry: 'Retail & Apparel' },
+  { symbol: 'MAXHEALTH',name: 'Max Healthcare Institute', logo: '🏥', color: '#991b1b', basePrice: 850.0, changePct: 1.95, rank: 45, sector: 'Healthcare', industry: 'Hospitals' },
+  { symbol: 'INDIGO',   name: 'InterGlobe Aviation Ltd', logo: '✈️', color: '#1e3a8a', basePrice: 4200.0, changePct: 1.85, rank: 46, sector: 'Consumer Services', industry: 'Airlines' },
+  { symbol: 'SHRIRAMFIN',name: 'Shriram Finance Ltd', logo: '🪙', color: '#0284c7', basePrice: 2400.0, changePct: 1.15, rank: 47, sector: 'Banking & Financial', industry: 'NBFC' },
+  { symbol: 'TATACONSUM',name: 'Tata Consumer Products Ltd', logo: '🍵', color: '#0ea5e9', basePrice: 1150.0, changePct: 1.25, rank: 48, sector: 'FMCG', industry: 'Consumer Goods' },
+  { symbol: 'HDFCLIFE', name: 'HDFC Life Insurance Co', logo: '🛡️', color: '#7c3aed', basePrice: 600.0, changePct: 0.95, rank: 49, sector: 'Banking & Financial', industry: 'Life Insurance' },
+  { symbol: 'ETERNAL',  name: 'Eternal Limited', logo: '🍔', color: '#cb202d', basePrice: 250.0, changePct: 2.45, rank: 50, sector: 'Consumer Services', industry: 'Online Food Delivery' },
 ];
 
 const REVENUE_BREAKDOWN: Record<string, { label: string; name: string; value: number }[]> = {

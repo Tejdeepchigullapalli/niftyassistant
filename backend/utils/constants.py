@@ -17,7 +17,7 @@ NIFTY_TOP_10 = [
         "industry": "IT Services",
         "logo": "🔵",
         "color": "#2563eb",
-        "base_price": 3915.20
+        "base_price": 3915.2
     },
     {
         "symbol": "HDFCBANK",
@@ -27,7 +27,7 @@ NIFTY_TOP_10 = [
         "industry": "Private Bank",
         "logo": "🟣",
         "color": "#7c3aed",
-        "base_price": 1682.40
+        "base_price": 1682.4
     },
     {
         "symbol": "BHARTIARTL",
@@ -47,7 +47,7 @@ NIFTY_TOP_10 = [
         "industry": "Private Bank",
         "logo": "🟡",
         "color": "#d97706",
-        "base_price": 1285.90
+        "base_price": 1285.9
     },
     {
         "symbol": "INFY",
@@ -67,7 +67,7 @@ NIFTY_TOP_10 = [
         "industry": "Public Sector Bank",
         "logo": "🔷",
         "color": "#0284c7",
-        "base_price": 812.40
+        "base_price": 812.4
     },
     {
         "symbol": "HINDUNILVR",
@@ -97,7 +97,7 @@ NIFTY_TOP_10 = [
         "industry": "Engineering",
         "logo": "🔶",
         "color": "#b45309",
-        "base_price": 3625.80
+        "base_price": 3625.8
     },
     {
         "symbol": "HCLTECH",
@@ -107,7 +107,7 @@ NIFTY_TOP_10 = [
         "industry": "IT Services",
         "logo": "💻",
         "color": "#06b6d4",
-        "base_price": 1345.50
+        "base_price": 1345.5
     },
     {
         "symbol": "AXISBANK",
@@ -117,7 +117,7 @@ NIFTY_TOP_10 = [
         "industry": "Private Bank",
         "logo": "🔴",
         "color": "#be123c",
-        "base_price": 1042.80
+        "base_price": 1042.8
     },
     {
         "symbol": "SUNPHARMA",
@@ -127,7 +127,7 @@ NIFTY_TOP_10 = [
         "industry": "Pharmaceuticals",
         "logo": "💊",
         "color": "#059669",
-        "base_price": 1540.20
+        "base_price": 1540.2
     },
     {
         "symbol": "MARUTI",
@@ -137,7 +137,7 @@ NIFTY_TOP_10 = [
         "industry": "Passenger Vehicles",
         "logo": "🚗",
         "color": "#1e3a8a",
-        "base_price": 12420.50
+        "base_price": 12420.5
     },
     {
         "symbol": "KOTAKBANK",
@@ -147,7 +147,7 @@ NIFTY_TOP_10 = [
         "industry": "Private Bank",
         "logo": "🔴",
         "color": "#b91c1c",
-        "base_price": 1721.40
+        "base_price": 1721.4
     },
     {
         "symbol": "ULTRACEMCO",
@@ -157,7 +157,7 @@ NIFTY_TOP_10 = [
         "industry": "Cement",
         "logo": "🧱",
         "color": "#4b5563",
-        "base_price": 9840.50
+        "base_price": 9840.5
     },
     {
         "symbol": "NTPC",
@@ -167,17 +167,17 @@ NIFTY_TOP_10 = [
         "industry": "Power Generation",
         "logo": "⚡",
         "color": "#047857",
-        "base_price": 362.40
+        "base_price": 362.4
     },
     {
-        "symbol": "TATAMOTORS",
-        "nse_symbol": "TMCV.NS",
-        "name": "Tata Motors Ltd",
+        "symbol": "TMPV",
+        "nse_symbol": "TMPV.NS",
+        "name": "Tata Motors Passenger Vehicles",
         "sector": "Automobile",
-        "industry": "Commercial Vehicles",
-        "logo": "🚚",
+        "industry": "Passenger Vehicles",
+        "logo": "🚗",
         "color": "#1d4ed8",
-        "base_price": 942.30
+        "base_price": 450.0
     },
     {
         "symbol": "ONGC",
@@ -187,7 +187,7 @@ NIFTY_TOP_10 = [
         "industry": "Oil exploration",
         "logo": "🔥",
         "color": "#b45309",
-        "base_price": 275.60
+        "base_price": 275.6
     },
     {
         "symbol": "COALINDIA",
@@ -217,7 +217,7 @@ NIFTY_TOP_10 = [
         "industry": "Jewellery & Watches",
         "logo": "💎",
         "color": "#7c2d12",
-        "base_price": 3241.60
+        "base_price": 3241.6
     },
     {
         "symbol": "ADANIENT",
@@ -227,7 +227,7 @@ NIFTY_TOP_10 = [
         "industry": "Conglomerate",
         "logo": "🦅",
         "color": "#312e81",
-        "base_price": 3122.50
+        "base_price": 3122.5
     },
     {
         "symbol": "ADANIPORTS",
@@ -237,7 +237,7 @@ NIFTY_TOP_10 = [
         "industry": "Ports & Logistics",
         "logo": "⚓",
         "color": "#1e1b4b",
-        "base_price": 1284.60
+        "base_price": 1284.6
     },
     {
         "symbol": "M&M",
@@ -247,7 +247,7 @@ NIFTY_TOP_10 = [
         "industry": "Diversified Vehicles",
         "logo": "🚜",
         "color": "#991b1b",
-        "base_price": 2842.10
+        "base_price": 2842.1
     },
     {
         "symbol": "JSWSTEEL",
@@ -257,7 +257,7 @@ NIFTY_TOP_10 = [
         "industry": "Steel Production",
         "logo": "🏗️",
         "color": "#0f172a",
-        "base_price": 875.40
+        "base_price": 875.4
     },
     {
         "symbol": "ASIANPAINT",
@@ -267,7 +267,7 @@ NIFTY_TOP_10 = [
         "industry": "Paints & Decors",
         "logo": "🎨",
         "color": "#701a75",
-        "base_price": 2854.20
+        "base_price": 2854.2
     },
     {
         "symbol": "HINDALCO",
@@ -287,7 +287,7 @@ NIFTY_TOP_10 = [
         "industry": "Steel Production",
         "logo": "⚙️",
         "color": "#0369a1",
-        "base_price": 165.40
+        "base_price": 165.4
     },
     {
         "symbol": "GRASIM",
@@ -297,7 +297,7 @@ NIFTY_TOP_10 = [
         "industry": "Textiles & Cement",
         "logo": "🧶",
         "color": "#581c87",
-        "base_price": 2354.20
+        "base_price": 2354.2
     },
     {
         "symbol": "WIPRO",
@@ -317,7 +317,7 @@ NIFTY_TOP_10 = [
         "industry": "IT Services",
         "logo": "🌐",
         "color": "#be123c",
-        "base_price": 1242.30
+        "base_price": 1242.3
     },
     {
         "symbol": "NESTLEIND",
@@ -327,27 +327,17 @@ NIFTY_TOP_10 = [
         "industry": "Packaged Foods",
         "logo": "☕",
         "color": "#4b5563",
-        "base_price": 24500.60
+        "base_price": 24500.6
     },
     {
-        "symbol": "LTIM",
-        "nse_symbol": "LTM.NS",
-        "name": "LTIMindtree Ltd",
-        "sector": "Information Technology",
-        "industry": "IT Services",
-        "logo": "🏢",
-        "color": "#2e1065",
-        "base_price": 4850.25
-    },
-    {
-        "symbol": "INDUSINDBK",
-        "nse_symbol": "INDUSINDBK.NS",
-        "name": "IndusInd Bank Ltd",
-        "sector": "Banking & Financial",
-        "industry": "Private Bank",
-        "logo": "🦁",
-        "color": "#c2410c",
-        "base_price": 1421.40
+        "symbol": "BAJAJ-AUTO",
+        "nse_symbol": "BAJAJ-AUTO.NS",
+        "name": "Bajaj Auto Ltd",
+        "sector": "Automobile",
+        "industry": "Two & Three Wheelers",
+        "logo": "🏍️",
+        "color": "#1d4ed8",
+        "base_price": 9400.0
     },
     {
         "symbol": "BAJFINANCE",
@@ -357,7 +347,7 @@ NIFTY_TOP_10 = [
         "industry": "NBFC",
         "logo": "💵",
         "color": "#0369a1",
-        "base_price": 6842.10
+        "base_price": 6842.1
     },
     {
         "symbol": "BAJAJFINSV",
@@ -367,7 +357,7 @@ NIFTY_TOP_10 = [
         "industry": "NBFC",
         "logo": "🛡️",
         "color": "#0284c7",
-        "base_price": 1542.30
+        "base_price": 1542.3
     },
     {
         "symbol": "CIPLA",
@@ -377,7 +367,7 @@ NIFTY_TOP_10 = [
         "industry": "Pharmaceuticals",
         "logo": "🔬",
         "color": "#047857",
-        "base_price": 1425.40
+        "base_price": 1425.4
     },
     {
         "symbol": "DRREDDY",
@@ -387,7 +377,7 @@ NIFTY_TOP_10 = [
         "industry": "Pharmaceuticals",
         "logo": "🧪",
         "color": "#065f46",
-        "base_price": 5845.20
+        "base_price": 5845.2
     },
     {
         "symbol": "APOLLOHOSP",
@@ -397,7 +387,7 @@ NIFTY_TOP_10 = [
         "industry": "Hospitals",
         "logo": "🏥",
         "color": "#991b1b",
-        "base_price": 5940.50
+        "base_price": 5940.5
     },
     {
         "symbol": "SBILIFE",
@@ -407,7 +397,7 @@ NIFTY_TOP_10 = [
         "industry": "Life Insurance",
         "logo": "🛡️",
         "color": "#0369a1",
-        "base_price": 1420.20
+        "base_price": 1420.2
     },
     {
         "symbol": "EICHERMOT",
@@ -417,47 +407,7 @@ NIFTY_TOP_10 = [
         "industry": "Motorcycles",
         "logo": "🏍️",
         "color": "#854d0e",
-        "base_price": 4540.60
-    },
-    {
-        "symbol": "BPCL",
-        "nse_symbol": "BPCL.NS",
-        "name": "Bharat Petroleum",
-        "sector": "Utilities",
-        "industry": "Oil Refining",
-        "logo": "⛽",
-        "color": "#0369a1",
-        "base_price": 612.40
-    },
-    {
-        "symbol": "DIVISLAB",
-        "nse_symbol": "DIVISLAB.NS",
-        "name": "Divis Laboratories",
-        "sector": "Healthcare",
-        "industry": "Biotechnologies",
-        "logo": "🧪",
-        "color": "#15803d",
-        "base_price": 3840.50
-    },
-    {
-        "symbol": "HEROCOCO",
-        "nse_symbol": "HEROMOTOCO.NS",
-        "name": "Hero MotoCorp Ltd",
-        "sector": "Automobile",
-        "industry": "Motorcycles",
-        "logo": "🛵",
-        "color": "#991b1b",
-        "base_price": 4842.10
-    },
-    {
-        "symbol": "BRITANNIA",
-        "nse_symbol": "BRITANNIA.NS",
-        "name": "Britannia Industries",
-        "sector": "FMCG",
-        "industry": "Packaged Foods",
-        "logo": "🍪",
-        "color": "#854d0e",
-        "base_price": 5240.20
+        "base_price": 4540.6
     },
     {
         "symbol": "JIOFIN",
@@ -470,16 +420,6 @@ NIFTY_TOP_10 = [
         "base_price": 362.45
     },
     {
-        "symbol": "SHREECEM",
-        "nse_symbol": "SHREECEM.NS",
-        "name": "Shree Cement Ltd",
-        "sector": "Materials",
-        "industry": "Cement",
-        "logo": "🧱",
-        "color": "#374151",
-        "base_price": 24500.20
-    },
-    {
         "symbol": "BEL",
         "nse_symbol": "BEL.NS",
         "name": "Bharat Electronics Ltd",
@@ -487,17 +427,77 @@ NIFTY_TOP_10 = [
         "industry": "Defense Tech",
         "logo": "📡",
         "color": "#047857",
-        "base_price": 285.40
+        "base_price": 285.4
     },
     {
-        "symbol": "HAL",
-        "nse_symbol": "HAL.NS",
-        "name": "Hindustan Aeronautics",
-        "sector": "Infrastructure",
-        "industry": "Aerospace & Defense",
+        "symbol": "TRENT",
+        "nse_symbol": "TRENT.NS",
+        "name": "Trent Ltd",
+        "sector": "Consumer Services",
+        "industry": "Retail & Apparel",
+        "logo": "🛍️",
+        "color": "#4b5563",
+        "base_price": 4700.0
+    },
+    {
+        "symbol": "MAXHEALTH",
+        "nse_symbol": "MAXHEALTH.NS",
+        "name": "Max Healthcare Institute",
+        "sector": "Healthcare",
+        "industry": "Hospitals",
+        "logo": "🏥",
+        "color": "#991b1b",
+        "base_price": 850.0
+    },
+    {
+        "symbol": "INDIGO",
+        "nse_symbol": "INDIGO.NS",
+        "name": "InterGlobe Aviation Ltd",
+        "sector": "Consumer Services",
+        "industry": "Airlines",
         "logo": "✈️",
-        "color": "#0369a1",
-        "base_price": 4242.10
+        "color": "#1e3a8a",
+        "base_price": 4200.0
+    },
+    {
+        "symbol": "SHRIRAMFIN",
+        "nse_symbol": "SHRIRAMFIN.NS",
+        "name": "Shriram Finance Ltd",
+        "sector": "Banking & Financial",
+        "industry": "NBFC",
+        "logo": "🪙",
+        "color": "#0284c7",
+        "base_price": 2400.0
+    },
+    {
+        "symbol": "TATACONSUM",
+        "nse_symbol": "TATACONSUM.NS",
+        "name": "Tata Consumer Products Ltd",
+        "sector": "FMCG",
+        "industry": "Consumer Goods",
+        "logo": "🍵",
+        "color": "#0ea5e9",
+        "base_price": 1150.0
+    },
+    {
+        "symbol": "HDFCLIFE",
+        "nse_symbol": "HDFCLIFE.NS",
+        "name": "HDFC Life Insurance Co",
+        "sector": "Banking & Financial",
+        "industry": "Life Insurance",
+        "logo": "🛡️",
+        "color": "#7c3aed",
+        "base_price": 600.0
+    },
+    {
+        "symbol": "ETERNAL",
+        "nse_symbol": "ETERNAL.NS",
+        "name": "Eternal Limited",
+        "sector": "Consumer Services",
+        "industry": "Online Food Delivery",
+        "logo": "🍔",
+        "color": "#cb202d",
+        "base_price": 250.0
     }
 ]
 
