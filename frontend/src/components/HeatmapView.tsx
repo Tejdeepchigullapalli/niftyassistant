@@ -209,14 +209,14 @@ export default function HeatmapView({ quotes, onSymbolSelect }: HeatmapViewProps
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
   // Helper mapping logo to local or initials fallback
-  const renderLogo = (symbol: string, size = 20) => {
+  const renderLogo = (symbol: string, size = 20, showBg = true) => {
     const src = COMPANY_LOGOS[symbol.toUpperCase()];
     if (src) {
       return (
         <img 
           src={src} 
           alt={symbol} 
-          className="rounded-full bg-white object-contain border border-slate-700/30 flex-shrink-0"
+          className={`rounded-full object-contain flex-shrink-0 ${showBg ? 'bg-white border border-slate-700/30' : ''}`}
           style={{ width: size, height: size }}
           onError={(e) => {
             (e.target as HTMLElement).style.display = 'none';
@@ -227,10 +227,10 @@ export default function HeatmapView({ quotes, onSymbolSelect }: HeatmapViewProps
     const initials = symbol.slice(0, 2).toUpperCase();
     return (
       <div 
-        className="rounded-full flex items-center justify-center font-bold text-white bg-slate-750 flex-shrink-0 leading-none select-none text-[8.5px]"
+        className={`rounded-full flex items-center justify-center font-bold text-white flex-shrink-0 leading-none select-none ${showBg ? 'bg-slate-750' : ''}`}
         style={{ width: size, height: size }}
       >
-        {initials}
+        <span style={{ fontSize: size * 0.4 }}>{initials}</span>
       </div>
     );
   };
@@ -570,8 +570,8 @@ export default function HeatmapView({ quotes, onSymbolSelect }: HeatmapViewProps
                         style={{ backgroundColor: color }}
                       >
                         {/* Faded logo watermark */}
-                        <div className="absolute -right-2 -bottom-2 opacity-[0.06] select-none pointer-events-none transform rotate-12 scale-[1.3] text-white">
-                          {renderLogo(node.symbol, 75)}
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.25] select-none pointer-events-none transform scale-125 rotate-12 text-white z-0">
+                          {renderLogo(node.symbol, 64, true)}
                         </div>
 
                         {/* Top info */}
@@ -619,8 +619,8 @@ export default function HeatmapView({ quotes, onSymbolSelect }: HeatmapViewProps
                       whileHover={{ scale: 1.03, zIndex: 10 }}
                     >
                       {/* Faded Logo Watermark */}
-                      <div className="absolute -right-2 -bottom-2 opacity-[0.06] select-none pointer-events-none transform rotate-12 scale-[1.3] text-white">
-                        {renderLogo(node.symbol, 50)}
+                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.25] select-none pointer-events-none transform scale-125 rotate-12 text-white z-0">
+                        {renderLogo(node.symbol, 44, true)}
                       </div>
 
                       <div className="flex justify-between items-start gap-1 select-none relative z-10">
@@ -804,18 +804,20 @@ export default function HeatmapView({ quotes, onSymbolSelect }: HeatmapViewProps
         {/* Card B: Price Change Legend */}
         <div className="card p-4 bg-[#0F172A] border border-[#1E293B] rounded-2xl flex flex-col justify-between min-h-[145px] hover:border-slate-800 transition-colors select-none">
           <span className="text-[10px] font-black text-[#94A3B8] uppercase tracking-wider block mb-2.5">Price Change Legend (%)</span>
-          <div className="grid grid-cols-8 gap-1 items-center flex-grow">
+          <div className="grid grid-cols-7 gap-1.5 items-center flex-grow">
             {[
-              { label: '≤ -3%', color: '#7F1D1D' },
-              { label: '-3% to -1.5%', color: '#B91C1C' },
-              { label: '-1.5% to -0.5%', color: '#F59E0B' },
-              { label: '-0.5% to 0%', color: '#374151' },
-              { label: '0% to +0.5%', color: '#374151' },
-              { label: '+0.5% to +1.5%', color: '#22C55E' },
-              { label: '+1.5% to +3%', color: '#15803D' },
-              { label: '≥ +3%', color: '#166534' }
+              { index: '-3', label: '≤ -3%', color: '#7F1D1D' },
+              { index: '-2', label: '-3% to -1.5%', color: '#B91C1C' },
+              { index: '-1', label: '-1.5% to -0.5%', color: '#F59E0B' },
+              { index: '0', label: '-0.5% to +0.5%', color: '#374151' },
+              { index: '+1', label: '+0.5% to +1.5%', color: '#22C55E' },
+              { index: '+2', label: '+1.5% to +3%', color: '#15803D' },
+              { index: '+3', label: '≥ +3%', color: '#166534' }
             ].map((leg, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
+                <span className="text-[8px] font-black text-[#8B5CF6] bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 px-1.5 py-0.5 rounded-md leading-none select-none">
+                  Index {leg.index}
+                </span>
                 <div className="w-full h-8 rounded-lg border border-slate-700/20" style={{ backgroundColor: leg.color }} />
                 <span className="text-[7.5px] font-extrabold text-slate-500 text-center leading-tight">{leg.label}</span>
               </div>
