@@ -459,9 +459,9 @@ export default function AlertsView() {
                   placeholder="Search alerts..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="bg-[#080c14] border border-[#152036] rounded-xl py-1 pl-7 pr-2.5 text-[9px] text-slate-200 focus:outline-none focus:border-violet-500 w-full placeholder:text-slate-655"
+                  className="bg-[#080c14] border border-[#152036] rounded-xl py-1 pl-8 pr-2.5 text-[9px] text-slate-200 focus:outline-none focus:border-violet-500 w-full placeholder:text-slate-500 transition-colors"
                 />
-                <Search className="absolute left-2.5 top-1.5 w-3 h-3 text-slate-500" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
               </div>
               
               <button className="p-1 rounded-xl bg-[#080c14] border border-[#152036] hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all cursor-pointer">

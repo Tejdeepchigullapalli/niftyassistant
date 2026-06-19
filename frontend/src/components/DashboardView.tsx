@@ -1047,9 +1047,9 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
                 placeholder="Search companies, stocks or anything..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#060B17] border border-[#1E293B] rounded-xl py-2 pl-8.5 pr-4 text-xs text-[#F8FAFC] focus:outline-none focus:border-violet-500 placeholder-slate-600"
+                className="w-full bg-[#060B17] border border-[#1E293B] rounded-xl py-2 pl-10 pr-4 text-xs text-[#F8FAFC] focus:outline-none focus:border-violet-500 placeholder-slate-600 transition-colors"
               />
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-600" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 pointer-events-none" />
             </div>
 
             {/* Table headers */}

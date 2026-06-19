@@ -460,9 +460,9 @@ export default function WatchlistView({ quotes = [] }: { quotes?: any[] }) {
                   placeholder="Search in watchlist..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[#080c14] border border-[#152036] rounded-xl py-0.5 pl-6 pr-2.5 text-[10px] text-slate-200 focus:outline-none focus:border-violet-500 w-full"
+                  className="bg-[#080c14] border border-[#152036] rounded-xl py-1 pl-8 pr-2.5 text-[10px] text-slate-200 focus:outline-none focus:border-violet-500 w-full transition-colors"
                 />
-                <Search className="absolute left-2 top-1.5 w-3 h-3 text-slate-505" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-505 pointer-events-none" />
               </div>
 
               <button className="text-[9px] font-bold text-slate-400 bg-[#080c14] border border-[#152036] px-2 py-0.5 rounded-xl hover:border-slate-700 flex items-center gap-1 transition-all">
