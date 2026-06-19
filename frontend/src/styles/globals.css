@@ -152,3 +152,10 @@ body {
   color: #f8fafc !important;
 }
 
+@media (min-width: 1024px) {
+  .dashboard-zoom-container {
+    zoom: 0.81;
+  }
+}
+
+

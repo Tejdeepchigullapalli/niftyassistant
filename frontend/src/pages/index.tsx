@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { api, getRecBadgeClass } from '../utils/api';
 import StockDetail from '../components/StockDetail';
+import HeatmapView from '../components/HeatmapView';
 import MarketOverview from '../components/MarketOverview';
 import PortfolioView from '../components/PortfolioView';
 import DashboardView from '../components/DashboardView';
@@ -27,7 +28,8 @@ import {
   Search, 
   RefreshCw, 
   UserCircle2, 
-  ChevronDown 
+  ChevronDown,
+  LayoutGrid
 } from 'lucide-react';
 
 const SIDEBAR_TABS = [
@@ -144,6 +146,7 @@ export default function Home() {
     { id: 'market-overview', label: 'Market Overview', icon: Globe2, isActive: activeTab === 1 },
     { id: 'stock-analysis', label: 'Stock Analysis', icon: TrendingUp, isActive: activeTab === 2 },
     { id: 'top-companies', label: 'Top Fifty Nifty', icon: CircleDollarSign, isActive: activeTab === 0 && niftyFilterLimit === 50 },
+    { id: 'heatmap', label: 'Heatmap', icon: LayoutGrid, isActive: activeTab === 10 },
     { id: 'portfolio', label: 'Portfolio', icon: Briefcase, isActive: activeTab === 4 },
     { id: 'ai-assistant', label: 'AI Assistant', icon: Bot, badge: 'NEW', isActive: activeTab === 5 },
     { id: 'watchlist', label: 'Watchlist', icon: Star, isActive: activeTab === 6 },
@@ -152,15 +155,31 @@ export default function Home() {
     { id: 'settings', label: 'Settings', icon: Settings, isActive: activeTab === 9 }
   ];
 
-  const handleNavClick = (id: string, index: number) => {
+  const handleNavClick = (id: string) => {
     if (id === 'top-companies') {
       setNiftyFilterLimit(50);
       setActiveTab(0);
     } else if (id === 'dashboard') {
       setNiftyFilterLimit(10);
       setActiveTab(0);
-    } else {
-      setActiveTab(index);
+    } else if (id === 'market-overview') {
+      setActiveTab(1);
+    } else if (id === 'stock-analysis') {
+      setActiveTab(2);
+    } else if (id === 'heatmap') {
+      setActiveTab(10);
+    } else if (id === 'portfolio') {
+      setActiveTab(4);
+    } else if (id === 'ai-assistant') {
+      setActiveTab(5);
+    } else if (id === 'watchlist') {
+      setActiveTab(6);
+    } else if (id === 'alerts') {
+      setActiveTab(7);
+    } else if (id === 'reports') {
+      setActiveTab(8);
+    } else if (id === 'settings') {
+      setActiveTab(9);
     }
   };
 
@@ -252,7 +271,7 @@ export default function Home() {
               {navItems.map(({ id, label, icon: Icon, badge, count, isActive }, idx) => (
                 <button
                   key={id}
-                  onClick={() => handleNavClick(id, idx)}
+                  onClick={() => handleNavClick(id)}
                   className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[12px] font-semibold transition ${
                     isActive 
                       ? "bg-gradient-to-r from-violet-700 to-violet-600 text-white shadow-lg shadow-violet-950/40" 
@@ -283,7 +302,7 @@ export default function Home() {
                   Market Snapshot
                 </span>
                 <span className="flex items-center gap-1 text-[8px] font-bold text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Live
                 </span>
               </div>
@@ -309,6 +328,48 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* AI Market Outlook Card at bottom of sidebar */}
+            <div className="mx-3 mb-4 p-3 rounded-2xl border border-[#1e293b]/45 bg-[#0b1220] select-none">
+              <div className="flex items-center gap-1.5 text-[8.5px] font-black text-violet-400 uppercase tracking-wider mb-1.5">
+                <span>🤖</span>
+                <span>AI Market Outlook</span>
+              </div>
+              <div className="flex justify-between items-start">
+                <div className="space-y-0.5">
+                  <span className="text-[13px] font-black text-[#22C55E] block leading-none">Bullish</span>
+                  <p className="text-[7.5px] text-[#94A3B8] font-medium leading-tight mt-1 max-w-[100px]">
+                    High probability of positive move in next 5 sessions
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[9px] font-black text-[#F8FAFC] block leading-none">78%</span>
+                  <span className="text-[7px] text-[#94A3B8] font-bold block mt-0.5">Confidence</span>
+                </div>
+              </div>
+              <div className="h-6 w-full mt-2.5">
+                <svg className="w-full h-full" viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <path 
+                    d="M 0 16 Q 15 14 30 18 T 60 8 T 90 4 L 100 2" 
+                    fill="none" 
+                    stroke="#22C55E" 
+                    strokeWidth="1.8"
+                    strokeLinecap="round" 
+                  />
+                  <path 
+                    d="M 0 16 Q 15 14 30 18 T 60 8 T 90 4 L 100 2 L 100 20 L 0 20 Z" 
+                    fill="url(#sidebarOutlookGrad)" 
+                    opacity="0.12" 
+                  />
+                  <defs>
+                    <linearGradient id="sidebarOutlookGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#22C55E" />
+                      <stop offset="100%" stopColor="#22C55E" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
             </div>
           </aside>
 
@@ -357,6 +418,13 @@ export default function Home() {
                 <span className="hidden text-[10px] font-semibold text-slate-300 xl:block select-none">
                   {timeStr || '02:38:38 PM'}
                 </span>
+                
+                {/* Green Live Badge in top navbar */}
+                <div className="hidden sm:flex items-center gap-1 bg-[#10b981]/10 border border-[#10b981]/25 text-[#10b981] px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider select-none">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                  Live
+                </div>
+
                 <button 
                   onClick={fetchData}
                   className="flex h-8 items-center gap-1.5 rounded-lg bg-violet-750 px-3 text-[10px] font-bold text-white hover:bg-violet-600 transition-colors shadow shadow-violet-500/10"
@@ -426,7 +494,10 @@ export default function Home() {
                   />
                 )}
                 {activeTab === 2 && (
-                  <StockDetail symbol={selectedSymbol} />
+                  <StockDetail symbol={selectedSymbol} onSymbolSelect={(s) => setSelectedSymbol(s)} />
+                )}
+                {activeTab === 10 && (
+                  <HeatmapView quotes={quotes} onSymbolSelect={(s) => { setSelectedSymbol(s); setActiveTab(2); }} />
                 )}
                 {activeTab === 4 && (
                   <PortfolioView
@@ -460,7 +531,7 @@ export default function Home() {
                 )}
               </>
             )}
-            {![6, 7, 8].includes(activeTab) && (
+            {![1, 6, 7, 8].includes(activeTab) && (
               <footer className="py-4 text-center border-t border-[#152036] mt-6">
                 <p className="text-[10px] text-slate-550 leading-snug">
                   Nifty AI Investment Assistant · Developed for research purposes only · Not financial advice
