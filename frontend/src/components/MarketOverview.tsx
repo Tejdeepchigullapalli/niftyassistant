@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { getRecBadgeClass, getRecColor, getScoreColor, getCompanyMeta } from '../utils/api';
 import { CompanyLogo } from './DashboardView';
 import {
-  AreaChart, Area, ResponsiveContainer, LineChart, Line, BarChart, Bar, Cell
+  AreaChart, Area, ResponsiveContainer, LineChart, Line, BarChart, Bar, Cell, YAxis
 } from 'recharts';
 import {
   Star,
@@ -334,6 +334,7 @@ export default function MarketOverview({ quotes, recs, onSelect }: Props) {
                     <stop offset="95%" stopColor={niftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0} />
                   </linearGradient>
                 </defs>
+                <YAxis domain={['dataMin - 0.2', 'dataMax + 0.2']} hide />
                 <Area
                   type="monotone"
                   dataKey="value"
@@ -368,6 +369,7 @@ export default function MarketOverview({ quotes, recs, onSelect }: Props) {
                     <stop offset="95%" stopColor={bankNiftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0} />
                   </linearGradient>
                 </defs>
+                <YAxis domain={['dataMin - 0.2', 'dataMax + 0.2']} hide />
                 <Area
                   type="monotone"
                   dataKey="value"

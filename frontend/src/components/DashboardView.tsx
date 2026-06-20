@@ -826,7 +826,8 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
           <div className="h-8 w-[38%] flex-shrink-0 self-center">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={niftySpark}>
-                <Area type="monotone" dataKey="value" stroke="#22C55E" fill="none" strokeWidth={1.5} dot={false} />
+                <YAxis domain={['dataMin - 0.2', 'dataMax + 0.2']} hide />
+                <Area type="monotone" dataKey="value" stroke={niftyChangePct >= 0 ? '#22C55E' : '#EF4444'} fill="none" strokeWidth={1.5} dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -846,7 +847,8 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
           <div className="h-8 w-[38%] flex-shrink-0 self-center">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={bankNiftySpark}>
-                <Area type="monotone" dataKey="value" stroke="#22C55E" fill="none" strokeWidth={1.5} dot={false} />
+                <YAxis domain={['dataMin - 0.2', 'dataMax + 0.2']} hide />
+                <Area type="monotone" dataKey="value" stroke={bankNiftyChangePct >= 0 ? '#22C55E' : '#EF4444'} fill="none" strokeWidth={1.5} dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -1421,6 +1423,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
               <div className="w-14 h-6 flex-shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={niftySpark.slice(-6)}>
+                    <YAxis domain={['dataMin - 0.1', 'dataMax + 0.1']} hide />
                     <Line type="monotone" dataKey="value" stroke="#22C55E" strokeWidth={1.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
