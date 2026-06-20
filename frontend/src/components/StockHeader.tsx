@@ -1,6 +1,8 @@
 import React from 'react';
-import { ExternalLink, Star, Bell, FileText, Share2, Layers } from 'lucide-react';
+import { ExternalLink, FileText, Layers } from 'lucide-react';
 import ScoreRing from './ScoreRing';
+import { useInvestmentState } from '../context/InvestmentStateContext';
+import CompanyActionMenu from './common/CompanyActionMenu';
 
 interface StockHeaderProps {
   symbol: string;
@@ -13,12 +15,9 @@ interface StockHeaderProps {
   };
   quote: any;
   recommendation: any;
-  isWatchlisted: boolean;
-  onWatchToggle: () => void;
   onCompare: () => void;
   onAIReport: () => void;
   lastUpdated: string;
-  onSetAlert?: () => void;
 }
 
 export default function StockHeader({
@@ -26,18 +25,19 @@ export default function StockHeader({
   meta,
   quote,
   recommendation,
-  isWatchlisted,
-  onWatchToggle,
   onCompare,
   onAIReport,
-  lastUpdated,
-  onSetAlert
+  lastUpdated
 }: StockHeaderProps) {
+  const { getCompanyRecord } = useInvestmentState();
+  const record = getCompanyRecord(symbol);
+
   // Safe stats values
   const currentPrice = quote?.current_price ?? meta.basePrice;
   const changeVal = quote?.change ?? (currentPrice * 0.012);
   const changePct = quote?.change_pct ?? 1.2;
   const isUp = changeVal >= 0;
+
 
   // Retrieve investment scores
   const scoreOverall = recommendation?.ai_investment_score ?? 75;
@@ -139,7 +139,7 @@ export default function StockHeader({
 
         {/* Recommendation & action block */}
         <div className="flex flex-col justify-between py-1 h-full min-w-[180px] gap-2">
-          <div className="flex items-center justify-end gap-2 leading-none">
+          <div className="flex items-center justify-end gap-2 leading-none flex-wrap">
             <span className="text-[7.5px] text-[#94A3B8] font-black uppercase">Consensus Rating:</span>
             <span 
               className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider leading-none border"
@@ -151,43 +151,30 @@ export default function StockHeader({
             >
               {recommendation?.recommendation || 'Strong Buy'}
             </span>
+            {record.positionStatus !== 'none' && (
+              <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider leading-none border ${
+                record.positionStatus === 'purchased' ? 'bg-[#22C55E]/10 border-[#22C55E]/20 text-[#22C55E]' : 'bg-[#8B5CF6]/10 border-[#8B5CF6]/20 text-[#8B5CF6]'
+              }`}>
+                User Status: {record.positionStatus}
+              </span>
+            )}
           </div>
 
           {/* Persistent header Actions Row */}
           <div className="flex gap-1.5 items-center justify-end flex-wrap">
             <button 
               onClick={onCompare}
-              className="p-1.5 bg-[#060B17] border border-[#1E293B] hover:border-violet-500/40 text-[#94A3B8] hover:text-[#F8FAFC] rounded-lg transition-all"
+              className="p-1.5 bg-[#060B17] border border-[#1E293B] hover:border-violet-500/40 text-[#94A3B8] hover:text-[#F8FAFC] rounded-lg transition-all cursor-pointer"
               title="Compare Stocks"
             >
               <Layers className="w-3.5 h-3.5" />
             </button>
             
-            <button 
-              onClick={onWatchToggle}
-              className={`p-1.5 border rounded-lg transition-all ${
-                isWatchlisted 
-                  ? 'bg-amber-600/10 border-amber-500/40 text-amber-400' 
-                  : 'bg-[#060B17] border-[#1E293B] hover:border-violet-500/40 text-[#94A3B8]'
-              }`}
-              title={isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
-            >
-              <Star className={`w-3.5 h-3.5 ${isWatchlisted ? 'fill-current' : ''}`} />
-            </button>
-
-            {onSetAlert && (
-              <button 
-                onClick={onSetAlert}
-                className="p-1.5 bg-[#060B17] border border-[#1E293B] hover:border-violet-500/40 text-[#94A3B8] hover:text-[#F8FAFC] rounded-lg transition-all"
-                title="Set Price Alert"
-              >
-                <Bell className="w-3.5 h-3.5" />
-              </button>
-            )}
+            <CompanyActionMenu symbol={symbol} align="right" />
 
             <button 
               onClick={onAIReport}
-              className="px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-[#F8FAFC] text-[8.5px] font-black uppercase tracking-wider rounded-lg transition-all shadow-md flex items-center gap-1"
+              className="px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-[#F8FAFC] text-[8.5px] font-black uppercase tracking-wider rounded-lg transition-all shadow-md flex items-center gap-1 cursor-pointer"
               title="Generate PDF Report"
             >
               <FileText className="w-3 h-3" />

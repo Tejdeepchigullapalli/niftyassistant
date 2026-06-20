@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Cell } from 'recharts';
 import { Award, ShieldAlert, Sparkles, TrendingUp } from 'lucide-react';
 import { getSectorPeers } from '../utils/analysisUtils';
-import { CompanyLogo } from './DashboardView';
+import { CompanyLogo } from './common/CompanyLogo';
 import { formatCurrency } from '../utils/api';
 import MetricCard from './MetricCard';
+import SectorPeerComparison from './SectorPeerComparison';
 
 interface PeerComparisonTabProps {
   symbol: string;
@@ -123,63 +124,12 @@ export default function PeerComparisonTab({
         </div>
       </div>
 
-      {/* Peer Comparison Table */}
-      <div className="card p-4 bg-[#0F172A] border border-[#1E293B] rounded-2xl hover:border-violet-500/20 transition-all">
-        <span className="text-[10px] font-black text-[#94A3B8] uppercase tracking-wider block mb-3">Solvency Benchmarking Table</span>
-        <div className="overflow-x-auto w-full">
-          <table className="w-full text-left text-[9.5px] font-bold border-collapse min-w-[700px]">
-            <thead>
-              <tr className="text-[8px] text-[#64748B] border-b border-[#1E293B] uppercase">
-                <th className="pb-2">Company Name</th>
-                <th className="pb-2 text-right">Price</th>
-                <th className="pb-2 text-right">Market Cap</th>
-                <th className="pb-2 text-center">P/E Ratio</th>
-                <th className="pb-2 text-center">P/B Ratio</th>
-                <th className="pb-2 text-center">ROE %</th>
-                <th className="pb-2 text-center">Rev Growth %</th>
-                <th className="pb-2 text-center">AI Score</th>
-                <th className="pb-2 text-right">AI Rating</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1E293B]/50 select-none">
-              {peerRows.map((peer) => {
-                const isActive = peer.symbol.toUpperCase() === symbol.toUpperCase();
-                return (
-                  <tr 
-                    key={peer.symbol} 
-                    onClick={() => onSymbolSelect?.(peer.symbol)}
-                    className={`hover:bg-white/[0.015] cursor-pointer transition-colors h-9 leading-none ${
-                      isActive ? 'border-l-2 border-violet-500 bg-violet-500/[0.02]' : ''
-                    }`}
-                  >
-                    <td className="py-2 pl-2 flex items-center gap-2">
-                      <CompanyLogo symbol={peer.symbol} size="sm" />
-                      <div className="leading-none">
-                        <span className="text-[#F8FAFC] font-extrabold block">{peer.symbol}</span>
-                        <span className="text-[7.5px] text-[#64748B] block mt-0.5">{peer.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-2 text-right">₹{peer.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                    <td className="py-2 text-right">{formatCurrency(peer.marketCap)}</td>
-                    <td className="py-2 text-center text-[#94A3B8]">{peer.pe.toFixed(2)}</td>
-                    <td className="py-2 text-center text-[#94A3B8]">{peer.pb.toFixed(2)}</td>
-                    <td className="py-2 text-center text-[#22C55E]">{peer.roe}%</td>
-                    <td className="py-2 text-center text-violet-400">{peer.revenueGrowth}%</td>
-                    <td className="py-2 text-center font-black" style={{ color: isActive ? meta.color : '#F8FAFC' }}>{peer.aiScore}</td>
-                    <td className="py-2 text-right pr-2">
-                      <span className={`text-[7px] px-1.5 py-0.5 rounded font-black uppercase ${
-                        peer.recommendation.includes('Buy') ? 'bg-[#22C55E]/10 text-[#22C55E]' : 'bg-[#F59E0B]/10 text-[#F59E0B]'
-                      }`}>
-                        {peer.recommendation}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Sector Peer Comparison Component */}
+      <SectorPeerComparison 
+        symbol={symbol}
+        quotes={quotes}
+        onSymbolSelect={onSymbolSelect}
+      />
 
       {/* Benchmarking Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch select-none">

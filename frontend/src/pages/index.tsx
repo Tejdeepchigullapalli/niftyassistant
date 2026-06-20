@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { api, getRecBadgeClass } from '../utils/api';
+import { useInvestmentState } from '../context/InvestmentStateContext';
 import StockDetail from '../components/StockDetail';
 import HeatmapView from '../components/HeatmapView';
 import MarketOverview from '../components/MarketOverview';
@@ -46,6 +47,11 @@ const SIDEBAR_TABS = [
 ];
 
 export default function Home() {
+  const { state, getWatchlistSymbols } = useInvestmentState();
+  const watchlistSymbols = getWatchlistSymbols();
+  const watchlistCount = watchlistSymbols.length;
+  const activeAlertsCount = Object.values(state.alerts).filter(a => a.enabled).length;
+
   const [activeTab, setActiveTab] = useState(0); // Index of SIDEBAR_TABS
   const [selectedSymbol, setSelectedSymbol] = useState('RELIANCE');
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -58,14 +64,6 @@ export default function Home() {
   const [niftyFilterLimit, setNiftyFilterLimit] = useState(50); // Default to Nifty 50
   const [chatPreQuery, setChatPreQuery] = useState('');
   const [user, setUser] = useState<any | null>(null);
-  const [portfolio, setPortfolio] = useState<any[]>([
-    { symbol: 'RELIANCE', quantity: 25, averageBuyPrice: 2800.0, purchaseDate: '2025-01-15', investedAmount: 70000.0 },
-    { symbol: 'TCS', quantity: 15, averageBuyPrice: 3750.0, purchaseDate: '2025-02-10', investedAmount: 56250.0 },
-    { symbol: 'HDFCBANK', quantity: 50, averageBuyPrice: 1550.0, purchaseDate: '2025-03-05', investedAmount: 77500.0 },
-    { symbol: 'INFY', quantity: 30, averageBuyPrice: 1420.0, purchaseDate: '2025-04-12', investedAmount: 42600.0 },
-    { symbol: 'ICICIBANK', quantity: 40, averageBuyPrice: 1180.0, purchaseDate: '2025-05-02', investedAmount: 47200.0 }
-  ]);
-  const [watchlist, setWatchlist] = useState<string[]>(['RELIANCE', 'TCS', 'HDFCBANK', 'ICICIBANK', 'INFY', 'AXISBANK', 'BHARTIARTL', 'ULTRACEMCO']);
 
   // Listen to Firebase authentication state
   useEffect(() => {
@@ -157,8 +155,8 @@ export default function Home() {
     { id: 'heatmap', label: 'Heatmap', icon: LayoutGrid, isActive: activeTab === 10 },
     { id: 'portfolio', label: 'Portfolio', icon: Briefcase, isActive: activeTab === 4 },
     { id: 'ai-assistant', label: 'AI Assistant', icon: Bot, badge: 'NEW', isActive: activeTab === 5 },
-    { id: 'watchlist', label: 'Watchlist', icon: Star, isActive: activeTab === 6 },
-    { id: 'alerts', label: 'Alerts', icon: Bell, count: 8, isActive: activeTab === 7 },
+    { id: 'watchlist', label: 'Watchlist', icon: Star, count: watchlistCount > 0 ? watchlistCount : undefined, isActive: activeTab === 6 },
+    { id: 'alerts', label: 'Alerts', icon: Bell, count: activeAlertsCount > 0 ? activeAlertsCount : undefined, isActive: activeTab === 7 },
     { id: 'reports', label: 'Reports', icon: FileText, isActive: activeTab === 8 },
     { id: 'settings', label: 'Settings', icon: Settings, isActive: activeTab === 9 }
   ];
@@ -445,9 +443,11 @@ export default function Home() {
                   className="relative text-slate-400 hover:text-white"
                 >
                   <Bell className="h-4 w-4" />
-                  <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[7px] font-black text-white">
-                    3
-                  </span>
+                  {activeAlertsCount > 0 && (
+                    <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[7px] font-black text-white">
+                      {activeAlertsCount}
+                    </span>
+                  )}
                 </button>
                 <button className="flex items-center gap-1.5 group select-none">
                   {user && user.photoURL ? (
@@ -528,18 +528,27 @@ export default function Home() {
                   />
                 )}
                 {activeTab === 6 && (
-                  <WatchlistView quotes={quotes} />
+                  <WatchlistView 
+                    quotes={quotes} 
+                    recs={recs}
+                    onSymbolSelect={(s) => { setSelectedSymbol(s); setActiveTab(2); }}
+                    onNavigateToTab={(tab) => {
+                      if (tab === 'alerts') setActiveTab(7);
+                      else if (tab === 'portfolio') setActiveTab(4);
+                    }}
+                  />
                 )}
                 {activeTab === 7 && (
-                  <AlertsView />
+                  <AlertsView 
+                    quotes={quotes}
+                    onSymbolSelect={(s) => { setSelectedSymbol(s); setActiveTab(2); }}
+                  />
                 )}
                 {activeTab === 8 && (
                   <ReportsView
                     quotes={quotes}
                     recs={recs}
                     selectedSymbol={selectedSymbol}
-                    portfolio={portfolio}
-                    watchlist={watchlist}
                     lastUpdated={lastUpdated}
                     onSymbolSelect={setSelectedSymbol}
                     onNavigateToStockAnalysis={(s) => { setSelectedSymbol(s); setActiveTab(2); }}

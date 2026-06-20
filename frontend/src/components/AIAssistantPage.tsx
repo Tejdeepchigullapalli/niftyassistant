@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import AIChatbot from './AIChatbot';
-import { CompanyLogo } from './DashboardView';
+import { CompanyLogo } from './common/CompanyLogo';
 import { 
   api, 
   formatCurrency, 

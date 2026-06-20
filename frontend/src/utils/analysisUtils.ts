@@ -117,15 +117,21 @@ export function getSectorPeers(
   sector: string,
   quotes: any[] = []
 ): PeerComparisonRow[] {
+  const activeSymbol = symbol.toUpperCase().trim();
+  const activeMeta = COMPANIES_METADATA.find(c => c.symbol.toUpperCase() === activeSymbol) || { sector, industry: '', symbol: activeSymbol, name: activeSymbol, basePrice: 100 };
+  
   // Find all metadata peers in the same sector
   const peersMeta = COMPANIES_METADATA.filter(
-    c => c.sector === sector && c.symbol.toUpperCase() !== symbol.toUpperCase()
-  ).slice(0, 4);
+    c => c.sector === activeMeta.sector && c.symbol.toUpperCase() !== activeSymbol
+  ).sort((a, b) => {
+    const aSameInd = a.industry === activeMeta.industry ? 1 : 0;
+    const bSameInd = b.industry === activeMeta.industry ? 1 : 0;
+    return bSameInd - aSameInd;
+  }).slice(0, 4);
 
   const list: PeerComparisonRow[] = [];
 
   // Add the active stock itself first
-  const activeMeta = COMPANIES_METADATA.find(c => c.symbol.toUpperCase() === symbol.toUpperCase());
   if (activeMeta) {
     const activeQuote = quotes.find(q => q.symbol.toUpperCase() === symbol.toUpperCase());
     list.push({

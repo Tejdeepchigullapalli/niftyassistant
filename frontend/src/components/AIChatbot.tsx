@@ -4,6 +4,8 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, AreaChart, Area
 } from 'recharts';
+import { CompanyLogo } from './common/CompanyLogo';
+import CompanyActionMenu from './common/CompanyActionMenu';
 
 // Top 50 Nifty Companies list
 const COMPANIES = [
@@ -347,13 +349,19 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
     return (
       <div className="card p-4 bg-slate-900 border-slate-800 max-w-md shadow-2xl">
         <div className="flex justify-between items-start mb-3">
-          <div>
-            <h4 className="text-base font-bold text-slate-100">{quote.symbol}</h4>
-            <p className="text-xs text-slate-400">{quote.name}</p>
+          <div className="flex items-center gap-2">
+            <CompanyLogo symbol={quote.symbol} size="sm" />
+            <div>
+              <h4 className="text-base font-bold text-slate-100">{quote.symbol}</h4>
+              <p className="text-xs text-slate-400 mt-0.5">{quote.name}</p>
+            </div>
           </div>
-          <span className={`text-xs px-2 py-0.5 rounded font-semibold ${getRecBadgeClass(rec.recommendation)}`}>
-            {rec.recommendation}
-          </span>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className={`text-xs px-2 py-0.5 rounded font-semibold ${getRecBadgeClass(rec.recommendation)}`}>
+              {rec.recommendation}
+            </span>
+            <CompanyActionMenu symbol={quote.symbol} align="right" className="scale-90 origin-top-right mt-1" />
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3 mb-2">
           <div className="bg-slate-950/40 p-2 rounded-lg border border-slate-800/40">
@@ -910,6 +918,19 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
                   <span className={`px-1 rounded text-[7.5px] font-bold ${getRecBadgeClass(recB.recommendation)}`}>{recB.recommendation}</span>
                 </td>
               </tr>
+              <tr>
+                <td className="py-1.5 text-slate-400">Actions</td>
+                <td className="py-1.5 text-center">
+                  <div className="flex justify-center scale-75 origin-center">
+                    <CompanyActionMenu symbol={qA.symbol} align="left" />
+                  </div>
+                </td>
+                <td className="py-1.5 text-center">
+                  <div className="flex justify-center scale-75 origin-center">
+                    <CompanyActionMenu symbol={qB.symbol} align="right" />
+                  </div>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -1357,7 +1378,7 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
     } else if (lowercase.includes('buy') || lowercase.includes('sell') || lowercase.includes('recommend')) {
       replyText = "Our AI scores companies out of 100 to issue recommendations: Strong Buy (78+), Buy (65-77), Hold (48-64), Reduce (35-47), and Sell (under 35). Tell me a specific company name and I'll pull its AI recommendation!";
     } else if (lowercase.includes('help') || lowercase.includes('faq') || lowercase.includes('what can you do')) {
-      replyText = "As your NiftyAI assistant, I can: \n1. Conduct in-depth financial analysis of any of the top 50 NSE stocks.\n2. Walk you through beautiful milestones of their corporate history.\n3. Show daily return statistics and revenue breakdowns.\n4. Perform future investment value simulations based on active market indicators.\n5. Execute dynamic side-by-side sector peer comparisons (e.g. RELIANCE vs TCS).\n\nWhich company are you interested in?";
+      replyText = "As your NiftyAI assistant, I can: \n1. Conduct in-depth financial analysis of any of the top 50 NSE stocks.\n2. Walk you through beautiful milestones of their corporate history.\n3. Show daily return statistics and revenue breakdowns.\n4. Perform future investment value simulations based on active market indicators.\n5. Execute dynamic side-by-side sector peer comparisons (e.g. comparing RELIANCE with sector peers).\n\nWhich company are you interested in?";
     } else {
       replyText = "I hold real-time knowledge of all NIFTY 50 companies, financial algorithms, and risk indicators. Would you like to select a company to see its comprehensive AI-powered investment profile and animated history?";
       replyComponent = renderStep1CompanySelector();

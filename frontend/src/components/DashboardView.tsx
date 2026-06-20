@@ -129,6 +129,12 @@ const LOCAL_LOGOS: Record<string, string> = {
 import { CompanyLogo } from './common/CompanyLogo';
 export { CompanyLogo };
 
+import { useInvestmentState } from '../context/InvestmentStateContext';
+import CompanyStatusBadge from './common/CompanyStatusBadge';
+import CompanyActionMenu from './common/CompanyActionMenu';
+import WatchlistToggle from './common/WatchlistToggle';
+
+
 // Top 50 Nifty Companies matching mockup metrics exactly
 const NIFTY_50_COMPANIES = [
   { symbol: 'RELIANCE', name: 'Reliance Industries Ltd', logo: '🔴', color: '#e11d48', basePrice: 1325.70, changePct: -0.18, rank: 1, sector: 'Energy & Retail', industry: 'Conglomerate', mcap: '17.94 L Cr' },
@@ -202,6 +208,8 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANCE', onNavigateToChat, filterLimit = 10, quotes = [] }: DashboardViewProps) {
+  const { getCompanyRecord, getCompanyAlerts, setInterested, clearInterest, markPurchased } = useInvestmentState();
+
   const [selectedSymbol, setSelectedSymbol] = useState(initialSymbol);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSubTab, setActiveSubTab] = useState(0);
@@ -216,49 +224,6 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
     setCurrentLimit(filterLimit);
   }, [filterLimit]);
 
-  // Star Watchlist state management
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({
-    RELIANCE: true,
-    TCS: true,
-    HDFCBANK: true,
-    ICICIBANK: true,
-    INFY: false,
-    SBIN: false,
-    BHARTIARTL: false,
-    HINDUNILVR: false,
-    ITC: false,
-    LT: false
-  });
-
-  const toggleFavorite = (symbol: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFavorites(prev => ({
-      ...prev,
-      [symbol]: !prev[symbol]
-    }));
-  };
-
-  // Interest Status tracking (dropdown selection) for each company
-  const [companyInterest, setCompanyInterest] = useState<Record<string, 'Interested' | 'Purchased' | 'Locked' | 'Watch'>>({
-    RELIANCE: 'Interested',
-    TCS: 'Locked',
-    HDFCBANK: 'Locked',
-    ICICIBANK: 'Interested',
-    INFY: 'Locked',
-    SBIN: 'Locked',
-    BHARTIARTL: 'Interested',
-    HINDUNILVR: 'Locked',
-    ITC: 'Interested',
-    LT: 'Locked'
-  });
-
-  const handleInterestSelect = (status: 'Interested' | 'Purchased' | 'Locked' | 'Watch') => {
-    setCompanyInterest(prev => ({
-      ...prev,
-      [selectedSymbol]: status
-    }));
-    setShowDropdown(false);
-  };
 
   // Checkboxes list state
   const [checkedCompanies, setCheckedCompanies] = useState<Record<string, boolean>>({
@@ -1000,7 +965,6 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
             <div className="overflow-y-auto pr-1 mt-1 space-y-1.5 max-h-[360px] chat-scrollbar">
               {filteredCompanies.map((c) => {
                 const isSelected = selectedSymbol === c.symbol;
-                const interest = companyInterest[c.symbol] || 'Locked';
                 
                 return (
                   <button
@@ -1061,19 +1025,8 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
                       </div>
                       
                       {/* Interest state representation badge */}
-                      <div className="flex items-center justify-center w-5.5 h-5.5 rounded-lg border border-[#1E293B]/80 bg-[#0B1220]/50">
-                        {interest === 'Interested' && (
-                          <Heart className="w-3 h-3 text-violet-400 fill-violet-500" />
-                        )}
-                        {interest === 'Purchased' && (
-                          <Check className="w-3 h-3 text-[#22C55E]" />
-                        )}
-                        {interest === 'Locked' && (
-                          <Lock className="w-2.5 h-2.5 text-[#F59E0B]" />
-                        )}
-                        {interest === 'Watch' && (
-                          <Star className="w-3 h-3 text-sky-400" />
-                        )}
+                      <div className="flex items-center justify-center flex-shrink-0">
+                        <CompanyStatusBadge symbol={c.symbol} />
                       </div>
                     </div>
                   </button>
@@ -1130,36 +1083,8 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
                     </span>
                   </div>
                   
-                  {/* Dropdown Interest state button */}
-                  <div className="relative">
-                    <button 
-                      onClick={() => setShowDropdown(!showDropdown)}
-                      className="px-4 py-2 bg-violet-650 hover:bg-violet-600 border border-violet-500/20 text-[#F8FAFC] rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-violet-550/15"
-                    >
-                      <Heart className="w-3.5 h-3.5 fill-current" />
-                      <span>{companyInterest[selectedSymbol] || 'Interested'}</span>
-                      <ChevronDown className="w-3 h-3 text-[#F8FAFC]" />
-                    </button>
-                    {showDropdown && (
-                      <div className="absolute right-0 mt-1.5 w-40 rounded-xl bg-[#0F172A] border border-[#1E293B] p-1 shadow-2xl z-30 select-none">
-                        {[
-                          { id: 'Interested', label: 'Interested', icon: Heart, iconColor: 'text-violet-400 fill-violet-500' },
-                          { id: 'Purchased', label: 'Mark as Purchased', icon: Check, iconColor: 'text-[#22C55E]' },
-                          { id: 'Locked', label: 'Add Price Alert', icon: Info, iconColor: 'text-[#F59E0B]' },
-                          { id: 'Watch', label: 'Add to Watchlist', icon: Star, iconColor: 'text-sky-400' }
-                        ].map(opt => (
-                          <button
-                            key={opt.id}
-                            onClick={() => handleInterestSelect(opt.id as any)}
-                            className="w-full text-left px-3 py-2 text-[9.5px] font-bold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0B1220] rounded-lg flex items-center gap-2"
-                          >
-                            <opt.icon className={`w-3.5 h-3.5 ${opt.iconColor}`} />
-                            <span>{opt.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  {/* Reusable Company Action Menu */}
+                  <CompanyActionMenu symbol={selectedSymbol} align="right" />
                 </div>
               </div>
 
@@ -1248,7 +1173,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
             <div className="flex flex-wrap gap-1 items-center mt-1">
               <span className="text-[7.5px] text-[#64748B] font-extrabold uppercase mr-1 tracking-wider">Suggested:</span>
               {[
-                `Compare ${selectedSymbol} vs TCS`,
+                `Compare ${selectedSymbol} with its most relevant sector peers`,
                 'Show top gainers today',
                 'Best stocks for long term'
               ].map((chip, idx) => (

@@ -2,9 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   QuoteData, 
   PortfolioHolding, 
-  RecommendationData, 
-  SentimentData, 
-  FinancialData 
+  RecommendationData 
 } from '../types/stock';
 import ReportsHeader from './ReportsHeader';
 import ReportTabBar from './ReportTabBar';
@@ -17,14 +15,12 @@ import PortfolioReport from './PortfolioReport';
 import StockResearchReport from './StockResearchReport';
 import MarketIntelligenceReport from './MarketIntelligenceReport';
 import CustomReportBuilder from './CustomReportBuilder';
-import { getCompanyMeta } from '../utils/api';
+import { useInvestmentState } from '../context/InvestmentStateContext';
 
 interface ReportsViewProps {
   quotes?: QuoteData[];
   recs?: Record<string, RecommendationData>;
   selectedSymbol: string;
-  portfolio?: PortfolioHolding[];
-  watchlist?: string[];
   lastUpdated?: string;
   onSymbolSelect: (symbol: string) => void;
   onNavigateToStockAnalysis?: (symbol: string) => void;
@@ -34,16 +30,18 @@ export default function ReportsView({
   quotes = [],
   recs = {},
   selectedSymbol = 'RELIANCE',
-  portfolio = [],
-  watchlist = [],
   lastUpdated,
   onSymbolSelect,
   onNavigateToStockAnalysis
 }: ReportsViewProps) {
+  const { getPortfolioHoldings, getWatchlistSymbols } = useInvestmentState();
+  const portfolio = getPortfolioHoldings();
+  const watchlist = getWatchlistSymbols();
+
   const [activeTab, setActiveTab] = useState('Overview');
   const [loading, setLoading] = useState(false);
 
-  // Dynamic Date range calculation for system/browser local dates (current timeframe June 2026)
+  // Dynamic Date range calculation
   const dateRange = useMemo(() => {
     const today = new Date();
     const oneWeekAgo = new Date();
@@ -52,7 +50,6 @@ export default function ReportsView({
     return `${oneWeekAgo.toLocaleDateString('en-US', options)} - ${today.toLocaleDateString('en-US', options)}`;
   }, []);
 
-  // Action download notifications
   const handleDownloadPDF = () => {
     alert('Report downloaded successfully as PDF!');
   };
@@ -61,7 +58,6 @@ export default function ReportsView({
     alert('Holding Ledger exported as CSV!');
   };
 
-  // Safe symbol routing callback
   const handleNavigateStock = (sym: string) => {
     if (onNavigateToStockAnalysis) {
       onNavigateToStockAnalysis(sym);
@@ -93,7 +89,8 @@ export default function ReportsView({
       totalInvested += holdingCost;
       todayPnLSum += holdingValue * (changePct / 100);
 
-      const aiScore = recs[holding.symbol]?.ai_investment_score ?? 74;
+      const rec = recs[holding.symbol];
+      const aiScore = rec?.ai_investment_score ?? 74;
       scoreWeightSum += holdingValue * aiScore;
     });
 
@@ -143,6 +140,8 @@ export default function ReportsView({
       />
     );
   }
+
+  const isPortfolioTab = ['Overview', 'Performance Reports', 'Portfolio Reports', 'Custom Reports'].includes(activeTab);
 
   return (
     <div className="space-y-4 text-slate-100 pb-10 select-none animate-fadeIn">
@@ -220,59 +219,66 @@ export default function ReportsView({
 
       {/* 4. Tab Workspace Router */}
       <div className="w-full">
-        
-        {activeTab === 'Overview' && (
-          <OverviewReport 
-            quotes={quotes}
-            recs={recs}
-            portfolio={portfolio}
-            watchlist={watchlist}
-            onNavigateToStockAnalysis={handleNavigateStock}
-            onTabChange={setActiveTab}
+        {portfolio.length === 0 && isPortfolioTab ? (
+          <ReportEmptyState 
+            title="No Portfolio Holdings Found"
+            message="Constituent reporting requires at least one purchased position. Add holdings from the Dashboard or Stock Analysis page."
           />
-        )}
+        ) : (
+          <>
+            {activeTab === 'Overview' && (
+              <OverviewReport 
+                quotes={quotes}
+                recs={recs as any}
+                portfolio={portfolio as any}
+                watchlist={watchlist}
+                onNavigateToStockAnalysis={handleNavigateStock}
+                onTabChange={setActiveTab}
+              />
+            )}
 
-        {activeTab === 'Performance Reports' && (
-          <PerformanceReport 
-            quotes={quotes}
-            portfolio={portfolio}
-            recs={recs}
-          />
-        )}
+            {activeTab === 'Performance Reports' && (
+              <PerformanceReport 
+                quotes={quotes}
+                portfolio={portfolio as any}
+                recs={recs as any}
+              />
+            )}
 
-        {activeTab === 'Portfolio Reports' && (
-          <PortfolioReport 
-            quotes={quotes}
-            portfolio={portfolio}
-            recs={recs}
-            onNavigateToStockAnalysis={handleNavigateStock}
-          />
-        )}
+            {activeTab === 'Portfolio Reports' && (
+              <PortfolioReport 
+                quotes={quotes}
+                portfolio={portfolio as any}
+                recs={recs as any}
+                onNavigateToStockAnalysis={handleNavigateStock}
+              />
+            )}
 
-        {activeTab === 'Stock Reports' && (
-          <StockResearchReport 
-            initialSymbol={selectedSymbol}
-            quotes={quotes}
-            recs={recs}
-            onSymbolSelect={onSymbolSelect}
-            onNavigateToStockAnalysis={handleNavigateStock}
-          />
-        )}
+            {activeTab === 'Stock Reports' && (
+              <StockResearchReport 
+                initialSymbol={selectedSymbol}
+                quotes={quotes}
+                recs={recs as any}
+                onSymbolSelect={onSymbolSelect}
+                onNavigateToStockAnalysis={handleNavigateStock}
+              />
+            )}
 
-        {activeTab === 'Market Reports' && (
-          <MarketIntelligenceReport 
-            quotes={quotes}
-            onNavigateToStockAnalysis={handleNavigateStock}
-          />
-        )}
+            {activeTab === 'Market Reports' && (
+              <MarketIntelligenceReport 
+                quotes={quotes}
+                onNavigateToStockAnalysis={handleNavigateStock}
+              />
+            )}
 
-        {activeTab === 'Custom Reports' && (
-          <CustomReportBuilder 
-            quotes={quotes}
-            portfolio={portfolio}
-          />
+            {activeTab === 'Custom Reports' && (
+              <CustomReportBuilder 
+                quotes={quotes}
+                portfolio={portfolio as any}
+              />
+            )}
+          </>
         )}
-
       </div>
 
     </div>

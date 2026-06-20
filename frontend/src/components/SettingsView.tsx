@@ -18,6 +18,7 @@ import {
   SlidersHorizontal 
 } from 'lucide-react';
 import { isFirebaseConfigured } from '../utils/firebase';
+import { useInvestmentState } from '../context/InvestmentStateContext';
 
 interface SettingsViewProps {
   user: any;
@@ -26,6 +27,8 @@ interface SettingsViewProps {
 }
 
 export default function SettingsView({ user, onSignIn, onSignOut }: SettingsViewProps) {
+  const { resetAllData } = useInvestmentState();
+
   const [activeSubTab, setActiveSubTab] = useState('Preferences');
   const [theme, setTheme] = useState('Dark');
   const [compactMode, setCompactMode] = useState(false);
@@ -62,7 +65,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
     { id: 'Data & Integrations', label: 'Data & Integrations' }
   ];
 
-  // Helper to render premium dropdown select elements matching mockup chevron look
+  // Helper to render premium dropdown select elements
   const renderDropdown = (
     label: string,
     desc: string,
@@ -75,7 +78,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-0.5">
         <div>
           <label className="text-[11px] font-extrabold block text-slate-200">{label}</label>
-          <span className="text-[8.5px] text-slate-500 block mt-0.5">{desc}</span>
+          <span className="text-[8.5px] text-slate-505 block mt-0.5">{desc}</span>
         </div>
         <div className="relative min-w-[160px] flex-shrink-0">
           <select 
@@ -105,7 +108,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
       <div className="flex items-center justify-between gap-2 py-0.5">
         <div>
           <label className="text-[11px] font-extrabold block text-slate-200">{label}</label>
-          <span className="text-[8.5px] text-slate-500 block mt-0.5">{desc}</span>
+          <span className="text-[8.5px] text-slate-505 block mt-0.5">{desc}</span>
         </div>
         <button
           onClick={() => setVal(!val)}
@@ -121,7 +124,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
     );
   };
 
-  // Helper to render sidebar row options with Lucide icons
+  // Helper to render sidebar row options
   const renderSidebarRow = (
     label: string,
     desc: string | null,
@@ -140,13 +143,13 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
             <Icon className="w-3.5 h-3.5" />
           </span>
           <div className="min-w-0">
-            <h4 className="text-[9.5px] font-bold text-slate-300 group-hover:text-violet-400 transition-colors leading-tight">{label}</h4>
-            {desc && <p className="text-[7.5px] text-slate-500 mt-0.5 leading-none">{desc}</p>}
+            <h4 className="text-[9.5px] font-bold text-slate-355 group-hover:text-violet-400 transition-colors leading-tight">{label}</h4>
+            {desc && <p className="text-[7.5px] text-slate-505 mt-0.5 leading-none">{desc}</p>}
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0 select-none">
           {val && <span className="text-slate-400 text-[8.5px] font-semibold">{val}</span>}
-          <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-violet-400 transition-colors" />
+          <ChevronRight className="w-3 h-3 text-slate-550 group-hover:text-violet-400 transition-colors" />
         </div>
       </button>
     );
@@ -157,7 +160,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
       
       {/* Settings Header */}
       <div>
-        <h2 className="text-xl font-extrabold tracking-tight">Settings</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-white">Settings</h2>
         <p className="text-[10px] text-slate-400 mt-0.5">Manage your preferences, account settings and app configuration.</p>
       </div>
 
@@ -167,7 +170,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
           <button
             key={tab.id}
             onClick={() => setActiveSubTab(tab.id)}
-            className={`px-3.5 py-1 text-[10px] font-semibold border-b-2 transition-all relative ${
+            className={`px-3.5 py-1 text-[10px] font-semibold border-b-2 transition-all relative cursor-pointer ${
               activeSubTab === tab.id
                 ? 'border-violet-500 text-violet-400 font-bold'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -285,7 +288,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
                 <div className="flex items-center justify-between gap-2 py-0.5">
                   <div>
                     <label className="text-[11px] font-extrabold block text-slate-200">Chart Preferences</label>
-                    <span className="text-[8.5px] text-slate-500 block mt-0.5">Customize default chart appearance</span>
+                    <span className="text-[8.5px] text-slate-505 block mt-0.5">Customize default chart appearance</span>
                   </div>
                   <button className="text-[9.5px] font-bold text-violet-400 bg-[#080c14] border border-[#152036] hover:border-slate-700 px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
                     <SlidersHorizontal className="w-3 h-3 text-violet-400" />
@@ -328,6 +331,37 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
               </div>
             </div>
 
+            {/* BROKERAGE DISCLAIMER & RESET DANGER ZONE */}
+            <div className="card p-4 bg-[#0d121f] border border-[#152036] rounded-2xl shadow-xl space-y-4">
+              <h3 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider border-b border-slate-850/60 pb-1.5">Brokerage Status</h3>
+              
+              <div className="flex items-start gap-2.5 bg-[#f59e0b]/5 border border-[#f59e0b]/20 p-3 rounded-xl text-[9.5px]">
+                <Info className="w-4 h-4 text-[#f59e0b] flex-shrink-0 mt-0.5" />
+                <div className="text-left text-[#94a3b8] leading-relaxed">
+                  <span className="font-extrabold text-[#f59e0b] uppercase tracking-wider block mb-1">Brokerage Disclaimer</span>
+                  NiftyAI tracks user-entered research preferences and simulated holdings. This is not connected to a brokerage account.
+                </div>
+              </div>
+
+              <div className="border-t border-slate-850 pt-3 flex justify-between items-center text-[10px]">
+                <div>
+                  <h4 className="text-[9.5px] font-bold text-slate-300 leading-tight">Reset Investment Data</h4>
+                  <p className="text-[7.5px] text-slate-505 mt-0.5 leading-none">Delete all custom portfolio, watchlist, alerts and notes records</p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (confirm("Are you sure you want to reset all your simulated holdings, watchlisted symbols, custom alerts, and notes? This action cannot be undone.")) {
+                      resetAllData();
+                      alert("Your investment data has been successfully reset.");
+                    }
+                  }}
+                  className="text-[9.5px] font-black text-rose-455 hover:text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer select-none"
+                >
+                  Reset My Investment Data
+                </button>
+              </div>
+            </div>
+
           </div>
 
           {/* RIGHT SIDEBAR STATS & INFO */}
@@ -360,7 +394,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
                     )}
                     <div className="min-w-0 flex-1">
                       <h4 className="text-[10px] font-bold text-slate-200 truncate leading-tight">{user.displayName || 'Google User'}</h4>
-                      <p className="text-[8px] text-slate-500 truncate mt-0.5">{user.email}</p>
+                      <p className="text-[8px] text-slate-505 truncate mt-0.5">{user.email}</p>
                     </div>
                   </div>
 
@@ -380,7 +414,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-[10px] font-bold text-slate-450 leading-tight">Not Signed In</h4>
-                      <p className="text-[8px] text-slate-550 truncate mt-0.5">Please log in to sync preferences</p>
+                      <p className="text-[8px] text-slate-505 truncate mt-0.5">Please log in to sync preferences</p>
                     </div>
                   </div>
 
@@ -402,7 +436,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
 
             {/* APP SETTINGS */}
             <div className="card p-3.5 bg-[#0d121f] border border-[#152036] rounded-2xl shadow-xl space-y-1.5">
-              <h3 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">App Settings</h3>
+              <h3 className="text-[10px] font-bold text-slate-305 uppercase tracking-wider mb-1.5">App Settings</h3>
               
               <div className="space-y-0.5">
                 {renderSidebarRow('Language', null, 'English', Globe)}
@@ -413,7 +447,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
 
             {/* SECURITY */}
             <div className="card p-3.5 bg-[#0d121f] border border-[#152036] rounded-2xl shadow-xl space-y-1.5">
-              <h3 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Security</h3>
+              <h3 className="text-[10px] font-bold text-slate-305 uppercase tracking-wider mb-1.5">Security</h3>
               
               <div className="space-y-0.5">
                 {renderSidebarRow('Change Password', 'Update your account password', null, Lock)}
@@ -423,7 +457,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
 
             {/* OTHERS (UTILITIES) */}
             <div className="card p-3.5 bg-[#0d121f] border border-[#152036] rounded-2xl shadow-xl space-y-1.5">
-              <h3 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Others</h3>
+              <h3 className="text-[10px] font-bold text-slate-305 uppercase tracking-wider mb-1.5">Others</h3>
               
               <div className="space-y-0.5">
                 {renderSidebarRow('Export My Data', 'Download your account and data', null, Download)}
@@ -435,7 +469,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
                       <Trash2 className="w-3.5 h-3.5" />
                     </span>
                     <div className="min-w-0">
-                      <h4 className="text-[9.5px] font-bold text-slate-300 leading-tight">Clear Cache</h4>
+                      <h4 className="text-[9.5px] font-bold text-slate-355 leading-tight">Clear Cache</h4>
                       <p className="text-[7.5px] text-slate-505 mt-0.5 leading-none">Free up space and improve performance</p>
                     </div>
                   </div>
@@ -450,7 +484,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
                 </div>
 
                 {renderSidebarRow('Help & Support', 'Get help and view support resources', null, HelpCircle)}
-                {renderSidebarRow('About NiftyAI', 'Version 1.0.0', null, Info)}
+                {renderSidebarRow('About NiftyAI', 'Version 1.5.0', null, Info)}
               </div>
             </div>
 

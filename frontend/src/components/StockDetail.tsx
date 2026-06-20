@@ -109,8 +109,6 @@ export default function StockDetail({ symbol, onSymbolSelect, onNavigateToChat }
         meta={meta}
         quote={quote}
         recommendation={recommendation}
-        isWatchlisted={isWatchlisted}
-        onWatchToggle={handleWatchToggle}
         onCompare={handleCompare}
         onAIReport={handleAIReport}
         lastUpdated={lastUpdated}
