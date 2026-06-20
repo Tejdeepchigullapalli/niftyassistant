@@ -58,6 +58,14 @@ export default function Home() {
   const [niftyFilterLimit, setNiftyFilterLimit] = useState(50); // Default to Nifty 50
   const [chatPreQuery, setChatPreQuery] = useState('');
   const [user, setUser] = useState<any | null>(null);
+  const [portfolio, setPortfolio] = useState<any[]>([
+    { symbol: 'RELIANCE', quantity: 25, averageBuyPrice: 2800.0, purchaseDate: '2025-01-15', investedAmount: 70000.0 },
+    { symbol: 'TCS', quantity: 15, averageBuyPrice: 3750.0, purchaseDate: '2025-02-10', investedAmount: 56250.0 },
+    { symbol: 'HDFCBANK', quantity: 50, averageBuyPrice: 1550.0, purchaseDate: '2025-03-05', investedAmount: 77500.0 },
+    { symbol: 'INFY', quantity: 30, averageBuyPrice: 1420.0, purchaseDate: '2025-04-12', investedAmount: 42600.0 },
+    { symbol: 'ICICIBANK', quantity: 40, averageBuyPrice: 1180.0, purchaseDate: '2025-05-02', investedAmount: 47200.0 }
+  ]);
+  const [watchlist, setWatchlist] = useState<string[]>(['RELIANCE', 'TCS', 'HDFCBANK', 'ICICIBANK', 'INFY', 'AXISBANK', 'BHARTIARTL', 'ULTRACEMCO']);
 
   // Listen to Firebase authentication state
   useEffect(() => {
@@ -494,7 +502,11 @@ export default function Home() {
                   />
                 )}
                 {activeTab === 2 && (
-                  <StockDetail symbol={selectedSymbol} onSymbolSelect={(s) => setSelectedSymbol(s)} />
+                  <StockDetail 
+                    symbol={selectedSymbol} 
+                    onSymbolSelect={(s) => setSelectedSymbol(s)} 
+                    onNavigateToChat={handleNavigateToChat} 
+                  />
                 )}
                 {activeTab === 10 && (
                   <HeatmapView quotes={quotes} onSymbolSelect={(s) => { setSelectedSymbol(s); setActiveTab(2); }} />
@@ -511,6 +523,8 @@ export default function Home() {
                     onCompanySelect={(s) => setSelectedSymbol(s)}
                     initialQuery={chatPreQuery}
                     clearPreQuery={() => setChatPreQuery('')}
+                    quotes={quotes}
+                    recs={recs}
                   />
                 )}
                 {activeTab === 6 && (
@@ -520,7 +534,16 @@ export default function Home() {
                   <AlertsView />
                 )}
                 {activeTab === 8 && (
-                  <ReportsView />
+                  <ReportsView
+                    quotes={quotes}
+                    recs={recs}
+                    selectedSymbol={selectedSymbol}
+                    portfolio={portfolio}
+                    watchlist={watchlist}
+                    lastUpdated={lastUpdated}
+                    onSymbolSelect={setSelectedSymbol}
+                    onNavigateToStockAnalysis={(s) => { setSelectedSymbol(s); setActiveTab(2); }}
+                  />
                 )}
                 {activeTab === 9 && (
                   <SettingsView 
