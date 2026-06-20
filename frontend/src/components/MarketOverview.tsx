@@ -329,9 +329,16 @@ export default function MarketOverview({ quotes, recs, onSelect }: Props) {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={niftySpark}>
                 <defs>
+                  <filter id="niftyGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="1.2" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
                   <linearGradient id="niftyGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={niftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0.15} />
-                    <stop offset="95%" stopColor={niftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0} />
+                    <stop offset="5%" stopColor={niftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0.22} />
+                    <stop offset="95%" stopColor={niftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <YAxis domain={['dataMin - 0.2', 'dataMax + 0.2']} hide />
@@ -340,8 +347,9 @@ export default function MarketOverview({ quotes, recs, onSelect }: Props) {
                   dataKey="value"
                   stroke={niftyChangePct >= 0 ? '#22C55E' : '#EF4444'}
                   fill="url(#niftyGrad)"
-                  strokeWidth={1.5}
+                  strokeWidth={2}
                   dot={false}
+                  filter="url(#niftyGlow)"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -364,9 +372,16 @@ export default function MarketOverview({ quotes, recs, onSelect }: Props) {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={bankNiftySpark}>
                 <defs>
+                  <filter id="bankGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="1.2" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
                   <linearGradient id="bankGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={bankNiftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0.15} />
-                    <stop offset="95%" stopColor={bankNiftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0} />
+                    <stop offset="5%" stopColor={bankNiftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0.22} />
+                    <stop offset="95%" stopColor={bankNiftyChangePct >= 0 ? '#22C55E' : '#EF4444'} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <YAxis domain={['dataMin - 0.2', 'dataMax + 0.2']} hide />
@@ -375,8 +390,9 @@ export default function MarketOverview({ quotes, recs, onSelect }: Props) {
                   dataKey="value"
                   stroke={bankNiftyChangePct >= 0 ? '#22C55E' : '#EF4444'}
                   fill="url(#bankGrad)"
-                  strokeWidth={1.5}
+                  strokeWidth={2}
                   dot={false}
+                  filter="url(#bankGlow)"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -953,7 +969,17 @@ export default function MarketOverview({ quotes, recs, onSelect }: Props) {
                 <div className="w-16 h-8 flex-shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={niftySpark.slice(-6)}>
-                      <Line type="monotone" dataKey="value" stroke="#22C55E" strokeWidth={1.5} dot={false} />
+                      <defs>
+                        <filter id="predGlow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="1.2" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      <YAxis domain={['dataMin - 0.1', 'dataMax + 0.1']} hide />
+                      <Line type="monotone" dataKey="value" stroke="#22C55E" strokeWidth={2} dot={false} filter="url(#predGlow)" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
