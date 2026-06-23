@@ -208,7 +208,7 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANCE', onNavigateToChat, filterLimit = 10, quotes = [] }: DashboardViewProps) {
-  const { getCompanyRecord, getCompanyAlerts, setInterested, clearInterest, markPurchased } = useInvestmentState();
+  const { getCompanyRecord, getCompanyAlerts, markPurchased } = useInvestmentState();
 
   const [selectedSymbol, setSelectedSymbol] = useState(initialSymbol);
   const [searchTerm, setSearchTerm] = useState('');
@@ -1173,7 +1173,7 @@ export default function DashboardView({ onSymbolSelect, initialSymbol = 'RELIANC
             <div className="flex flex-wrap gap-1 items-center mt-1">
               <span className="text-[7.5px] text-[#64748B] font-extrabold uppercase mr-1 tracking-wider">Suggested:</span>
               {[
-                `Compare ${selectedSymbol} with its most relevant sector peers`,
+                `Compare ${selectedSymbol} with all ${getCompanyMeta(selectedSymbol).sector} peers`,
                 'Show top gainers today',
                 'Best stocks for long term'
               ].map((chip, idx) => (

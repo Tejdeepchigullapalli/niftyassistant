@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { CompanyLogo } from './common/CompanyLogo';
 import CompanyActionMenu from './common/CompanyActionMenu';
+import SectorComparisonBoard from './ai/SectorComparisonBoard';
 
 // Top 50 Nifty Companies list
 const COMPANIES = [
@@ -140,6 +141,13 @@ interface Message {
   text?: string;
   component?: React.ReactNode;
   timestamp: string;
+  type?: 'sector-comparison';
+  comparisonData?: {
+    selectedSymbol: string;
+    quotes: any[];
+    recs: any;
+    historicalReturnsBySymbol: any;
+  };
 }
 
 interface AIChatbotProps {
@@ -159,10 +167,103 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Autocomplete Suggestions State
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+  const [filteredCompanies, setFilteredCompanies] = useState<typeof COMPANIES>([]);
+
+  // Close suggestions on clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      // If we clicked outside the input container, hide suggestions
+      if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Filter suggestions as the user types
+  const handleInputChange = (val: string) => {
+    setInputText(val);
+    const cleanInput = val.trim().toLowerCase();
+    if (!cleanInput) {
+      setFilteredCompanies([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Match the entire input text first
+    let matches = COMPANIES.filter(c => 
+      c.symbol.toLowerCase().includes(cleanInput) || 
+      c.name.toLowerCase().includes(cleanInput)
+    );
+
+    // If no match and the input has multiple words, try matching with the last word
+    if (matches.length === 0 && cleanInput.includes(' ')) {
+      const words = cleanInput.split(/\s+/);
+      const lastWord = words[words.length - 1];
+      if (lastWord.length >= 1) {
+        matches = COMPANIES.filter(c => 
+          c.symbol.toLowerCase().includes(lastWord) || 
+          c.name.toLowerCase().includes(lastWord)
+        );
+      }
+    }
+
+    setFilteredCompanies(matches.slice(0, 10)); // Limit to top 10 matches for UI elegance
+    setActiveSuggestionIndex(0);
+    setShowSuggestions(matches.length > 0);
+  };
+
+  const handleSelectSuggestion = (company: typeof COMPANIES[0]) => {
+    const words = inputText.split(/\s+/);
+    if (words.length > 1) {
+      // Replace the last word fragment with the chosen symbol
+      const lastSpaceIndex = inputText.lastIndexOf(' ');
+      const prefix = inputText.substring(0, lastSpaceIndex + 1);
+      setInputText(prefix + company.symbol);
+    } else {
+      setInputText(company.symbol);
+    }
+    setShowSuggestions(false);
+    setFilteredCompanies([]);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (showSuggestions && filteredCompanies.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveSuggestionIndex(prev => 
+          prev < filteredCompanies.length - 1 ? prev + 1 : 0
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveSuggestionIndex(prev => 
+          prev > 0 ? prev - 1 : filteredCompanies.length - 1
+        );
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeSuggestionIndex >= 0 && activeSuggestionIndex < filteredCompanies.length) {
+          handleSelectSuggestion(filteredCompanies[activeSuggestionIndex]);
+        }
+      } else if (e.key === 'Escape') {
+        setShowSuggestions(false);
+      }
+    }
+  };
+
   // Set input text when initialQuery is provided, allowing the user to send it manually
   useEffect(() => {
     if (initialQuery && initialQuery.trim()) {
-      setInputText(initialQuery.trim());
+      const query = initialQuery.trim();
+      setInputText(query);
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
@@ -344,6 +445,98 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
     }
   };
 
+  const handleTriggerSectorComparison = async (symbol: string) => {
+    const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const meta = COMPANIES.find(c => c.symbol === symbol) || { name: symbol };
+
+    setMessages(prev => [
+      ...prev,
+      {
+        id: 'user-compare-' + Date.now(),
+        sender: 'user',
+        text: `Compare ${symbol} with its sector peers`,
+        timestamp: time
+      },
+      {
+        id: 'ai-loading-comparison-' + Date.now(),
+        sender: 'ai',
+        text: `Generating full-width sector-wide comparison board for ${symbol}...`,
+        timestamp: time
+      }
+    ]);
+
+    setLoading(true);
+
+    try {
+      const res = await api.getSectorComparison(symbol);
+      const data = res.data;
+
+      // Map response to the props format expected by SectorComparisonBoard
+      const quotes = data.companies.map((c: any) => ({
+        symbol: c.symbol,
+        current_price: c.currentPrice,
+        change_pct: c.changePct,
+        market_cap: c.marketCap,
+        pe_ratio: c.peRatio,
+        pb_ratio: c.pbRatio,
+        roe: c.roe,
+        revenue_growth: c.revenueGrowth
+      }));
+
+      const recs: Record<string, any> = {};
+      data.companies.forEach((c: any) => {
+        recs[c.symbol] = {
+          ai_investment_score: c.aiScore,
+          recommendation: c.recommendation
+        };
+      });
+
+      const historicalReturnsBySymbol: Record<string, any> = {};
+      data.companies.forEach((c: any) => {
+        historicalReturnsBySymbol[c.symbol] = {
+          return1W: c.return1W,
+          return1M: c.return1M,
+          return1Y: c.return1Y
+        };
+      });
+
+      setMessages(prev => {
+        const cleaned = prev.filter(m => !m.id.startsWith('ai-loading-comparison-'));
+        return [
+          ...cleaned,
+          {
+            id: 'ai-comparison-' + Date.now(),
+            sender: 'ai',
+            timestamp: time,
+            type: 'sector-comparison',
+            comparisonData: {
+              selectedSymbol: symbol,
+              quotes,
+              recs,
+              historicalReturnsBySymbol
+            }
+          }
+        ];
+      });
+    } catch (err) {
+      console.error(err);
+      setMessages(prev => {
+        const cleaned = prev.filter(m => !m.id.startsWith('ai-loading-comparison-'));
+        return [
+          ...cleaned,
+          {
+            id: 'ai-compare-error-' + Date.now(),
+            sender: 'ai',
+            text: `I had trouble generating the comparison board for **${symbol}**. Let's make sure the backend is active.`,
+            timestamp: time
+          }
+        ];
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Render overview cards in chat bubble
   const renderCompanyOverviewCard = (quote: any, rec: any) => {
     return (
@@ -435,8 +628,8 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
           <span>💸</span> Run Simulator
         </button>
         <button
-          onClick={() => triggerComparisonSelector()}
-          className="text-xs px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-lg transition-all flex items-center gap-1 shadow-md"
+          onClick={() => handleTriggerSectorComparison(symbol)}
+          className="text-xs px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-lg transition-all flex items-center gap-1 shadow-md cursor-pointer"
         >
           <span>⚔️</span> Comparision
         </button>
@@ -1209,6 +1402,19 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
 
     const queryUpper = query.toUpperCase();
 
+    // Check if sector peer comparison is requested (e.g. "Compare INFY with all sector peers")
+    const isSectorCompare = (queryUpper.includes('COMPARE') || queryUpper.includes('PEER')) &&
+                            (queryUpper.includes('PEER') || queryUpper.includes('SECTOR') || queryUpper.includes('ALL')) &&
+                            !queryUpper.includes('VS');
+    
+    // Find the symbol to compare. Check if there's any matching Nifty symbol in query, otherwise fallback to selected/external symbol.
+    const sectorCompareSymbol = COMPANIES.find(c => queryUpper.includes(c.symbol))?.symbol || selectedSymbol || externalSymbol;
+    
+    if (isSectorCompare && sectorCompareSymbol) {
+      await handleTriggerSectorComparison(sectorCompareSymbol);
+      return;
+    }
+
     // Check for peer comparison requests
     const words = queryUpper.replace(/[^A-Z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
     const mentionedSymbols = Array.from(new Set(
@@ -1279,20 +1485,43 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
 
     // Pattern matching for dynamic symbol typing lookup
     let singleSymbol = '';
-    const uppercaseQuery = queryUpper.replace(/[^A-Z]/g, ' ');
-    const possibleSymbols = uppercaseQuery.split(/\s+/).filter(w => 
-      w.length >= 3 && w.length <= 10 && 
-      !['COMPARE', 'CHART', 'STOCK', 'PRICE', 'SHOW', 'TELL', 'ABOUT', 'HELP', 'FAQ', 'INVEST', 'WHAT', 'WHO', 'THEM', 'THIS', 'THAT', 'AND', 'VERSUS'].includes(w)
+    const lowercaseQuery = query.toLowerCase();
+
+    // 1. Try to find a direct symbol or name match from COMPANIES
+    const matched = COMPANIES.find(
+      c => queryUpper.includes(c.symbol) || 
+           lowercaseQuery.includes(c.name.toLowerCase()) || 
+           c.name.toLowerCase().includes(lowercaseQuery)
     );
 
-    const matchedSymbol = COMPANIES.find(
-      c => queryUpper.includes(c.symbol) || query.toLowerCase().includes(c.name.toLowerCase())
-    );
-
-    if (matchedSymbol) {
-      singleSymbol = matchedSymbol.symbol;
-    } else if (possibleSymbols.length === 1) {
-      singleSymbol = possibleSymbols[0];
+    if (matched) {
+      singleSymbol = matched.symbol;
+    } else {
+      // 2. Try smart mapping for common market names
+      if (lowercaseQuery.includes('tata motors')) {
+        singleSymbol = 'TMPV';
+      } else if (lowercaseQuery.includes('zomato')) {
+        singleSymbol = 'ETERNAL';
+      } else if (lowercaseQuery.includes('airtel') || lowercaseQuery.includes('bharti')) {
+        singleSymbol = 'BHARTIARTL';
+      } else if (lowercaseQuery.includes('reliance') || lowercaseQuery.includes('reliance industries')) {
+        singleSymbol = 'RELIANCE';
+      } else if (lowercaseQuery.includes('trent')) {
+        singleSymbol = 'TRENT';
+      } else if (lowercaseQuery.includes('infosys')) {
+        singleSymbol = 'INFY';
+      } else if (lowercaseQuery.includes('tcs') || lowercaseQuery.includes('tata consultancy')) {
+        singleSymbol = 'TCS';
+      } else {
+        // 3. Fallback to check if a word is exactly a valid symbol
+        const possibleSymbols = queryUpper.replace(/[^A-Z]/g, ' ').split(/\s+/).filter(w => 
+          w.length >= 3 && w.length <= 10 && 
+          !['COMPARE', 'CHART', 'STOCK', 'PRICE', 'SHOW', 'TELL', 'ABOUT', 'HELP', 'FAQ', 'INVEST', 'WHAT', 'WHO', 'THEM', 'THIS', 'THAT', 'AND', 'VERSUS'].includes(w)
+        );
+        if (possibleSymbols.length === 1 && COMPANIES.some(c => c.symbol === possibleSymbols[0])) {
+          singleSymbol = possibleSymbols[0];
+        }
+      }
     }
 
     if (singleSymbol) {
@@ -1424,12 +1653,12 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
                 🤖
               </div>
             )}
-            <div className="max-w-[85%] space-y-2">
+            <div className={`${m.type === 'sector-comparison' ? 'w-full max-w-full lg:max-w-[95%]' : 'max-w-[85%]'} space-y-2`}>
               {m.text && (
                 <div
                   className={`p-3 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
                     m.sender === 'user'
-                      ? 'bg-violet-600 text-white rounded-tr-none'
+                      ? 'bg-violet-605 text-white rounded-tr-none'
                       : 'bg-slate-900 text-slate-200 border border-slate-800 rounded-tl-none'
                   } shadow-md`}
                   dangerouslySetInnerHTML={{
@@ -1437,11 +1666,26 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
                   }}
                 />
               )}
-              {m.component && (
+              {m.type === 'sector-comparison' && m.comparisonData ? (
+                <div className="w-full slide-in-left max-w-full">
+                  <SectorComparisonBoard
+                    selectedSymbol={m.comparisonData.selectedSymbol}
+                    quotes={m.comparisonData.quotes}
+                    recs={m.comparisonData.recs}
+                    historicalReturnsBySymbol={m.comparisonData.historicalReturnsBySymbol}
+                    onSymbolSelect={(sym) => handleSelectCompanyFlow(sym, true)}
+                    onOpenFullComparison={(sym) => {
+                      if (onCompanySelect) {
+                        onCompanySelect(sym);
+                      }
+                    }}
+                  />
+                </div>
+              ) : m.component ? (
                 <div className="slide-in-left">
                   {m.component}
                 </div>
-              )}
+              ) : null}
               <span className="text-[9px] text-slate-500 block px-1 mt-0.5">
                 {m.timestamp}
               </span>
@@ -1462,24 +1706,56 @@ export default function AIChatbot({ onCompanySelect, selectedSymbol: externalSym
       </div>
 
       {/* Input form */}
-      <form onSubmit={handleSubmitInput} className="p-3 bg-slate-900/80 border-t border-slate-800/80 flex gap-2">
-        <input
-          ref={inputRef}
-          type="text"
-          className="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
-          placeholder={selectedSymbol ? `Ask about ${selectedSymbol} or Nifty...` : "Ask anything about Nifty stocks..."}
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          disabled={loading}
-        />
-        <button
-          type="submit"
-          disabled={loading || !inputText.trim()}
-          className="px-4 bg-violet-600 hover:bg-violet-500 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl text-xs font-semibold shadow-lg transition-colors flex items-center justify-center"
-        >
-          Send
-        </button>
-      </form>
+      <div className="relative">
+        {showSuggestions && filteredCompanies.length > 0 && (
+          <div className="absolute bottom-full left-0 right-0 z-50 mb-2 max-h-48 overflow-y-auto rounded-xl border border-slate-800 bg-[#0f172a]/95 backdrop-blur-md shadow-2xl p-1 divide-y divide-slate-800/40 scrollbar-thin scrollbar-thumb-slate-800">
+            {filteredCompanies.map((company, index) => (
+              <div
+                key={company.symbol}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelectSuggestion(company);
+                }}
+                onMouseEnter={() => setActiveSuggestionIndex(index)}
+                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors text-xs ${
+                  index === activeSuggestionIndex
+                    ? 'bg-violet-600/20 text-violet-200'
+                    : 'text-slate-350 hover:bg-slate-800/40'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <CompanyLogo symbol={company.symbol} size="sm" />
+                  <span className="font-bold text-slate-200">{company.symbol}</span>
+                  <span className="text-slate-400 truncate max-w-[200px]">{company.name}</span>
+                </div>
+                <span className="text-[9px] text-slate-500 uppercase font-medium bg-slate-950/60 px-1.5 py-0.5 rounded border border-slate-800/40">
+                  Nifty 50
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmitInput} className="p-3 bg-slate-900/80 border-t border-slate-800/80 flex gap-2">
+          <input
+            ref={inputRef}
+            type="text"
+            className="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+            placeholder={selectedSymbol ? `Ask about ${selectedSymbol} or Nifty...` : "Ask anything about Nifty stocks..."}
+            value={inputText}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={loading || !inputText.trim()}
+            className="px-4 bg-violet-600 hover:bg-violet-500 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl text-xs font-semibold shadow-lg transition-colors flex items-center justify-center"
+          >
+            Send
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

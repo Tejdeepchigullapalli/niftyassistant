@@ -291,6 +291,55 @@ const safeCall = async (axiosCall: () => Promise<any>, fallbackDataGenerator: ()
 };
 
 export const api = {
+  getSectorComparison: (symbol: string) =>
+    safeCall(
+      () => axios.get(`${BASE}/sector-comparison?symbol=${symbol}`),
+      () => {
+        const selectedMeta = getCompanyMeta(symbol);
+        
+        let targetSymbols = COMPANIES_METADATA.filter(c => c.sector === selectedMeta.sector).map(c => c.symbol);
+        
+        if (symbol === 'RELIANCE') {
+          targetSymbols = ['RELIANCE', 'ONGC', 'NTPC', 'POWERGRID', 'COALINDIA', 'ADANIENT', 'GRASIM'];
+        } else if (targetSymbols.length <= 1) {
+          targetSymbols = [symbol];
+        }
+        
+        const companies = targetSymbols.map(sym => {
+          const meta = getCompanyMeta(sym);
+          const rec = generateMockRecommendation(sym);
+          const price = meta.basePrice;
+          const changePct = parseFloat((Math.random() * 4 - 2).toFixed(2));
+          return {
+            symbol: sym,
+            name: meta.name,
+            sector: meta.sector,
+            industry: meta.industry,
+            currentPrice: parseFloat((price * (1 + changePct/100)).toFixed(2)),
+            changePct: changePct,
+            marketCap: Math.floor(Math.random() * 12000000000000) + 200000000000,
+            peRatio: parseFloat((Math.random() * 15 + 15).toFixed(2)),
+            pbRatio: parseFloat((Math.random() * 4 + 1.5).toFixed(2)),
+            roe: parseFloat((Math.random() * 0.15 + 0.1).toFixed(4)),
+            revenueGrowth: parseFloat((Math.random() * 0.2).toFixed(4)),
+            aiScore: rec.ai_investment_score,
+            recommendation: rec.recommendation,
+            return1W: parseFloat((Math.random() * 6 - 2).toFixed(2)),
+            return1M: parseFloat((Math.random() * 12 - 4).toFixed(2)),
+            return1Y: parseFloat((Math.random() * 35 - 5).toFixed(2))
+          };
+        });
+        
+        return {
+          selectedSymbol: symbol,
+          sector: selectedMeta.sector,
+          industry: selectedMeta.industry,
+          companies: companies,
+          lastQuoteUpdated: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+          lastFundamentalUpdated: "latest available"
+        };
+      }
+    ),
   getCompanies: () => 
     safeCall(
       () => axios.get(`${BASE}/stocks/`),

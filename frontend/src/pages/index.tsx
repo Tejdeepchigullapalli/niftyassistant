@@ -64,6 +64,11 @@ export default function Home() {
   const [niftyFilterLimit, setNiftyFilterLimit] = useState(50); // Default to Nifty 50
   const [chatPreQuery, setChatPreQuery] = useState('');
   const [user, setUser] = useState<any | null>(null);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [user]);
 
   // Listen to Firebase authentication state
   useEffect(() => {
@@ -450,11 +455,13 @@ export default function Home() {
                   )}
                 </button>
                 <button className="flex items-center gap-1.5 group select-none">
-                  {user && user.photoURL ? (
+                  {user && user.photoURL && !imgError ? (
                     <img 
                       src={user.photoURL} 
                       alt={user.displayName || 'User'} 
                       className="h-7 w-7 rounded-full border border-[#33435f] object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={() => setImgError(true)}
                     />
                   ) : (
                     <div className="grid h-7 w-7 place-items-center rounded-full border border-[#33435f] bg-[#132038]">

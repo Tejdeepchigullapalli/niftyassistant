@@ -14,11 +14,10 @@ export default function CompanyStatusBadge({ symbol, className = '', showLabels 
   const alerts = getCompanyAlerts(symbol);
 
   const isPurchased = record.positionStatus === 'purchased';
-  const isInterested = record.positionStatus === 'interested';
   const isWatchlisted = record.watchlisted;
   const hasAlerts = alerts.length > 0;
 
-  if (!isPurchased && !isInterested && !isWatchlisted && !hasAlerts) {
+  if (!isPurchased && !isWatchlisted && !hasAlerts) {
     return null;
   }
 
@@ -31,16 +30,6 @@ export default function CompanyStatusBadge({ symbol, className = '', showLabels 
         >
           <Briefcase className="w-2.5 h-2.5" />
           {showLabels && <span>Purchased</span>}
-        </div>
-      )}
-      
-      {isInterested && (
-        <div 
-          className="flex items-center gap-1 bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 text-[#8B5CF6] px-1.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider"
-          title="Researching / Interested"
-        >
-          <Heart className="w-2.5 h-2.5 fill-current" />
-          {showLabels && <span>Interested</span>}
         </div>
       )}
 

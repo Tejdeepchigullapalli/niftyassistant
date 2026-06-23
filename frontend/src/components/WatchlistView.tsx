@@ -52,16 +52,12 @@ interface WatchlistViewProps {
 }
 
 export default function WatchlistView({ quotes = [], recs = {}, onSymbolSelect, onNavigateToTab }: WatchlistViewProps) {
-  const { getWatchlistSymbols, getInterestedSymbols, getCompanyAlerts, addToWatchlist, state } = useInvestmentState();
+  const { getWatchlistSymbols, getCompanyAlerts, addToWatchlist, state } = useInvestmentState();
   const watchlistSymbols = getWatchlistSymbols();
-  const interestedSymbols = getInterestedSymbols();
 
   const [activeTab, setActiveTab] = useState('My Watchlist');
 
-  const activeSymbols = useMemo(() => {
-    if (activeTab === 'Interested Stocks') return interestedSymbols;
-    return watchlistSymbols;
-  }, [activeTab, watchlistSymbols, interestedSymbols]);
+  const activeSymbols = watchlistSymbols;
 
   const [moversTab, setMoversTab] = useState<'Gainers' | 'Losers' | 'By Value'>('Gainers');
 
@@ -287,20 +283,16 @@ export default function WatchlistView({ quotes = [], recs = {}, onSymbolSelect, 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-extrabold tracking-tight flex items-center gap-1.5 text-white">
-            {activeTab === 'Interested Stocks' ? '💜 Interested Stocks' : '⭐ Watchlist'} <span className="text-[9px] text-slate-550 font-bold bg-[#0d121f] border border-slate-800 p-0.5 rounded-full cursor-help" title="Details">ⓘ</span>
+            ⭐ Watchlist <span className="text-[9px] text-slate-555 font-bold bg-[#0d121f] border border-slate-800 p-0.5 rounded-full cursor-help" title="Details">ⓘ</span>
           </h2>
-          <p className="text-[11px] text-slate-400 mt-0">
-            {activeTab === 'Interested Stocks' 
-              ? 'Track your interested companies and potential acquisitions in one place.' 
-              : 'Track your favorite stocks and market movers in one place.'}
-          </p>
+          <p className="text-[11px] text-slate-400 mt-0">Track your favorite stocks and market movers in one place.</p>
         </div>
 
         {/* Premium Separate Header Cards */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex gap-1.5">
             {[
-              { icon: <Briefcase className="w-3.5 h-3.5 text-slate-400" />, val: activeSymbols.length.toString(), label: activeTab === 'Interested Stocks' ? 'Interested' : 'Stocks' },
+              { icon: <Briefcase className="w-3.5 h-3.5 text-slate-400" />, val: activeSymbols.length.toString(), label: 'Stocks' },
               { icon: <Wallet className="w-3.5 h-3.5 text-slate-400" />, val: `₹${totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: 'Total Value' },
               { icon: <TrendingUp className={`w-3.5 h-3.5 ${todayChangePct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`} />, val: `${todayChangePct >= 0 ? '+' : ''}${todayChangePct.toFixed(2)}%`, label: "Today's Change", color: todayChangePct >= 0 ? 'text-emerald-450 font-bold' : 'text-rose-455 font-bold' },
               { icon: <Smile className={`w-3.5 h-3.5 ${todayPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`} />, val: `${todayPL >= 0 ? '+' : '-'}₹${Math.abs(todayPL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, label: "Today's P&L", color: todayPL >= 0 ? 'text-emerald-450 font-bold' : 'text-rose-455 font-bold' }
@@ -340,7 +332,7 @@ export default function WatchlistView({ quotes = [], recs = {}, onSymbolSelect, 
 
       {/* Categories sub menu */}
       <div className="flex border-b border-slate-800 gap-2 overflow-x-auto whitespace-nowrap pb-0 select-none scrollbar-none">
-        {['My Watchlist', 'Interested Stocks', 'Indices Watchlist', 'Custom Watchlists'].map((tab) => (
+        {['My Watchlist', 'Indices Watchlist', 'Custom Watchlists'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -365,18 +357,6 @@ export default function WatchlistView({ quotes = [], recs = {}, onSymbolSelect, 
               quotes={quotes} 
               recs={recs} 
               onSymbolSelect={onSymbolSelect} 
-              symbols={watchlistSymbols}
-              mode="watchlist"
-            />
-          )}
-
-          {activeTab === 'Interested Stocks' && (
-            <DynamicWatchlistTable 
-              quotes={quotes} 
-              recs={recs} 
-              onSymbolSelect={onSymbolSelect} 
-              symbols={interestedSymbols}
-              mode="interested"
             />
           )}
 
@@ -655,7 +635,7 @@ export default function WatchlistView({ quotes = [], recs = {}, onSymbolSelect, 
           <div className="card p-3 bg-[#0d121f] border border-[#1f293d] rounded-2xl shadow-xl space-y-2.5">
             <div className="flex items-center justify-between border-b border-slate-850 pb-1.5">
               <h3 className="text-xs font-bold text-slate-350 uppercase tracking-wider">
-                {activeTab === 'Interested Stocks' ? 'Interest Alerts' : 'Watchlist Alerts'} ({activeTabAlerts.length})
+                Watchlist Alerts ({activeTabAlerts.length})
               </h3>
               <button 
                 onClick={() => onNavigateToTab?.('alerts')}
@@ -668,7 +648,7 @@ export default function WatchlistView({ quotes = [], recs = {}, onSymbolSelect, 
             <div className="space-y-1">
               {activeTabAlerts.length === 0 ? (
                 <div className="text-center py-4 text-[9px] text-slate-550 font-bold">
-                  No active alerts for {activeTab === 'Interested Stocks' ? 'interested' : 'watchlisted'} stocks.
+                  No active alerts for watchlisted stocks.
                 </div>
               ) : (
                 activeTabAlerts.slice(0, 4).map((alert, idx) => {

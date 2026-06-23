@@ -22,7 +22,7 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
     createAlert
   } = useInvestmentState();
 
-  const [activeTab, setActiveTab] = useState<'All' | 'Watchlist' | 'Interested' | 'Portfolio' | 'Market'>('All');
+  const [activeTab, setActiveTab] = useState<'All' | 'Watchlist' | 'Portfolio' | 'Market'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('createdAt');
   const [sortAsc, setSortAsc] = useState(false);
@@ -35,13 +35,7 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
     return Object.values(state.companyRecords).filter(r => r.watchlisted).map(r => r.symbol);
   }, [state.companyRecords]);
 
-  const interestedSymbols = useMemo(() => {
-    return Object.values(state.companyRecords).filter(r => r.positionStatus === 'interested').map(r => r.symbol);
-  }, [state.companyRecords]);
-
-  const targetSymbols = useMemo(() => {
-    return Array.from(new Set([...watchlistSymbols, ...interestedSymbols]));
-  }, [watchlistSymbols, interestedSymbols]);
+  const targetSymbols = watchlistSymbols;
 
   const [companyNews, setCompanyNews] = useState<Record<string, any>>({});
   const [loadingNews, setLoadingNews] = useState(false);
@@ -102,12 +96,6 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
         if (!a.symbol) return false;
         const rec = getCompanyRecord(a.symbol);
         return rec.watchlisted;
-      });
-    } else if (activeTab === 'Interested') {
-      list = list.filter(a => {
-        if (!a.symbol) return false;
-        const rec = getCompanyRecord(a.symbol);
-        return rec.positionStatus === 'interested';
       });
     } else if (activeTab === 'Portfolio') {
       list = list.filter(a => {
@@ -184,7 +172,7 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
       {/* Category Tabs & Filter Actions */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 bg-[#0d121f] border border-[#152036] p-1.5 rounded-2xl select-none">
         <div className="flex gap-1 overflow-x-auto w-full md:w-auto scrollbar-none">
-          {(['All', 'Watchlist', 'Interested', 'Portfolio', 'Market'] as const).map((tab) => {
+          {(['All', 'Watchlist', 'Portfolio', 'Market'] as const).map((tab) => {
             const count = tab === 'All' 
               ? alertsList.length 
               : tab === 'Market' 
@@ -193,7 +181,6 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
                   if (!a.symbol) return false;
                   const rec = getCompanyRecord(a.symbol);
                   return tab === 'Watchlist' ? rec.watchlisted :
-                         tab === 'Interested' ? rec.positionStatus === 'interested' :
                          rec.positionStatus === 'purchased';
                 }).length;
 
@@ -394,7 +381,7 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
               <div className="flex items-center justify-between border-b border-slate-850 pb-2">
                 <div>
                   <h3 className="text-xs font-bold text-slate-200">📰 Stock Updates & News Hub</h3>
-                  <p className="text-[9px] text-slate-500 mt-0.5 font-medium">Real-time sentiment feed for watchlist & interested companies</p>
+                  <p className="text-[9px] text-slate-500 mt-0.5 font-medium">Real-time sentiment feed for watchlist companies</p>
                 </div>
                 <span className="text-[8px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded-md uppercase">
                   {targetSymbols.length} Assets
@@ -411,7 +398,7 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
                   <div className="text-2xl">📰</div>
                   <p className="text-[10px] font-bold">No news targets configured</p>
                   <p className="text-[9px] font-semibold text-slate-655 max-w-[220px] mx-auto leading-relaxed text-slate-500">
-                    Mark stocks as <span className="text-[#F59E0B] font-bold">Watchlist ⭐</span> or <span className="text-[#8B5CF6] font-bold">Interested 💜</span> to automatically view updates here.
+                    Mark stocks as <span className="text-[#F59E0B] font-bold">Watchlist ⭐</span> to automatically view updates here.
                   </p>
                 </div>
               ) : (
@@ -450,7 +437,7 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
                         </div>
 
                         {/* Overall Sentiment bar info */}
-                        {sentiment ? (
+                        {sentiment && sentiment.overall_sentiment ? (
                           <div className="flex items-center justify-between text-[8px] bg-slate-900/45 px-2 py-1.2 rounded-lg border border-slate-850">
                             <span className="text-slate-400 font-semibold">Overall Sentiment:</span>
                             <div className="flex items-center gap-1.5">
@@ -465,7 +452,7 @@ export default function DynamicAlertsWorkspace({ quotes = [], onSymbolSelect }: 
                               >
                                 {sentiment.overall_sentiment}
                               </span>
-                              <span className="text-slate-500 font-bold">({Math.round(sentiment.overall_score * 100)}%)</span>
+                              <span className="text-slate-500 font-bold">({Math.round((sentiment.overall_score || 0) * 100)}%)</span>
                             </div>
                           </div>
                         ) : (

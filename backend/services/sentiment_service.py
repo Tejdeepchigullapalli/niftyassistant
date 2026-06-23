@@ -80,7 +80,7 @@ def get_sentiment(symbol: str) -> dict:
     """Get sentiment analysis for a company."""
     company = SYMBOL_MAP.get(symbol)
     if not company:
-        return {}
+        company = {"name": f"{symbol} Ltd.", "sector": "Diversified"}
 
     news_items = NEWS_TEMPLATES.get(symbol)
     if not news_items:

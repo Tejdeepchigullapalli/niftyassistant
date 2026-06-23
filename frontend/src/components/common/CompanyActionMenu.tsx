@@ -14,8 +14,6 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
   const { 
     getCompanyRecord, 
     getCompanyAlerts,
-    setInterested, 
-    clearInterest, 
     markPurchased, 
     updateHolding,
     removePurchased, 
@@ -82,23 +80,17 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
           className={`px-4 py-2 border rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center gap-2 shadow-md cursor-pointer ${
             record.positionStatus === 'purchased'
               ? 'bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E] hover:bg-[#22C55E]/20 hover:border-[#22C55E]/50'
-              : record.positionStatus === 'interested'
-              ? 'bg-[#8B5CF6]/10 border-[#8B5CF6]/30 text-[#8B5CF6] hover:bg-[#8B5CF6]/20 hover:border-[#8B5CF6]/50 shadow-violet-950/20 shadow-lg'
               : 'bg-[#080c14] border-[#152036] text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
         >
           {record.positionStatus === 'purchased' ? (
             <Check className="w-3.5 h-3.5" />
-          ) : record.positionStatus === 'interested' ? (
-            <Heart className="w-3.5 h-3.5 fill-current" />
           ) : (
             <Heart className="w-3.5 h-3.5 text-slate-550" />
           )}
           <span>
             {record.positionStatus === 'purchased'
               ? 'Purchased'
-              : record.positionStatus === 'interested'
-              ? 'Interested'
               : 'Manage Position'}
           </span>
           <ChevronDown className="w-3 h-3 opacity-60" />
@@ -111,26 +103,7 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
               align === 'right' ? 'right-0' : 'left-0'
             }`}
           >
-            {record.positionStatus === 'none' && (
-              <>
-                <button
-                  onClick={() => { setInterested(symbol); setIsOpen(false); }}
-                  className="w-full text-left px-3 py-2 text-[9.5px] font-bold text-slate-350 hover:text-slate-100 hover:bg-[#0B1220] rounded-lg flex items-center gap-2"
-                >
-                  <Heart className="w-3.5 h-3.5 text-violet-400 fill-violet-500/25" />
-                  <span>Mark as Interested</span>
-                </button>
-                <button
-                  onClick={() => { setShowPurchaseDialog(true); setIsOpen(false); }}
-                  className="w-full text-left px-3 py-2 text-[9.5px] font-bold text-slate-350 hover:text-slate-100 hover:bg-[#0B1220] rounded-lg flex items-center gap-2"
-                >
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Mark as Purchased</span>
-                </button>
-              </>
-            )}
-
-            {record.positionStatus === 'interested' && (
+            {record.positionStatus !== 'purchased' && (
               <>
                 <button
                   onClick={() => { setShowPurchaseDialog(true); setIsOpen(false); }}
@@ -138,13 +111,6 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
                 >
                   <Check className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Mark as Purchased</span>
-                </button>
-                <button
-                  onClick={() => { clearInterest(symbol); setIsOpen(false); }}
-                  className="w-full text-left px-3 py-2 text-[9.5px] font-bold text-rose-455 hover:bg-rose-950/10 rounded-lg flex items-center gap-2"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Remove Interest</span>
                 </button>
               </>
             )}
@@ -258,7 +224,7 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
             </div>
             
             <p className="text-[10.5px] text-slate-400 leading-relaxed text-left">
-              You are about to remove <b>{symbol}</b> from your simulated holdings portfolio. Please select your next position status:
+              You are about to remove <b>{symbol}</b> from your simulated holdings portfolio. Are you sure you want to proceed?
             </p>
 
             <div className="flex flex-col gap-2 pt-1 select-none">
@@ -269,16 +235,7 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
                 }}
                 className="w-full bg-rose-600 hover:bg-rose-500 text-white text-[9.5px] font-black uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer text-center"
               >
-                Remove Completely
-              </button>
-              <button
-                onClick={() => {
-                  removePurchased(symbol, 'interested');
-                  setShowExitConfirm(false);
-                }}
-                className="w-full bg-slate-900 hover:bg-slate-850 border border-[#1E293B] hover:border-slate-700 text-[#8B5CF6] text-[9.5px] font-black uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer text-center"
-              >
-                Keep as Interested
+                Confirm Removal
               </button>
               <button
                 onClick={() => setShowExitConfirm(false)}

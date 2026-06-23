@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -28,6 +28,12 @@ interface SettingsViewProps {
 
 export default function SettingsView({ user, onSignIn, onSignOut }: SettingsViewProps) {
   const { resetAllData } = useInvestmentState();
+
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [user]);
 
   const [activeSubTab, setActiveSubTab] = useState('Preferences');
   const [theme, setTheme] = useState('Dark');
@@ -381,11 +387,13 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
               {user ? (
                 <>
                   <div className="flex items-center gap-3 bg-slate-950/40 border border-slate-850/40 p-2.5 rounded-2xl">
-                    {user.photoURL ? (
+                    {user.photoURL && !imgError ? (
                       <img 
                         src={user.photoURL} 
                         alt={user.displayName || 'User'} 
                         className="w-8.5 h-8.5 rounded-full object-cover border border-[#152036]"
+                        referrerPolicy="no-referrer"
+                        onError={() => setImgError(true)}
                       />
                     ) : (
                       <div className="w-8.5 h-8.5 rounded-full bg-violet-605/20 border border-violet-500/30 flex items-center justify-center font-bold text-violet-400 text-xs flex-shrink-0">

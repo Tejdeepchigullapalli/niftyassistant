@@ -10,14 +10,11 @@ interface DynamicWatchlistTableProps {
   quotes: any[];
   recs?: Record<string, any>;
   onSymbolSelect?: (symbol: string) => void;
-  symbols?: string[];
-  mode?: 'watchlist' | 'interested';
 }
 
-export default function DynamicWatchlistTable({ quotes = [], recs = {}, onSymbolSelect, symbols, mode = 'watchlist' }: DynamicWatchlistTableProps) {
+export default function DynamicWatchlistTable({ quotes = [], recs = {}, onSymbolSelect }: DynamicWatchlistTableProps) {
   const { getWatchlistSymbols, getCompanyRecord, getCompanyAlerts, removeFromWatchlist } = useInvestmentState();
-  const defaultSymbols = getWatchlistSymbols();
-  const activeSymbols = symbols || defaultSymbols;
+  const activeSymbols = getWatchlistSymbols();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('changePct');
@@ -116,17 +113,12 @@ export default function DynamicWatchlistTable({ quotes = [], recs = {}, onSymbol
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-[#0d121f] border border-[#152036] rounded-2xl text-center space-y-4">
         <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-xl">
-          {mode === 'interested' ? '💜' : '⭐'}
+          ⭐
         </div>
         <div>
-          <h4 className="text-sm font-extrabold text-slate-200">
-            {mode === 'interested' ? 'Interested List is Empty' : 'Watchlist is Empty'}
-          </h4>
+          <h4 className="text-sm font-extrabold text-slate-200">Watchlist is Empty</h4>
           <p className="text-[11px] text-slate-400 mt-1 max-w-[280px]">
-            {mode === 'interested' 
-              ? 'Mark companies as interested from the Dashboard or Stock Analysis page to track them here.'
-              : 'Add companies to your watchlist from the Dashboard or Stock Analysis page to track them here.'
-            }
+            Add companies to your watchlist from the Dashboard or Stock Analysis page to track them here.
           </p>
         </div>
       </div>

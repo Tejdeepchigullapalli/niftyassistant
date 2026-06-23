@@ -211,7 +211,7 @@ export default function PortfolioHoldingsTable({
             </div>
             
             <p className="text-[10.5px] text-slate-400 leading-relaxed text-left">
-              Remove <b>{exitConfirmSymbol}</b> from Portfolio? Please choose if you want to retain it in your research dashboard:
+              You are about to remove <b>{exitConfirmSymbol}</b> from your simulated holdings portfolio. Are you sure you want to proceed?
             </p>
 
             <div className="flex flex-col gap-2 pt-1 select-none">
@@ -222,16 +222,7 @@ export default function PortfolioHoldingsTable({
                 }}
                 className="w-full bg-rose-600 hover:bg-rose-500 text-white text-[9.5px] font-black uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer text-center"
               >
-                Remove Completely
-              </button>
-              <button
-                onClick={() => {
-                  removePurchased(exitConfirmSymbol, 'interested');
-                  setExitConfirmSymbol(null);
-                }}
-                className="w-full bg-slate-900 hover:bg-slate-850 border border-[#1E293B] hover:border-slate-700 text-[#8B5CF6] text-[9.5px] font-black uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer text-center"
-              >
-                Keep as Interested
+                Confirm Removal
               </button>
               <button
                 onClick={() => setExitConfirmSymbol(null)}
