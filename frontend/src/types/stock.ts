@@ -42,6 +42,7 @@ export interface ScoreComponents {
   sentiment_score: number;
   technical_score?: number;
   risk_score: number;
+  valuation_score?: number;
 }
 
 export interface RecommendationData {
@@ -124,6 +125,12 @@ export interface FinancialData {
     investing_cf?: number;
     financing_cf?: number;
   };
+  revenue_history?: Array<{ year: string; value: number }>;
+  ebitda_history?: Array<{ year: string; value: number }>;
+  net_income_history?: Array<{ year: string; value: number }>;
+  debt_to_equity?: number;
+  interest_coverage?: number;
+  roe?: number;
 }
 
 export interface PortfolioHolding {
@@ -132,4 +139,26 @@ export interface PortfolioHolding {
   averageBuyPrice: number;
   purchaseDate?: string;
   investedAmount?: number;
+}
+
+export interface TechnicalData {
+  rsi: number;
+  macd: {
+    macdLine: number;
+    signalLine: number;
+    histogram: number;
+  };
+  sma20: number;
+  sma50: number;
+  sma200: number;
+}
+
+export interface ForecastData {
+  bull_case: number;
+  base_case: number;
+  bear_case: number;
+  upside_pct: number;
+  downside_pct: number;
+  time_horizon: string;
+  confidence_score: number;
 }

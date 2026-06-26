@@ -112,6 +112,7 @@ export default function StockDetail({ symbol, onSymbolSelect, onNavigateToChat }
         onCompare={handleCompare}
         onAIReport={handleAIReport}
         lastUpdated={lastUpdated}
+        allQuotes={allQuotes}
       />
 
       {/* 2. Sub-tab Selection Bar */}

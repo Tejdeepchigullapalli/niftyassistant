@@ -16,6 +16,7 @@ import StockResearchReport from './StockResearchReport';
 import MarketIntelligenceReport from './MarketIntelligenceReport';
 import CustomReportBuilder from './CustomReportBuilder';
 import { useInvestmentState } from '../context/InvestmentStateContext';
+import ReportConfigurationDialog from './common/ReportConfigurationDialog';
 
 interface ReportsViewProps {
   quotes?: QuoteData[];
@@ -40,6 +41,7 @@ export default function ReportsView({
 
   const [activeTab, setActiveTab] = useState('Overview');
   const [loading, setLoading] = useState(false);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
 
   // Dynamic Date range calculation
   const dateRange = useMemo(() => {
@@ -51,7 +53,7 @@ export default function ReportsView({
   }, []);
 
   const handleDownloadPDF = () => {
-    alert('Report downloaded successfully as PDF!');
+    setIsConfigOpen(true);
   };
 
   const handleDownloadCSV = () => {
@@ -281,6 +283,14 @@ export default function ReportsView({
         )}
       </div>
 
+      {/* Report Customization Dialog */}
+      <ReportConfigurationDialog
+        isOpen={isConfigOpen}
+        onClose={() => setIsConfigOpen(false)}
+        quotes={quotes}
+        recs={recs}
+        lastUpdated={lastUpdated}
+      />
     </div>
   );
 }

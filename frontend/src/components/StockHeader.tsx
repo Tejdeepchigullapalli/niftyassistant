@@ -1,8 +1,9 @@
 import React from 'react';
-import { ExternalLink, FileText, Layers } from 'lucide-react';
+import { ExternalLink, Layers } from 'lucide-react';
 import ScoreRing from './ScoreRing';
 import { useInvestmentState } from '../context/InvestmentStateContext';
 import CompanyActionMenu from './common/CompanyActionMenu';
+import GenerateAIReportButton from './common/GenerateAIReportButton';
 
 interface StockHeaderProps {
   symbol: string;
@@ -18,6 +19,7 @@ interface StockHeaderProps {
   onCompare: () => void;
   onAIReport: () => void;
   lastUpdated: string;
+  allQuotes?: any[];
 }
 
 export default function StockHeader({
@@ -27,7 +29,8 @@ export default function StockHeader({
   recommendation,
   onCompare,
   onAIReport,
-  lastUpdated
+  lastUpdated,
+  allQuotes = []
 }: StockHeaderProps) {
   const { getCompanyRecord } = useInvestmentState();
   const record = getCompanyRecord(symbol);
@@ -172,14 +175,11 @@ export default function StockHeader({
             
             <CompanyActionMenu symbol={symbol} align="right" />
 
-            <button 
-              onClick={onAIReport}
-              className="px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-[#F8FAFC] text-[8.5px] font-black uppercase tracking-wider rounded-lg transition-all shadow-md flex items-center gap-1 cursor-pointer"
-              title="Generate PDF Report"
-            >
-              <FileText className="w-3 h-3" />
-              AI Report
-            </button>
+            <GenerateAIReportButton 
+              symbol={symbol}
+              quotes={allQuotes}
+              recs={recommendation ? { [symbol]: recommendation } : {}}
+            />
           </div>
         </div>
       </div>
