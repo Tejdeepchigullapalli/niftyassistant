@@ -46,13 +46,14 @@ interface ReportTableProps {
   rows: Array<Array<string | number | React.ReactNode>>;
   alignments?: Array<'left' | 'center' | 'right'>;
   style?: any;
+  wrap?: boolean;
 }
 
-export function ReportTable({ headers, colWidths, rows, alignments = [], style }: ReportTableProps) {
+export function ReportTable({ headers, colWidths, rows, alignments = [], style, wrap = true }: ReportTableProps) {
   return (
-    <View style={[styles.table, style]} wrap={false}>
+    <View style={[styles.table, style]} wrap={wrap}>
       {/* Header Row */}
-      <View style={styles.headerRow}>
+      <View style={styles.headerRow} fixed>
         {headers.map((h, i) => {
           const width = colWidths[i] || 'auto';
           const align = alignments[i] || 'left';

@@ -377,7 +377,7 @@ export default function SettingsView({ user, onSignIn, onSignOut }: SettingsView
             <div className="card p-3.5 bg-[#0d121f] border border-[#152036] rounded-2xl shadow-xl space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Account Information</h3>
-                {!isFirebaseConfigured && (
+                {user?.isDemo && (
                   <span className="text-[7px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1 rounded select-none">
                     Demo Mode
                   </span>

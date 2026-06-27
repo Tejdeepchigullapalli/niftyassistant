@@ -26,6 +26,23 @@ export interface HistoricalPricePoint {
   volume: number;
 }
 
+export interface ReportSnapshot {
+  snapshotId: string;
+  generatedAt: string;
+  marketStatus: "open" | "closed";
+  quoteTimestamp?: string;
+  fundamentalsTimestamp?: string;
+  historicalDataRange?: {
+    from: string;
+    to: string;
+  };
+  sourceStatus: {
+    quotes: "live" | "last-close" | "unavailable";
+    fundamentals: "latest-filing" | "estimated" | "unavailable";
+    sentiment: "live" | "recent" | "estimated" | "unavailable";
+  };
+}
+
 export interface CompanyReportData {
   symbol: string;
   companyName: string;
@@ -47,6 +64,7 @@ export interface CompanyReportData {
 
   quoteUpdatedAt?: string;
   fundamentalsUpdatedAt?: string;
+  snapshot?: ReportSnapshot;
 }
 
 export interface PortfolioReportData {
@@ -59,6 +77,7 @@ export interface PortfolioReportData {
   todayPnLPct: number;
   healthScore: number;
   diversificationScore: number;
+  diversificationLabel: string;
   riskScore: number;
   marketOutlook: {
     outlook: string;
@@ -134,4 +153,5 @@ export interface PortfolioReportData {
   
   appendices: Record<string, CompanyReportData>;
   generationTimestamp: string;
+  snapshot?: ReportSnapshot;
 }

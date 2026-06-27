@@ -13,6 +13,7 @@ import { ReportDisclosure } from '../components/ReportDisclosure';
 import { ReportChartFrame } from '../components/ReportChartFrame';
 import { PortfolioIdentityHeader } from '../components/PortfolioIdentityHeader';
 import { CompanyResearchReport } from './CompanyResearchReport';
+import '../constants/reportFonts';
 
 // SVG Charts
 import { ReportPriceChart } from '../charts/ReportPriceChart';
@@ -98,6 +99,16 @@ export function PortfolioIntelligenceReport(data: PortfolioReportData) {
     value: v
   }));
 
+  // Find the largest sector and its percentage
+  let maxSectorName = "None";
+  let maxSectorPct = 0;
+  Object.entries(data.sectorAllocation).forEach(([k, v]) => {
+    if (v > maxSectorPct) {
+      maxSectorPct = v;
+      maxSectorName = k;
+    }
+  });
+
   // Asset allocations adapter format
   const assetData = [
     { label: "Equities", value: 92 },
@@ -130,6 +141,7 @@ export function PortfolioIntelligenceReport(data: PortfolioReportData) {
     `+${g.change.toFixed(2)}%`
   ]);
 
+  // Losers
   const losersRows = data.marketIntel.topLosers.map(l => [
     l.symbol,
     `₹${l.price.toLocaleString('en-IN')}`,
@@ -162,7 +174,7 @@ export function PortfolioIntelligenceReport(data: PortfolioReportData) {
           <ReportMetricCard label="Net Asset Value" value={`₹${data.value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`} change={`${isUp ? '+' : ''}${data.pnlPct.toFixed(1)}% Return`} trend={isUp ? 'up' : 'down'} style={styles.col} />
           <ReportMetricCard label="Invested Cost" value={`₹${data.invested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`} style={styles.col} />
           <ReportMetricCard label="Today's Gain/Loss" value={`${data.todayPnL >= 0 ? '+' : ''}₹${Math.round(data.todayPnL).toLocaleString('en-IN')}`} change={`${data.todayPnLPct.toFixed(2)}%`} trend={data.todayPnL >= 0 ? 'up' : 'down'} style={styles.col} />
-          <ReportMetricCard label="Diversification" value={`${data.diversificationScore}/100`} style={styles.col} />
+          <ReportMetricCard label="Diversification" value={data.diversificationLabel || "Well Diversified"} style={styles.col} />
           <ReportMetricCard label="Risk Index" value="Low Vol" style={styles.col} />
         </View>
 
@@ -184,8 +196,16 @@ export function PortfolioIntelligenceReport(data: PortfolioReportData) {
             <Text style={[styles.cardTitle, { marginTop: 8 }]}>Concentration Risks</Text>
             <View style={{ gap: 3.5 }}>
               <View style={styles.bulletItem}>
-                <Text style={[styles.bulletCheck, { color: reportTheme.orange }]}>•</Text>
-                <Text style={styles.bulletText}>Moderate weighting towards largest single holding (Reliance).</Text>
+                <Text style={[styles.bulletCheck, { color: maxSectorPct > 55 ? reportTheme.red : maxSectorPct > 25 ? reportTheme.orange : reportTheme.green }]}>•</Text>
+                <Text style={styles.bulletText}>
+                  {maxSectorPct > 55 
+                    ? `CRITICAL RISK: Portfolio has critical concentration in the ${maxSectorName} sector (${maxSectorPct.toFixed(1)}% allocation). Consider rebalancing.`
+                    : maxSectorPct > 40
+                    ? `HIGH CONCENTRATION: Sector ${maxSectorName} allocation is high at ${maxSectorPct.toFixed(1)}%.`
+                    : maxSectorPct > 25
+                    ? `MODERATE CONCENTRATION: Largest sector is ${maxSectorName} at ${maxSectorPct.toFixed(1)}%.`
+                    : `EXCELLENT DIVERSIFICATION: Sector allocations are well balanced.`}
+                </Text>
               </View>
             </View>
           </View>

@@ -73,13 +73,8 @@ export default function Home() {
   // Listen to Firebase authentication state
   useEffect(() => {
     if (!isFirebaseConfigured) {
-      // Failsafe: Start in demo fallback mode if env variables are not present
-      setUser({
-        displayName: 'Akash Verma',
-        email: 'akash.verma@email.com',
-        photoURL: null,
-        isDemo: true
-      });
+      // Do not automatically sign in as demo user; let the user start as guest/unsigned in
+      setUser(null);
       return;
     }
 
@@ -101,7 +96,7 @@ export default function Home() {
 
   const handleSignIn = async () => {
     if (!isFirebaseConfigured) {
-      // Demo simulation login
+      alert("Firebase is not configured in this build. To use Google Sign-In, please define the required NEXT_PUBLIC_FIREBASE_* environment variables in your deployment dashboard and re-trigger a production build. Logging in as Demo User for this session.");
       setUser({
         displayName: 'Akash Verma',
         email: 'akash.verma@email.com',
@@ -121,9 +116,9 @@ export default function Home() {
           isDemo: false
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Firebase Sign-In Error:", error);
-      alert("Failed to sign in with Google. Check console for details.");
+      alert(`Failed to sign in with Google: ${error.message || error}`);
     }
   };
 

@@ -1,4 +1,4 @@
-import { CompanyReportData, PortfolioReportData, ReportConfig, HistoricalPricePoint } from '../types/reportTypes';
+import { CompanyReportData, PortfolioReportData, ReportConfig, HistoricalPricePoint, ReportSnapshot } from '../types/reportTypes';
 import { QuoteData, RecommendationData } from '../../types/stock';
 import { api, getCompanyMeta } from '../../utils/api';
 
@@ -42,12 +42,317 @@ export function calculateMaxDrawdown(prices: number[]): number {
   return maxDD;
 }
 
+export function formatMarketCap(n: number | undefined | null): string {
+  if (n === undefined || n === null || isNaN(n)) return '—';
+  if (n >= 1e12) return `₹${(n / 1e12).toFixed(2)}T`;
+  if (n >= 1e9)  return `₹${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e7)  return `₹${(n / 1e7).toFixed(2)}Cr`;
+  if (n >= 1e5)  return `₹${(n / 1e5).toFixed(2)}L`;
+  return `₹${n.toLocaleString('en-IN')}`;
+}
+
+export function formatPercentageString(val: number | undefined | null, isDecimal = false): string {
+  if (val === undefined || val === null || isNaN(val)) return '0.00%';
+  const num = isDecimal ? val * 100 : val;
+  return `${num.toFixed(2)}%`;
+}
+
+export function createSnapshot(): ReportSnapshot {
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const istOffset = 5.5 * 60 * 60000;
+  const istTime = new Date(utc + istOffset);
+  
+  const day = istTime.getDay();
+  const hours = istTime.getHours();
+  const minutes = istTime.getMinutes();
+  const totalMinutes = hours * 60 + minutes;
+  const marketOpenMinutes = 9 * 60 + 15;
+  const marketCloseMinutes = 15 * 60 + 30;
+  
+  const isWeekend = day === 0 || day === 6;
+  const isMarketHours = totalMinutes >= marketOpenMinutes && totalMinutes <= marketCloseMinutes;
+  const marketStatus = (!isWeekend && isMarketHours) ? "open" : "closed";
+
+  return {
+    snapshotId: `SNAP_${now.getTime()}_${Math.random().toString(36).substring(2, 11).toUpperCase()}`,
+    generatedAt: istTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    marketStatus,
+    quoteTimestamp: istTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    fundamentalsTimestamp: istTime.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    historicalDataRange: {
+      from: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      to: istTime.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })
+    },
+    sourceStatus: {
+      quotes: marketStatus === "open" ? "live" : "last-close",
+      fundamentals: "latest-filing",
+      sentiment: "live"
+    }
+  };
+}
+
+export function getSectorSpecificInsights(symbol: string, sector: string, companyName: string) {
+  const sym = symbol.toUpperCase().trim();
+  
+  if (sym === 'RELIANCE') {
+    return {
+      thesis: `${companyName} represents a diversified growth engine spanning energy, digital services, and retail. Key drivers include retail store expansion, Jio's 5G subscriber monetisation, and rising refining/petrochemical margins.`,
+      why_perform: [
+        "Jio 5G monetization through premium tier data packages and fiber rollouts.",
+        "O2C (Oil-to-Chemicals) gross refining margins (GRM) outperforming Singapore benchmarks.",
+        "Retail digital integration driving footprint expansions in Tier 2/3 cities."
+      ],
+      what_go_wrong: [
+        "Fluctuations in global crude prices affecting O2C margins.",
+        "Capital expenditure pressure from aggressive green energy and retail build-outs."
+      ],
+      what_monitor: [
+        "Singapore Gross Refining Margin (GRM) spreads quarterly.",
+        "Jio ARPU (Average Revenue Per User) and subscriber addition velocity.",
+        "EBITDA margins of the organized retail segment."
+      ],
+      suitability: "Conglomerate Core Allocation",
+      horizon: "3 - 5 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'Market-leading presence in telecom/retail, massive cash-generating oil business, and strong capital backing.' },
+        { type: 'W', label: 'Weaknesses', text: 'High capital expenditure requirement, debt levels from aggressive expansions, and O2C cyclicality.' },
+        { type: 'O', label: 'Opportunities', text: 'New Energy business commercialization (solar giga-factories), and IPO of retail/telecom divisions.' },
+        { type: 'T', label: 'Threats', text: 'Volatility in international petrochemical margins, and intense competitive dynamics in telecom.' }
+      ]
+    };
+  }
+
+  if (sector.includes('Information Technology') || sector.includes('IT')) {
+    return {
+      thesis: `${companyName} benefits from global enterprise digital transformation, cloud migrations, and cognitive AI implementations. A robust order book and stabilizing employee attrition support operating margin improvements.`,
+      why_perform: [
+        "Strong large-deal pipeline in cloud transformation and generative AI integration.",
+        "Declining attrition rates leading to reduced subcontractor costs and improved margins.",
+        "High percentage of billing in USD/EUR providing rupee depreciation tailwinds."
+      ],
+      what_go_wrong: [
+        "Slowdown in US/Europe banking and retail discretionary tech spend.",
+        "Rising onsite wage inflation and strict visa compliance requirements."
+      ],
+      what_monitor: [
+        "TCV (Total Contract Value) of new deal wins announced quarterly.",
+        "LTM (Last Twelve Months) employee attrition rate trends.",
+        "Operating margins inside the core IT services segment."
+      ],
+      suitability: "Defensive Tech Growth",
+      horizon: "2 - 5 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'Global delivery footprint, deep client relationships with Fortune 500s, and high Return on Equity (ROE).' },
+        { type: 'W', label: 'Weaknesses', text: 'Dependence on North American and European banking/finance segments, and lower pricing power in legacy services.' },
+        { type: 'O', label: 'Opportunities', text: 'Generative AI consulting, cloud migration execution, and expansion in European engineering services.' },
+        { type: 'T', label: 'Threats', text: 'Rapid technological obsolescence, vendor consolidation by major clients, and currency volatility.' }
+      ]
+    };
+  }
+
+  if (sector.includes('Banking') || sector.includes('Financial') || sector.includes('NBFC')) {
+    return {
+      thesis: `${companyName} exhibits solid balance sheet capitalization, consistent credit growth, and stable asset quality. Digital banking channels and credit expansions in retail/MSME segments remain key structural tailwinds.`,
+      why_perform: [
+        "Strong loan book expansion driven by credit demand in retail and infrastructure.",
+        "Industry-leading Net Interest Margins (NIM) supported by low-cost CASA deposits.",
+        "Robust asset quality with declining Gross and Net NPA ratios."
+      ],
+      what_go_wrong: [
+        "Pressure on cost of deposits leading to margin compression.",
+        "Macroeconomic slowdown affecting retail credit default rates."
+      ],
+      what_monitor: [
+        "Net Interest Margin (NIM) trajectory and loan-to-deposit ratio.",
+        "Gross and Net Non-Performing Asset (NPA) percentages.",
+        "CASA (Current Account Savings Account) ratio trends."
+      ],
+      suitability: "Financial Core Holding",
+      horizon: "3 - 5 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'Massive branch networks, strong brand trust, low cost of funds, and advanced digital platforms.' },
+        { type: 'W', label: 'Weaknesses', text: 'Cost-to-income pressure from digital transformation, and exposure to corporate project loans.' },
+        { type: 'O', label: 'Opportunities', text: 'Cross-selling insurance/wealth products, credit cards penetration, and semi-urban expansion.' },
+        { type: 'T', label: 'Threats', text: 'Regulatory tightening on unsecured retail loans, and aggressive competition from FinTech players.' }
+      ]
+    };
+  }
+
+  if (sector.includes('Telecom')) {
+    return {
+      thesis: `${companyName} operates in a highly consolidated telecom industry with strong pricing power. Tailwinds include rising ARPU from tariff hikes, 5G monetization, and growing enterprise connectivity requirements.`,
+      why_perform: [
+        "Improving ARPU growth trajectory driven by industry-wide tariff adjustments.",
+        "Monetisation of 5G infrastructure through premium data packs and fixed-wireless access.",
+        "Expanding digital enterprise business including cloud, IoT, and cybersecurity."
+      ],
+      what_go_wrong: [
+        "High spectrum acquisition debt and ongoing 5G network rollout expenses.",
+        "Regulatory interventions on tariffs or Quality of Service (QoS) parameters."
+      ],
+      what_monitor: [
+        "ARPU (Average Revenue Per User) growth levels.",
+        "Monthly active subscriber gains and churn rate percentage.",
+        "EBITDA margins for the mobile services business."
+      ],
+      suitability: "Infrastructure Core Portfolio",
+      horizon: "3 - 5 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'Extensive pan-India network infrastructure, high brand equity, and strong enterprise relationships.' },
+        { type: 'W', label: 'Weaknesses', text: 'Significant debt burden from spectrum bidding, and high capital intensity.' },
+        { type: 'O', label: 'Opportunities', text: 'Expansion of home broadband services, and enterprise IoT/data center businesses.' },
+        { type: 'T', label: 'Threats', text: 'Intense competitive response, and changes in spectrum licensing fees.' }
+      ]
+    };
+  }
+
+  if (sector.includes('FMCG') || sector.includes('Consumer Goods')) {
+    return {
+      thesis: `${companyName} commands high brand loyalty, a vast distribution reach, and defensive cash flows. Growth is supported by rural consumption recovery, premiumization trends, and direct-to-consumer (D2C) channels.`,
+      why_perform: [
+        "Premiumisation of product portfolios driving gross margin expansions.",
+        "Unparalleled distribution network reaching millions of retail outlets.",
+        "Resilient demand and defensive pricing power in core daily-use categories."
+      ],
+      what_go_wrong: [
+        "Inflation in agricultural input commodities and packaging materials.",
+        "Intense competition from local regional brands and digital D2C challengers."
+      ],
+      what_monitor: [
+        "Volume growth vs price-led value growth metrics.",
+        "Raw material index (palm oil, crude derivatives, agri-inputs).",
+        "EBITDA margin spreads."
+      ],
+      suitability: "Defensive Consumer Portfolio",
+      horizon: "3 - 5 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'Unmatched distribution depth, strong pricing power, and high return ratios (ROE/ROCE).' },
+        { type: 'W', label: 'Weaknesses', text: 'Slower growth in mature core categories, and vulnerability to rural economic slowdowns.' },
+        { type: 'O', label: 'Opportunities', text: 'Expansion into premium personal care, health wellness, and D2C brand acquisitions.' },
+        { type: 'T', label: 'Threats', text: 'Counterfeit products in rural markets, and shifting consumer preferences to natural/organic products.' }
+      ]
+    };
+  }
+
+  if (sector.includes('Automobile') || sector.includes('Auto')) {
+    return {
+      thesis: `${companyName} benefits from robust premiumization trends (SUVs), expanding export markets, and transition to electric/hybrid drivetrains. Scale efficiencies and stable raw material costs aid margins.`,
+      why_perform: [
+        "Shift in product mix towards higher-margin SUV and premium passenger vehicles.",
+        "Early mover advantage and dedicated investments in EV battery ecosystems.",
+        "Stabilizing commodity input costs (steel, aluminum, rubber) protecting margins."
+      ],
+      what_go_wrong: [
+        "Slower-than-expected adoption of electric vehicles in the mass market segment.",
+        "Global logistics bottlenecks impacting auto component exports."
+      ],
+      what_monitor: [
+        "Monthly vehicle wholesale dispatch volumes.",
+        "Waiting period of popular premium SUV models.",
+        "EV penetration rate as a percentage of total sales."
+      ],
+      suitability: "Cyclical Consumer Growth",
+      horizon: "2 - 4 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'Strong manufacturing scale, dominant market shares in target categories, and deep dealer networks.' },
+        { type: 'W', label: 'Weaknesses', text: 'High dependence on single fuel types historically, and high capex requirement for EV conversion.' },
+        { type: 'O', label: 'Opportunities', text: 'Expansion in EV passenger/commercial vehicles, and exporting to developing economies.' },
+        { type: 'T', label: 'Threats', text: 'New tech-first EV startup entry, and rapid changes in safety or emission regulations.' }
+      ]
+    };
+  }
+
+  if (sector.includes('Materials') || sector.includes('Steel') || sector.includes('Cement') || sector.includes('Aluminium')) {
+    return {
+      thesis: `${companyName} represents a leveraged play on national infrastructure build-outs, real estate cycles, and industrial expansions. Lower raw material overheads and domestic demand support high utilization rates.`,
+      why_perform: [
+        "Robust domestic demand driven by government infrastructure spending.",
+        "Capacity expansions coming online to capture high utilization rates.",
+        "Captive mining of raw inputs (iron ore, coal, bauxite) shielding margins."
+      ],
+      what_go_wrong: [
+        "Global steel/commodity price dumping affecting domestic price realizations.",
+        "High fuel (coal, petcoke) and freight overhead costs."
+      ],
+      what_monitor: [
+        "Global commodity spot prices (LME steel/aluminum index).",
+        "Capacity utilization percentage quarterly.",
+        "Domestic cement/steel realization prices per ton."
+      ],
+      suitability: "Cyclical Infrastructure Asset",
+      horizon: "2 - 4 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'Captive raw material sources, scale efficiency, and proximity to major industrial clusters.' },
+        { type: 'W', label: 'Weaknesses', text: 'Highly cyclical earnings, significant capital debt, and high carbon footprint intensity.' },
+        { type: 'O', label: 'Opportunities', text: 'Manufacturing of high-grade specialty alloys, and expanding green steel production.' },
+        { type: 'T', label: 'Threats', text: 'Global trade tariffs, dumping from China, and strict environmental compliance mandates.' }
+      ]
+    };
+  }
+
+  if (sector.includes('Healthcare') || sector.includes('Pharma') || sector.includes('Hospitals')) {
+    return {
+      thesis: `${companyName} gains from strong healthcare spending, expanding insurance coverage, and generic drug export pipelines. Specialty hospital build-outs and complex generic approvals drive valuations.`,
+      why_perform: [
+        "Expanding domestic hospital networks with higher Average Revenue Per Occupied Bed (ARPOB).",
+        "Approvals for high-margin biosimilars and complex injectables in global regulated markets.",
+        "Resilient, non-discretionary consumer demand for therapeutic medications."
+      ],
+      what_go_wrong: [
+        "USFDA regulatory warnings or import alerts on critical manufacturing facilities.",
+        "Price control policies on essential medicines in the domestic market."
+      ],
+      what_monitor: [
+        "USFDA inspections outcome and status of active warning letters.",
+        "Bed occupancy rates and ARPOB for the hospital segment.",
+        "R&D spend as a percentage of total revenue."
+      ],
+      suitability: "Defensive Healthcare Growth",
+      horizon: "3 - 5 Years",
+      swot: [
+        { type: 'S', label: 'Strengths', text: 'R&D capabilities, low-cost USFDA compliant facilities, and strong brand presence in hospitals.' },
+        { type: 'W', label: 'Weaknesses', text: 'Dependence on API raw material imports, and litigation costs in US generics.' },
+        { type: 'O', label: 'Opportunities', text: 'Expansion of specialized oncology/cardiology hospital chains, and biosimilar drug development.' },
+        { type: 'T', label: 'Threats', text: 'Strict domestic price regulation, US market pricing pressure, and compliance audit failures.' }
+      ]
+    };
+  }
+
+  // Fallback
+  return {
+    thesis: `${companyName} exhibits solid competitive positioning in the ${sector} industry. Core tailwinds include structural domestic volume growth, prudent capital allocation, and strong operational efficiency.`,
+    why_perform: [
+      "Market share leadership in primary operational business lines.",
+      "Prudent capital management yielding clean free cash flow generation.",
+      "Cost optimization programs enhancing overall operating leverage."
+    ],
+    what_go_wrong: [
+      "General input commodity inflation compressing operating margins.",
+      "Regulatory environment adjustments in the domestic retail segment."
+    ],
+    what_monitor: [
+      "Quarterly operating profit margins trajectory.",
+      "Key macro indicators (interest rates, consumer sentiment index)."
+    ],
+    suitability: "Core Balanced Allocation",
+    horizon: "3 - 5 Years",
+    swot: [
+      { type: 'S', label: 'Strengths', text: 'Experienced management, strong cash reserves, and high operational execution efficiency.' },
+      { type: 'W', label: 'Weaknesses', text: 'Exposure to general economic cyclicality, and rising overhead costs.' },
+      { type: 'O', label: 'Opportunities', text: 'Digital process integration, and expanding into adjacent regional markets.' },
+      { type: 'T', label: 'Threats', text: 'Competitive pricing pressure, and sudden technological shifts.' }
+    ]
+  };
+}
+
 // Main Adapter Service
 export class ReportDataAdapter {
   static async compileCompanyReportData(
     symbol: string,
     quotes: QuoteData[],
-    recs: Record<string, RecommendationData>
+    recs: Record<string, RecommendationData>,
+    passedSnapshot?: ReportSnapshot
   ): Promise<CompanyReportData> {
     const sym = symbol.toUpperCase().trim();
     const meta = getCompanyMeta(sym);
@@ -62,13 +367,15 @@ export class ReportDataAdapter {
     let risk: any = null;
     let history: any = null;
 
+    const snapshot = passedSnapshot || createSnapshot();
+
     try {
       const [qRes, recRes, fRes, sRes, tRes, cRes, rRes, hRes] = await Promise.all([
         quote ? Promise.resolve({ data: quote }) : api.getQuote(sym),
         recommendation ? Promise.resolve({ data: recommendation }) : api.getRecommendation(sym),
         api.getFinancial(sym),
         api.getSentiment(sym),
-        api.getHistory(sym, '1y'), // Technical indicators computed on client from history
+        api.getHistory(sym, '1y'),
         api.getCorporate(sym),
         api.getRisk(sym),
         api.getHistory(sym, '1y')
@@ -136,12 +443,15 @@ export class ReportDataAdapter {
         market_cap: c.marketCap,
         pe_ratio: c.peRatio,
         pb_ratio: c.pbRatio,
-        roe: c.roe,
-        revenue_growth: c.revenueGrowth,
+        roe: c.roe ? parseFloat((c.roe * 100).toFixed(2)) : 14.5,
+        revenue_growth: c.revenueGrowth ? parseFloat((c.revenueGrowth * 100).toFixed(2)) : 12.0,
         aiScore: c.aiScore,
         recommendation: c.recommendation,
         return1Y: c.return1Y ?? 15.0
       })) || [];
+
+      // Get sector specific insights
+      const insights = getSectorSpecificInsights(sym, meta.sector, meta.name);
 
       return {
         symbol: sym,
@@ -167,26 +477,21 @@ export class ReportDataAdapter {
           confidence_score: recommendation?.confidence ?? 78
         } as any,
         aiInsights: {
-          thesis: `Fundamental and structural drivers represent a compelling thesis for ${sym} inside the ${meta.sector} sector.`,
-          why_perform: [
-            "Strong market share leadership in primary business lines.",
-            "Attractive capital allocation yields and balance sheet liquidity.",
-            "Positive earnings revisions expected from next-generation tech expansion."
-          ],
-          what_go_wrong: [
-            "Escalating supply chain input overheads.",
-            "Regulatory compliance headwinds in domestic retail divisions."
-          ],
-          what_monitor: [
-            "Quarterly EBITDA margin margins stability.",
-            "Crude oil and general commodity currency fluctuations."
-          ],
-          suitability: "Balanced Portfolio Core Holding",
-          horizon: "3 - 5 Years"
+          thesis: insights.thesis,
+          why_perform: insights.why_perform,
+          what_go_wrong: insights.what_go_wrong,
+          what_monitor: insights.what_monitor,
+          suitability: insights.suitability,
+          horizon: insights.horizon,
+          swot: insights.swot
         },
-        quoteUpdatedAt: quote?.updated_at || new Date().toLocaleTimeString('en-IN'),
-        fundamentalsUpdatedAt: financial?.updated_at || new Date().toLocaleDateString('en-IN'),
-        risk
+        quoteUpdatedAt: quote?.updated_at || snapshot.quoteTimestamp,
+        fundamentalsUpdatedAt: financial?.updated_at || snapshot.fundamentalsTimestamp,
+        risk: {
+          ...risk,
+          risk_level: risk?.risk_level || 'Moderate'
+        },
+        snapshot
       };
     } catch (err) {
       console.error(`[NiftyAI Data Adapter] Failed compiling ${sym} report:`, err);
@@ -197,7 +502,8 @@ export class ReportDataAdapter {
         sector: meta.sector,
         industry: meta.industry,
         quote: quote || { symbol: sym, name: meta.name, current_price: meta.basePrice } as any,
-        recommendation: recommendation || { ai_investment_score: 74, recommendation: 'Hold' } as any
+        recommendation: recommendation || { ai_investment_score: 74, recommendation: 'Hold' } as any,
+        snapshot
       };
     }
   }
@@ -211,6 +517,9 @@ export class ReportDataAdapter {
     alertsState: any[]
   ): Promise<PortfolioReportData> {
     
+    // Create the global snapshot for consistency across portfolio and all appendices
+    const snapshot = createSnapshot();
+
     // 1. holdings metrics mapping
     let totalValue = 0;
     let totalInvested = 0;
@@ -291,6 +600,20 @@ export class ReportDataAdapter {
     Object.keys(recWeights).forEach(k => {
       if (totalValue > 0) recAlloc[k] = (recWeights[k] / totalValue) * 100;
     });
+
+    // Determine diversification classification based on largest sector weighting
+    let maxSectorPct = 0;
+    Object.values(sectorAlloc).forEach(pct => {
+      if (pct > maxSectorPct) maxSectorPct = pct;
+    });
+    let diversificationLabel = "Well Diversified";
+    if (maxSectorPct > 55) {
+      diversificationLabel = "Critical Concentration";
+    } else if (maxSectorPct > 40) {
+      diversificationLabel = "High Concentration";
+    } else if (maxSectorPct > 25) {
+      diversificationLabel = "Moderate Concentration";
+    }
 
     // 2. Mock performance history (simulating 30 days)
     const performanceHistory: Array<{ date: string; portfolio: number; benchmark: number }> = [];
@@ -377,11 +700,11 @@ export class ReportDataAdapter {
       expectedRange: "22,400 - 22,800"
     };
 
-    // Load appendix companies data
+    // Load appendix companies data using the same snapshot ID for strict consistency
     const appendices: Record<string, CompanyReportData> = {};
     if (config.includeCompanyResearchAppendices && config.selectedAppendixSymbols.length > 0) {
       for (const sym of config.selectedAppendixSymbols) {
-        appendices[sym] = await this.compileCompanyReportData(sym, quotes, recs);
+        appendices[sym] = await this.compileCompanyReportData(sym, quotes, recs, snapshot);
       }
     }
 
@@ -395,6 +718,7 @@ export class ReportDataAdapter {
       todayPnLPct: todayPct,
       healthScore: averageScore,
       diversificationScore: Math.min(100, Object.keys(sectorWeights).length * 15 + 10),
+      diversificationLabel,
       riskScore: 42,
       marketOutlook: {
         outlook: 'Bullish',
@@ -428,7 +752,8 @@ export class ReportDataAdapter {
       alerts,
       marketIntel,
       appendices,
-      generationTimestamp: new Date().toLocaleString('en-IN')
+      generationTimestamp: snapshot.generatedAt,
+      snapshot
     };
   }
 }
