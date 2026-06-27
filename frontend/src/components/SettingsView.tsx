@@ -17,7 +17,6 @@ import {
   LogOut, 
   SlidersHorizontal 
 } from 'lucide-react';
-import { isFirebaseConfigured } from '../utils/firebase';
 import { useInvestmentState } from '../context/InvestmentStateContext';
 
 interface SettingsViewProps {

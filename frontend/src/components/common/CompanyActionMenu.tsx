@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Heart, Check, Star, Bell, ChevronDown, Plus, Info, Edit, Trash2, ShieldAlert } from 'lucide-react';
 import { useInvestmentState, Holding } from '../../context/InvestmentStateContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import PurchaseDialog from './PurchaseDialog';
 import AlertManagerDialog from './AlertManagerDialog';
 
@@ -21,6 +22,8 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
     removeFromWatchlist,
     setCompanyNotes
   } = useInvestmentState();
+
+  const { requireAuth } = useRequireAuth();
 
   const record = getCompanyRecord(symbol);
   const alerts = getCompanyAlerts(symbol);
@@ -45,17 +48,21 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
 
   const handleToggleWatchlist = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (record.watchlisted) {
-      removeFromWatchlist(symbol);
-    } else {
-      addToWatchlist(symbol);
-    }
+    requireAuth(() => {
+      if (record.watchlisted) {
+        removeFromWatchlist(symbol);
+      } else {
+        addToWatchlist(symbol);
+      }
+    }, 'watchlist');
   };
 
   const handleOpenAlerts = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowAlertDialog(true);
-    setIsOpen(false);
+    requireAuth(() => {
+      setShowAlertDialog(true);
+      setIsOpen(false);
+    }, 'alerts');
   };
 
   return (
@@ -76,7 +83,11 @@ export default function CompanyActionMenu({ symbol, className = '', align = 'rig
       {/* 2. Main Position Status Dropdown Button */}
       <div className="relative">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            requireAuth(() => {
+              setIsOpen(!isOpen);
+            }, 'purchase');
+          }}
           className={`px-4 py-2 border rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center gap-2 shadow-md cursor-pointer ${
             record.positionStatus === 'purchased'
               ? 'bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E] hover:bg-[#22C55E]/20 hover:border-[#22C55E]/50'

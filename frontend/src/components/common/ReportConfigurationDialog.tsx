@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useInvestmentState } from '../../context/InvestmentStateContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import { QuoteData, RecommendationData } from '../../types/stock';
 import { ReportPdfService, ProgressState } from '../../reports/services/reportPdfService';
 import { ReportConfig } from '../../reports/types/reportTypes';
@@ -22,6 +23,7 @@ export function ReportConfigurationDialog({
   lastUpdated
 }: ReportConfigurationDialogProps) {
   const { getPortfolioHoldings, getWatchlistSymbols, state } = useInvestmentState();
+  const { requireAuth } = useRequireAuth();
   const holdings = getPortfolioHoldings();
   const watchlist = getWatchlistSymbols();
   const alertsList = Object.values(state.alerts);
@@ -95,7 +97,9 @@ export function ReportConfigurationDialog({
   };
 
   const handleTriggerExport = () => {
-    setShowPreview(true);
+    requireAuth(() => {
+      setShowPreview(true);
+    }, 'report');
   };
 
   const handleStartGeneration = async () => {

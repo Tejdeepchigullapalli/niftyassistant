@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import { useInvestmentState } from '../../context/InvestmentStateContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 interface WatchlistToggleProps {
   symbol: string;
@@ -10,17 +11,20 @@ interface WatchlistToggleProps {
 
 export default function WatchlistToggle({ symbol, size = 'md', className = '' }: WatchlistToggleProps) {
   const { getCompanyRecord, addToWatchlist, removeFromWatchlist } = useInvestmentState();
+  const { requireAuth } = useRequireAuth();
   const record = getCompanyRecord(symbol);
   const isWatchlisted = record.watchlisted;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (isWatchlisted) {
-      removeFromWatchlist(symbol);
-    } else {
-      addToWatchlist(symbol);
-    }
+    requireAuth(() => {
+      if (isWatchlisted) {
+        removeFromWatchlist(symbol);
+      } else {
+        addToWatchlist(symbol);
+      }
+    }, 'watchlist');
   };
 
   const sizeClasses = {

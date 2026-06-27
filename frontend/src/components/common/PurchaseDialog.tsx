@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, X } from 'lucide-react';
 import { Holding } from '../../context/InvestmentStateContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 interface PurchaseDialogProps {
   symbol: string;
@@ -17,6 +18,7 @@ export default function PurchaseDialog({
   onSave,
   initialHolding
 }: PurchaseDialogProps) {
+  const { requireAuth } = useRequireAuth();
   const [quantity, setQuantity] = useState('');
   const [price, setPrice] = useState('');
   const [date, setDate] = useState('');
@@ -77,13 +79,15 @@ export default function PurchaseDialog({
       return;
     }
 
-    onSave({
-      symbol: symbol.toUpperCase(),
-      quantity: qtyNum,
-      averageBuyPrice: priceNum,
-      purchaseDate: date,
-      notes: notes.trim() || undefined
-    });
+    requireAuth(() => {
+      onSave({
+        symbol: symbol.toUpperCase(),
+        quantity: qtyNum,
+        averageBuyPrice: priceNum,
+        purchaseDate: date,
+        notes: notes.trim() || undefined
+      });
+    }, 'purchase');
   };
 
   return (

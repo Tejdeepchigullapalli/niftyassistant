@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   QuoteData, 
   PortfolioHolding, 
@@ -16,6 +16,7 @@ import StockResearchReport from './StockResearchReport';
 import MarketIntelligenceReport from './MarketIntelligenceReport';
 import CustomReportBuilder from './CustomReportBuilder';
 import { useInvestmentState } from '../context/InvestmentStateContext';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 import ReportConfigurationDialog from './common/ReportConfigurationDialog';
 
 interface ReportsViewProps {
@@ -36,12 +37,34 @@ export default function ReportsView({
   onNavigateToStockAnalysis
 }: ReportsViewProps) {
   const { getPortfolioHoldings, getWatchlistSymbols } = useInvestmentState();
+  const { requireAuth, isAuthenticated } = useRequireAuth();
   const portfolio = getPortfolioHoldings();
   const watchlist = getWatchlistSymbols();
 
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState(() => {
+    return isAuthenticated ? 'Overview' : 'Stock Reports';
+  });
   const [loading, setLoading] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setActiveTab('Overview');
+    } else {
+      setActiveTab('Stock Reports');
+    }
+  }, [isAuthenticated]);
+
+  const handleTabChange = (tab: string) => {
+    const isProtected = ['Overview', 'Performance Reports', 'Portfolio Reports', 'Custom Reports'].includes(tab);
+    if (isProtected) {
+      requireAuth(() => {
+        setActiveTab(tab);
+      }, 'report');
+    } else {
+      setActiveTab(tab);
+    }
+  };
 
   // Dynamic Date range calculation
   const dateRange = useMemo(() => {
@@ -53,11 +76,15 @@ export default function ReportsView({
   }, []);
 
   const handleDownloadPDF = () => {
-    setIsConfigOpen(true);
+    requireAuth(() => {
+      setIsConfigOpen(true);
+    }, 'report');
   };
 
   const handleDownloadCSV = () => {
-    alert('Holding Ledger exported as CSV!');
+    requireAuth(() => {
+      alert('Holding Ledger exported as CSV!');
+    }, 'report');
   };
 
   const handleNavigateStock = (sym: string) => {
@@ -155,14 +182,14 @@ export default function ReportsView({
         onRefresh={() => window.location.reload()}
         onDownloadPDF={handleDownloadPDF}
         onDownloadCSV={handleDownloadCSV}
-        onCreateCustom={() => setActiveTab('Custom Reports')}
+        onCreateCustom={() => handleTabChange('Custom Reports')}
       />
 
       {/* 2. Tab Bar Selector */}
       <ReportTabBar 
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
       />
 
       {/* 3. Summary metrics cards row */}
