@@ -5,21 +5,28 @@ echo "   Nifty AI Investment Assistant"
 echo "============================================="
 echo ""
 
-# Start Backend
-echo "[1/2] Starting FastAPI Backend..."
+# Start FastAPI Backend
+echo "[1/3] Starting FastAPI Backend on Port 8001..."
 cd backend
 pip install -r requirements.txt -q
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
-BACKEND_PID=$!
-echo "✅ Backend started (PID: $BACKEND_PID) → http://localhost:8000"
-echo "   API Docs → http://localhost:8000/docs"
+uvicorn main:app --host 0.0.0.0 --port 8001 --reload &
+FASTAPI_PID=$!
+echo "✅ FastAPI Backend started (PID: $FASTAPI_PID) → http://localhost:8001"
+echo "   API Docs → http://localhost:8001/docs"
+
+# Start Node.js Express Backend
+echo "[2/3] Starting Node.js Express Backend on Port 8000..."
+npm install --silent
+npm run dev &
+NODE_PID=$!
+echo "✅ Express Backend started (PID: $NODE_PID) → http://localhost:8000"
 cd ..
 
 sleep 3
 
 # Start Frontend
 echo ""
-echo "[2/2] Installing & Starting Next.js Frontend..."
+echo "[3/3] Installing & Starting Next.js Frontend..."
 cd frontend
 npm install --silent
 npm run dev &
@@ -37,5 +44,5 @@ echo "============================================="
 echo ""
 echo "Press Ctrl+C to stop all services"
 
-trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; echo 'Stopped.'" EXIT
+trap "kill $FASTAPI_PID $NODE_PID $FRONTEND_PID 2>/dev/null; echo 'Stopped.'" EXIT
 wait

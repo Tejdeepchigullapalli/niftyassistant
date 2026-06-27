@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { auth, googleProvider, isFirebaseConfigured } from '../utils/firebase';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 
+export type AccountProvider = "mongo-email" | "firebase-google";
 export type AuthReason =
   | "profile"
   | "watchlist"
@@ -13,81 +15,157 @@ export type AuthReason =
   | "saved_preferences"
   | "ai_personalization";
 
-export interface AuthUser {
+export interface AppUser {
   id: string;
-  name?: string;
-  displayName?: string | null;
-  email?: string;
-  image?: string;
-  photoURL?: string | null;
-  isDemo?: boolean;
+  provider: AccountProvider;
+  name: string;
+  email: string;
+  photoURL?: string;
+  isAuthenticated: boolean;
+  createdAt?: string;
+}
+
+interface SameEmailPromptData {
+  email: string;
+  firebaseToken: string;
+  firebaseUid: string;
+  firebaseUser: any;
 }
 
 interface AuthContextValue {
-  user: AuthUser | null;
+  user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isSignInModalOpen: boolean;
   signInReason: AuthReason | null;
   toastMessage: string | null;
+  sameEmailPrompt: SameEmailPromptData | null;
   openSignInModal: (reason?: AuthReason) => void;
   closeSignInModal: () => void;
   signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string) => Promise<void>;
-  continueDemoMode: () => void;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (name: string, email: string, password: string) => Promise<void>;
+  linkGoogleAccount: () => Promise<void>;
+  keepAccountsSeparate: () => Promise<void>;
+  cancelSameEmailLink: () => void;
   requireAuth: (action: () => void, reason?: AuthReason) => void;
   clearToast: () => void;
   signOutUser: () => Promise<void>;
+  setToastMessage: (msg: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const API_BASE = 'http://localhost:8000/api';
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [signInReason, setSignInReason] = useState<AuthReason | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [sameEmailPrompt, setSameEmailPrompt] = useState<SameEmailPromptData | null>(null);
 
   const pendingActionRef = useRef<(() => void) | null>(null);
 
-  // Synchronise Firebase Auth state
-  useEffect(() => {
-    if (!isFirebaseConfigured) {
-      // If Firebase is not configured, start as null (Not Signed In)
-      setIsLoading(false);
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
+  // Check custom Mongo authentication session on page load
+  const checkMongoSession = async (): Promise<boolean> => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/auth/me`, { withCredentials: true });
+      if (res.data && res.data.user) {
         setUser({
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || undefined,
-          displayName: firebaseUser.displayName || undefined,
-          email: firebaseUser.email || undefined,
-          image: firebaseUser.photoURL || undefined,
-          photoURL: firebaseUser.photoURL || null,
-          isDemo: false
+          ...res.data.user,
+          isAuthenticated: true
         });
-        
-        // Execute pending action if it exists after state sync
-        if (pendingActionRef.current) {
-          pendingActionRef.current();
-          pendingActionRef.current = null;
-          setToastMessage("Welcome to NiftyAI. Your account is now synced.");
-          setTimeout(() => setToastMessage(null), 4000);
-        }
-      } else {
-        setUser(null);
+        return true;
       }
-      setIsLoading(false);
-    });
+    } catch (err) {
+      // No active Mongo session
+    }
+    return false;
+  };
 
-    return () => unsubscribe();
+  // Sync Firebase / Google credentials on mount
+  useEffect(() => {
+    let firebaseUnsubscribe = () => {};
+
+    const initializeAuth = async () => {
+      // 1. First check if we have a valid MongoDB session (Email session is canonical)
+      const hasMongoSession = await checkMongoSession();
+      if (hasMongoSession) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (!isFirebaseConfigured) {
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Subscribe to Firebase auth changes if no session exists
+      firebaseUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          try {
+            const email = firebaseUser.email;
+            if (email) {
+              // Check if email already linked or registered in Mongo
+              const checkRes = await axios.get(`${API_BASE}/api/auth/check-email`, { params: { email } });
+              
+              if (checkRes.data.exists && checkRes.data.linked) {
+                // Already linked, try to log in via MongoDB automatically
+                const token = await firebaseUser.getIdToken();
+                const linkRes = await axios.post(`${API_BASE}/api/auth/link-google`, {}, {
+                  headers: { 'Authorization': `Bearer ${token}` },
+                  withCredentials: true
+                });
+                
+                if (linkRes.data && linkRes.data.user) {
+                  setUser({
+                    ...linkRes.data.user,
+                    isAuthenticated: true
+                  });
+                  triggerPendingAction();
+                  setIsLoading(false);
+                  return;
+                }
+              }
+            }
+
+            // Normal Google Authentication
+            setUser({
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || 'Google User',
+              email: firebaseUser.email || '',
+              photoURL: firebaseUser.photoURL || undefined,
+              provider: "firebase-google",
+              isAuthenticated: true
+            });
+            triggerPendingAction();
+          } catch (err) {
+            console.error("Failed to sync Google user state:", err);
+          }
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      });
+    };
+
+    initializeAuth();
+
+    return () => firebaseUnsubscribe();
   }, []);
 
-  const openSignInModal = (reason: AuthReason = "saved_preferences") => {
+  const triggerPendingAction = () => {
+    if (pendingActionRef.current) {
+      pendingActionRef.current();
+      pendingActionRef.current = null;
+      setToastMessage("Welcome to NiftyAI. Your account is securely synced.");
+      setTimeout(() => setToastMessage(null), 4000);
+    }
+  };
+
+  const openSignInModal = (reason: AuthReason = "watchlist") => {
     setSignInReason(reason);
     setIsSignInModalOpen(true);
   };
@@ -96,84 +174,163 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsSignInModalOpen(false);
     setSignInReason(null);
     pendingActionRef.current = null;
+    setSameEmailPrompt(null);
   };
 
   const signInWithGoogle = async () => {
     if (!isFirebaseConfigured) {
-      alert("Firebase is not configured in this build. To use Google Sign-In, please define the required NEXT_PUBLIC_FIREBASE_* environment variables in your deployment dashboard and re-trigger a production build. Logging in as Demo User for this session.");
-      continueDemoMode();
+      alert("Firebase Google Auth is not configured. Please define the required environment variables.");
       return;
     }
 
     try {
       setIsLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
-      if (result.user) {
-        setUser({
-          id: result.user.uid,
-          name: result.user.displayName || undefined,
-          displayName: result.user.displayName || undefined,
-          email: result.user.email || undefined,
-          image: result.user.photoURL || undefined,
-          photoURL: result.user.photoURL || null,
-          isDemo: false
-        });
+      const firebaseUser = result.user;
+      const email = firebaseUser.email;
+      const token = await firebaseUser.getIdToken();
 
-        if (pendingActionRef.current) {
-          pendingActionRef.current();
-          pendingActionRef.current = null;
+      if (email) {
+        // Check same email existence in MongoDB
+        const checkRes = await axios.get(`${API_BASE}/api/auth/check-email`, { params: { email } });
+        
+        if (checkRes.data.exists) {
+          if (checkRes.data.linked) {
+            // Already linked - auto verify and log in
+            const linkRes = await axios.post(`${API_BASE}/api/auth/link-google`, {}, {
+              headers: { 'Authorization': `Bearer ${token}` },
+              withCredentials: true
+            });
+            
+            setUser({
+              ...linkRes.data.user,
+              isAuthenticated: true
+            });
+            setIsSignInModalOpen(false);
+            triggerPendingAction();
+          } else {
+            // Unlinked existing account - show linkage popup dialog options
+            setSameEmailPrompt({
+              email,
+              firebaseToken: token,
+              firebaseUid: firebaseUser.uid,
+              firebaseUser
+            });
+          }
+          setIsLoading(false);
+          return;
         }
-        setIsSignInModalOpen(false);
-        setToastMessage("Welcome to NiftyAI. Your account is now synced.");
-        setTimeout(() => setToastMessage(null), 4000);
       }
+
+      // Fresh Google Authentication
+      setUser({
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || 'Google User',
+        email: firebaseUser.email || '',
+        photoURL: firebaseUser.photoURL || undefined,
+        provider: "firebase-google",
+        isAuthenticated: true
+      });
+      
+      setIsSignInModalOpen(false);
+      triggerPendingAction();
+
     } catch (error: any) {
-      console.error("Firebase Sign-In Error:", error);
+      console.error("Google Sign-In Error:", error);
       alert(`Failed to sign in with Google: ${error.message || error}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signInWithEmail = async (email: string) => {
-    setIsLoading(true);
-    // Simulate email login
-    setTimeout(() => {
-      setUser({
-        id: `email_${Date.now()}`,
-        name: email.split('@')[0],
-        displayName: email.split('@')[0],
-        email: email,
-        photoURL: null,
-        isDemo: false
+  const linkGoogleAccount = async () => {
+    if (!sameEmailPrompt) return;
+    try {
+      setIsLoading(true);
+      const res = await axios.post(`${API_BASE}/api/auth/link-google`, {}, {
+        headers: { 'Authorization': `Bearer ${sameEmailPrompt.firebaseToken}` },
+        withCredentials: true
       });
-      if (pendingActionRef.current) {
-        pendingActionRef.current();
-        pendingActionRef.current = null;
-      }
+
+      setUser({
+        ...res.data.user,
+        isAuthenticated: true
+      });
+
+      setSameEmailPrompt(null);
       setIsSignInModalOpen(false);
-      setToastMessage("Welcome to NiftyAI. Your account is now synced.");
-      setTimeout(() => setToastMessage(null), 4000);
+      triggerPendingAction();
+    } catch (err: any) {
+      alert(`Failed to link accounts: ${err.response?.data?.error || err.message}`);
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
-  const continueDemoMode = () => {
+  const keepAccountsSeparate = async () => {
+    if (!sameEmailPrompt) return;
+    // Log in as standard Firebase user, keeping firestore active
     setUser({
-      id: "demo_user",
-      name: "Akash Verma",
-      displayName: "Akash Verma",
-      email: "akash.verma@email.com",
-      photoURL: null,
-      isDemo: true
+      id: sameEmailPrompt.firebaseUid,
+      name: sameEmailPrompt.firebaseUser.displayName || 'Google User',
+      email: sameEmailPrompt.email,
+      photoURL: sameEmailPrompt.firebaseUser.photoURL || undefined,
+      provider: "firebase-google",
+      isAuthenticated: true
     });
+    setSameEmailPrompt(null);
     setIsSignInModalOpen(false);
-    pendingActionRef.current = null;
+    triggerPendingAction();
   };
 
-  const requireAuth = (action: () => void, reason: AuthReason = "saved_preferences") => {
-    const isAuthenticated = user !== null && !user.isDemo;
-    if (!isAuthenticated) {
+  const cancelSameEmailLink = () => {
+    setSameEmailPrompt(null);
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      const res = await axios.post(`${API_BASE}/api/auth/login`, { email, password }, {
+        withCredentials: true
+      });
+      
+      setUser({
+        ...res.data.user,
+        isAuthenticated: true
+      });
+
+      setIsSignInModalOpen(false);
+      triggerPendingAction();
+    } catch (err: any) {
+      throw new Error(err.response?.data?.error || "Failed to sign in. Please verify your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signUpWithEmail = async (name: string, email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      const res = await axios.post(`${API_BASE}/api/auth/register`, { name, email, password }, {
+        withCredentials: true
+      });
+
+      setUser({
+        ...res.data.user,
+        isAuthenticated: true
+      });
+
+      setIsSignInModalOpen(false);
+      triggerPendingAction();
+    } catch (err: any) {
+      throw new Error(err.response?.data?.error || "Failed to create account. Email may already be in use.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const requireAuth = (action: () => void, reason: AuthReason = "watchlist") => {
+    if (!user?.isAuthenticated) {
       pendingActionRef.current = action;
       openSignInModal(reason);
       return;
@@ -186,17 +343,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOutUser = async () => {
-    if (isFirebaseConfigured) {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        console.error("Firebase Sign-Out Error:", error);
+    setIsLoading(true);
+    try {
+      // 1. Sign out of MongoDB session cookie
+      if (user?.provider === 'mongo-email') {
+        await axios.post(`${API_BASE}/api/auth/logout`, {}, { withCredentials: true });
       }
+
+      // 2. Sign out of Firebase Google Auth
+      if (isFirebaseConfigured) {
+        await signOut(auth);
+      }
+    } catch (err) {
+      console.error("Sign out error:", err);
+    } finally {
+      setUser(null);
+      setIsLoading(false);
+      setToastMessage("You have been signed out securely.");
+      setTimeout(() => setToastMessage(null), 3000);
     }
-    setUser(null);
   };
 
-  const isAuthenticated = user !== null && !user.isDemo;
+  const isAuthenticated = user !== null && user.isAuthenticated;
 
   return (
     <AuthContext.Provider
@@ -207,14 +375,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isSignInModalOpen,
         signInReason,
         toastMessage,
+        sameEmailPrompt,
         openSignInModal,
         closeSignInModal,
         signInWithGoogle,
         signInWithEmail,
-        continueDemoMode,
+        signUpWithEmail,
+        linkGoogleAccount,
+        keepAccountsSeparate,
+        cancelSameEmailLink,
         requireAuth,
         clearToast,
-        signOutUser
+        signOutUser,
+        setToastMessage
       }}
     >
       {children}
@@ -229,3 +402,4 @@ export const useAuth = () => {
   }
   return context;
 };
+export default useAuth;

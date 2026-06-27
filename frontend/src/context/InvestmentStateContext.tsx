@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState, useMemo } from 'react';
+import { useAuth } from './AuthContext';
+import { useUserDataRepository } from '../hooks/useUserDataRepository';
 
 export type PositionStatus = "none" | "interested" | "purchased";
 
@@ -13,15 +15,7 @@ export interface Holding {
 export interface UserAlert {
   id: string;
   symbol?: string; // empty means general market alert
-  type:
-    | "price_above"
-    | "price_below"
-    | "daily_change"
-    | "volume_spike"
-    | "news"
-    | "earnings"
-    | "dividend"
-    | "recommendation_change";
+  type: string;
   targetValue?: number;
   enabled: boolean;
   createdAt: string;
@@ -50,10 +44,8 @@ const DEFAULT_STATE: InvestmentState = {
   alerts: {}
 };
 
-const STORAGE_KEY = 'niftyai-user-investment-state-v2';
-
 type Action =
-  | { type: 'HYDRATE'; payload: InvestmentState }
+  | { type: 'HYDRATE'; payload: Omit<InvestmentState, 'version'> }
   | { type: 'UPDATE_RECORD'; payload: { symbol: string; changes: Partial<CompanyUserRecord> } }
   | { type: 'SET_ALERT'; payload: UserAlert }
   | { type: 'UPDATE_ALERT'; payload: { alertId: string; changes: Partial<UserAlert> } }
@@ -66,7 +58,11 @@ function stateReducer(state: InvestmentState, action: Action): InvestmentState {
 
   switch (action.type) {
     case 'HYDRATE':
-      return action.payload;
+      return {
+        version: DEFAULT_STATE.version,
+        companyRecords: action.payload.companyRecords || {},
+        alerts: action.payload.alerts || {}
+      };
 
     case 'UPDATE_RECORD': {
       const { symbol, changes } = action.payload;
@@ -188,15 +184,7 @@ function stateReducer(state: InvestmentState, action: Action): InvestmentState {
       return state;
   }
 
-  // Persist state in localStorage on the client side
-  if (typeof window !== 'undefined') {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-    } catch (e) {
-      console.error("Failed to save investment state to localStorage:", e);
-    }
-  }
-
+  // LocalStorage persistence removed to avoid plain caching when unauthenticated.
   return newState;
 }
 
@@ -204,18 +192,18 @@ interface InvestmentContextProps {
   state: InvestmentState;
   hydrated: boolean;
   getCompanyRecord: (symbol: string) => CompanyUserRecord;
-  setInterested: (symbol: string) => void;
-  clearInterest: (symbol: string) => void;
-  markPurchased: (symbol: string, holding: Holding) => void;
-  updateHolding: (symbol: string, holding: Holding) => void;
-  removePurchased: (symbol: string, nextStatus: "none" | "interested") => void;
-  addToWatchlist: (symbol: string) => void;
-  removeFromWatchlist: (symbol: string) => void;
-  setCompanyNotes: (symbol: string, notes: string) => void;
-  createAlert: (alert: Omit<UserAlert, 'createdAt' | 'updatedAt'>) => void;
-  updateAlert: (alertId: string, changes: Partial<UserAlert>) => void;
-  deleteAlert: (alertId: string) => void;
-  deleteCompanyAlerts: (symbol: string) => void;
+  setInterested: (symbol: string) => Promise<void>;
+  clearInterest: (symbol: string) => Promise<void>;
+  markPurchased: (symbol: string, holding: Holding) => Promise<void>;
+  updateHolding: (symbol: string, holding: Holding) => Promise<void>;
+  removePurchased: (symbol: string, nextStatus: "none" | "interested") => Promise<void>;
+  addToWatchlist: (symbol: string) => Promise<void>;
+  removeFromWatchlist: (symbol: string) => Promise<void>;
+  setCompanyNotes: (symbol: string, notes: string) => Promise<void>;
+  createAlert: (alert: Omit<UserAlert, 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateAlert: (alertId: string, changes: Partial<UserAlert>) => Promise<void>;
+  deleteAlert: (alertId: string) => Promise<void>;
+  deleteCompanyAlerts: (symbol: string) => Promise<void>;
   resetAllData: () => void;
   getPortfolioHoldings: () => Holding[];
   getWatchlistSymbols: () => string[];
@@ -232,31 +220,31 @@ interface InvestmentContextProps {
 
 const InvestmentStateContext = createContext<InvestmentContextProps | undefined>(undefined);
 
-
 export const InvestmentStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(stateReducer, DEFAULT_STATE);
   const [hydrated, setHydrated] = useState(false);
+  const { user } = useAuth();
+  const repository = useUserDataRepository();
 
-  // Client hydration
+  // Load User Data State upon login context syncs
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = window.localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved) as InvestmentState;
-          if (parsed && parsed.version === DEFAULT_STATE.version) {
-            dispatch({ type: 'HYDRATE', payload: parsed });
-          } else {
-            console.warn("Storage version mismatch or corruption, resetting to default state.");
-          }
+    if (user?.isAuthenticated) {
+      const loadState = async () => {
+        try {
+          const dbState = await repository.getInvestmentState();
+          dispatch({ type: 'HYDRATE', payload: dbState });
+        } catch (err) {
+          console.error("Failed to load user state from repository:", err);
+        } finally {
+          setHydrated(true);
         }
-      } catch (e) {
-        console.error("Failed to hydrate investment state from localStorage:", e);
-      } finally {
-        setHydrated(true);
-      }
+      };
+      loadState();
+    } else {
+      dispatch({ type: 'RESET' });
+      setHydrated(true);
     }
-  }, []);
+  }, [user?.isAuthenticated, repository]);
 
   const getCompanyRecord = (symbol: string): CompanyUserRecord => {
     const clean = symbol.toUpperCase().trim();
@@ -269,96 +257,101 @@ export const InvestmentStateProvider: React.FC<{ children: React.ReactNode }> = 
     };
   };
 
-  const setInterested = (symbol: string) => {
+  const setInterested = async (symbol: string) => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { positionStatus: 'interested', holding: undefined } }
     });
+    await repository.setInterested(symbol);
   };
 
-  const clearInterest = (symbol: string) => {
+  const clearInterest = async (symbol: string) => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { positionStatus: 'none' } }
     });
+    await repository.clearInterest(symbol);
   };
 
-  const markPurchased = (symbol: string, holding: Holding) => {
+  const markPurchased = async (symbol: string, holding: Holding) => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { positionStatus: 'purchased', holding } }
     });
+    await repository.markPurchased(symbol, holding);
   };
 
-  const updateHolding = (symbol: string, holding: Holding) => {
+  const updateHolding = async (symbol: string, holding: Holding) => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { holding } }
     });
+    await repository.updatePurchasedHolding(symbol, holding);
   };
 
-  const removePurchased = (symbol: string, nextStatus: "none" | "interested") => {
+  const removePurchased = async (symbol: string, nextStatus: "none" | "interested") => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { positionStatus: nextStatus, holding: undefined } }
     });
+    await repository.removePurchased(symbol);
   };
 
-  const addToWatchlist = (symbol: string) => {
+  const addToWatchlist = async (symbol: string) => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { watchlisted: true } }
     });
+    await repository.addToWatchlist(symbol);
   };
 
-  const removeFromWatchlist = (symbol: string) => {
+  const removeFromWatchlist = async (symbol: string) => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { watchlisted: false } }
     });
+    await repository.removeFromWatchlist(symbol);
   };
 
-  const setCompanyNotes = (symbol: string, notes: string) => {
+  const setCompanyNotes = async (symbol: string, notes: string) => {
     dispatch({
       type: 'UPDATE_RECORD',
       payload: { symbol, changes: { notes } }
     });
+    await repository.saveNote(symbol, notes);
   };
 
-  const createAlert = (alert: Omit<UserAlert, 'createdAt' | 'updatedAt'>) => {
-    const now = new Date().toISOString();
-    const newAlert: UserAlert = {
-      ...alert,
-      createdAt: now,
-      updatedAt: now
-    };
+  const createAlert = async (alert: Omit<UserAlert, 'createdAt' | 'updatedAt'>) => {
+    const newAlert = await repository.createAlert(alert);
     dispatch({ type: 'SET_ALERT', payload: newAlert });
   };
 
-  const updateAlert = (alertId: string, changes: Partial<UserAlert>) => {
-    dispatch({ type: 'UPDATE_ALERT', payload: { alertId, changes } });
+  const updateAlert = async (alertId: string, changes: Partial<UserAlert>) => {
+    const updated = await repository.updateAlert(alertId, changes);
+    dispatch({ type: 'UPDATE_ALERT', payload: { alertId, changes: updated } });
   };
 
-  const deleteAlert = (alertId: string) => {
+  const deleteAlert = async (alertId: string) => {
     dispatch({ type: 'DELETE_ALERT', payload: alertId });
+    await repository.deleteAlert(alertId);
   };
 
-  const deleteCompanyAlerts = (symbol: string) => {
-    dispatch({ type: 'DELETE_COMPANY_ALERTS', payload: symbol });
+  const deleteCompanyAlerts = async (symbol: string) => {
+    const clean = symbol.toUpperCase().trim();
+    dispatch({ type: 'DELETE_COMPANY_ALERTS', payload: clean });
+    
+    // Delete individual alerts belonging to this company from db
+    const targetAlerts = Object.values(state.alerts).filter(a => a.symbol === clean);
+    for (const alert of targetAlerts) {
+      await repository.deleteAlert(alert.id);
+    }
   };
 
   const resetAllData = () => {
     dispatch({ type: 'RESET' });
-    if (typeof window !== 'undefined') {
-      try {
-        window.localStorage.removeItem(STORAGE_KEY);
-      } catch (e) {
-        console.error("Failed to delete storage data:", e);
-      }
-    }
   };
 
-  // Selectors
+  // Selector functions (reads sync from hydrated local state cache)
   const getPortfolioHoldings = (): Holding[] => {
     return Object.values(state.companyRecords)
       .filter(r => r.positionStatus === 'purchased' && r.holding)
@@ -433,7 +426,6 @@ export const InvestmentStateProvider: React.FC<{ children: React.ReactNode }> = 
     </InvestmentStateContext.Provider>
   );
 };
-
 
 export const useInvestmentState = () => {
   const context = useContext(InvestmentStateContext);

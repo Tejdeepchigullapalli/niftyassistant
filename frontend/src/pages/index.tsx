@@ -143,7 +143,7 @@ export default function Home() {
     } else if (id === 'alerts') {
       requireAuth(() => setActiveTab(7), 'alerts');
     } else if (id === 'reports') {
-      setActiveTab(8);
+      requireAuth(() => setActiveTab(8), 'report');
     } else if (id === 'settings') {
       setActiveTab(9);
     }
@@ -235,7 +235,7 @@ export default function Home() {
 
             <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-4">
               {navItems.map(({ id, label, icon: Icon, badge, count, isActive }, idx) => {
-                const isTabProtected = ['portfolio', 'watchlist', 'alerts'].includes(id);
+                const isTabProtected = ['portfolio', 'watchlist', 'alerts', 'reports'].includes(id);
                 const showLock = isTabProtected && !isAuthenticated;
                 
                 let hoverTitle = undefined;
@@ -243,6 +243,7 @@ export default function Home() {
                   if (id === 'watchlist') hoverTitle = "Sign in to access your saved Watchlist";
                   else if (id === 'portfolio') hoverTitle = "Sign in to manage your Portfolio";
                   else if (id === 'alerts') hoverTitle = "Sign in to manage your Alerts";
+                  else if (id === 'reports') hoverTitle = "Sign in to view your Reports";
                 }
 
                 return (
@@ -441,16 +442,16 @@ export default function Home() {
                     {user && user.photoURL && !imgError ? (
                       <img 
                         src={user.photoURL} 
-                        alt={user.displayName || 'User'} 
+                        alt={user.name || 'User'} 
                         className="h-7 w-7 rounded-full border border-[#33435f] object-cover"
                         referrerPolicy="no-referrer"
                         onError={() => setImgError(true)}
                       />
                     ) : (
                       <div className="grid h-7 w-7 place-items-center rounded-full border border-[#33435f] bg-[#132038]">
-                        {user && user.displayName ? (
+                        {user && user.name ? (
                           <span className="text-[10px] font-black text-violet-400">
-                            {user.displayName.charAt(0).toUpperCase()}
+                            {user.name.charAt(0).toUpperCase()}
                           </span>
                         ) : (
                           <UserCircle2 className="h-5 w-5 text-slate-300" />
@@ -466,21 +467,27 @@ export default function Home() {
                       {user ? (
                         <>
                           {/* Logged In Header */}
-                          <div className="px-3.5 py-3 border-b border-[#293550] flex items-center gap-3">
-                            {user.photoURL ? (
-                              <img 
-                                src={user.photoURL} 
-                                alt={user.displayName || 'User'} 
-                                className="h-8 w-8 rounded-full border border-violet-500/30 object-cover"
-                              />
-                            ) : (
-                              <div className="grid h-8 w-8 place-items-center rounded-full border border-violet-500/30 bg-[#162039] text-[11px] font-black text-violet-400">
-                                {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                          <div className="px-3.5 py-3 border-b border-[#293550] flex flex-col gap-2">
+                            <div className="flex items-center gap-3">
+                              {user.photoURL ? (
+                                <img 
+                                  src={user.photoURL} 
+                                  alt={user.name || 'User'} 
+                                  className="h-8 w-8 rounded-full border border-violet-500/30 object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <div className="grid h-8 w-8 place-items-center rounded-full border border-violet-500/30 bg-[#162039] text-[11px] font-black text-violet-400">
+                                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-black text-slate-100 truncate">{user.name || 'Authenticated User'}</p>
+                                <p className="text-[8px] text-slate-455 truncate mt-0.5">{user.email}</p>
                               </div>
-                            )}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-[10px] font-black text-slate-100 truncate">{user.displayName || 'Authenticated User'}</p>
-                              <p className="text-[8px] text-slate-455 truncate mt-0.5">{user.email}</p>
+                            </div>
+                            <div className="text-[7.5px] font-extrabold text-violet-400 bg-violet-400/5 border border-violet-500/20 px-2 py-1 rounded-lg text-center tracking-wide uppercase select-none">
+                              {user.provider === 'mongo-email' ? 'Signed in with Email' : 'Signed in with Google'}
                             </div>
                           </div>
 
@@ -488,22 +495,52 @@ export default function Home() {
                           <button
                             onClick={() => {
                               setIsProfileDropdownOpen(false);
-                              setActiveTab(9); // Settings/Profile tab
+                              setActiveTab(4); // Portfolio tab
                             }}
-                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-slate-300 hover:text-slate-100 hover:bg-[#162039] rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
+                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-slate-300 hover:text-slate-105 hover:bg-[#162039] rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
                           >
-                            <UserCircle2 className="w-4 h-4 text-violet-400" />
-                            <span>My Profile</span>
+                            <Briefcase className="w-4 h-4 text-slate-450" />
+                            <span>My Portfolio</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsProfileDropdownOpen(false);
+                              setActiveTab(6); // Watchlist tab
+                            }}
+                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-slate-300 hover:text-slate-105 hover:bg-[#162039] rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
+                          >
+                            <Star className="w-4 h-4 text-violet-400" />
+                            <span>My Watchlist</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsProfileDropdownOpen(false);
+                              setActiveTab(7); // Alerts tab
+                            }}
+                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-slate-300 hover:text-slate-105 hover:bg-[#162039] rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
+                          >
+                            <Bell className="w-4 h-4 text-slate-450" />
+                            <span>My Alerts</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsProfileDropdownOpen(false);
+                              setActiveTab(8); // Reports tab
+                            }}
+                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-slate-300 hover:text-slate-105 hover:bg-[#162039] rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
+                          >
+                            <FileText className="w-4 h-4 text-slate-450" />
+                            <span>My Reports</span>
                           </button>
                           <button
                             onClick={() => {
                               setIsProfileDropdownOpen(false);
                               setActiveTab(9); // Settings/Profile tab
                             }}
-                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-slate-300 hover:text-slate-100 hover:bg-[#162039] rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
+                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-slate-300 hover:text-slate-105 hover:bg-[#162039] rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
                           >
                             <Settings className="w-4 h-4 text-slate-455" />
-                            <span>Account Settings</span>
+                            <span>Settings</span>
                           </button>
                           
                           <div className="h-px bg-[#293550] my-1" />
@@ -513,7 +550,7 @@ export default function Home() {
                               setIsProfileDropdownOpen(false);
                               await handleSignOut();
                             }}
-                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-rose-400 hover:text-rose-300 hover:bg-rose-955/10 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
+                            className="w-full text-left px-3.5 py-2 text-[10px] font-black text-rose-400 hover:text-rose-305 hover:bg-rose-955/10 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer border-0"
                           >
                             <LogOut className="w-4 h-4 text-rose-500" />
                             <span>Sign Out</span>
@@ -530,7 +567,7 @@ export default function Home() {
                             <UserCircle2 className="w-8 h-8 text-slate-555 flex-shrink-0 mt-0.5" />
                             <div className="min-w-0">
                               <p className="text-[10px] font-black text-slate-305 leading-none">Not Signed In</p>
-                              <p className="text-[8.5px] text-slate-500 mt-1.5 leading-relaxed font-medium">Sign in to sync your investments and preferences.</p>
+                              <p className="text-[8.5px] text-slate-500 mt-1.5 leading-relaxed font-medium">Sign in to securely save your watchlist, portfolio, alerts, reports, and preferences.</p>
                             </div>
                           </div>
 
